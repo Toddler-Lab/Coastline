@@ -13,8 +13,8 @@ export interface BedPosition {
 }
 
 const COLUMNS = 4;
-const LAT_STEP = 0.00058;
-const LNG_STEP = 0.00075;
+const LAT_STEP = 0.00014;
+const LNG_STEP = 0.00016;
 
 /**
  * Beds are drawn as a tidy field anchored on the beach point. The layout is
