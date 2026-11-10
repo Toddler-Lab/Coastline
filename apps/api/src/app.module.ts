@@ -8,6 +8,8 @@ import { DemoAuthGuard } from './common/auth/demo-auth.guard';
 import { RolesGuard } from './common/auth/roles.guard';
 import { AuditModule } from './modules/audit/audit.module';
 import { HealthModule } from './health/health.module';
+import { IdentityModule } from './modules/identity/identity.module';
+import { CatalogueModule } from './modules/catalogue/catalogue.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { HealthModule } from './health/health.module';
     AuthModule,
     AuditModule,
     HealthModule,
+    IdentityModule,
+    CatalogueModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: DemoAuthGuard },
