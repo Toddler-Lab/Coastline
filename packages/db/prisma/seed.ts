@@ -5,6 +5,7 @@
  * Catalogue records are upserted by their stable codes. Orders are demo-only and
  * are cleared on every seed run.
  */
+import process from 'node:process';
 import { PrismaClient } from '../src/index';
 
 const prisma = new PrismaClient();
