@@ -1,0 +1,35 @@
+{
+  "name": "@coastline/db",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "prisma"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "db:generate": "dotenv -e ../../.env -- prisma generate",
+    "db:migrate": "dotenv -e ../../.env -- prisma migrate deploy",
+    "db:migrate:dev": "dotenv -e ../../.env -- prisma migrate dev",
+    "db:seed": "dotenv -e ../../.env -- tsx prisma/seed.ts",
+    "db:validate": "dotenv -e ../../.env -- prisma validate",
+    "db:reset": "dotenv -e ../../.env -- prisma migrate reset --force"
+  },
+  "prisma": {
+    "seed": "dotenv -e ../../.env -- tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "dotenv-cli": "^8.0.0",
+    "prisma": "6.19.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.3"
+  }
+}

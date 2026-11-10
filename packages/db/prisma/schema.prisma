@@ -1,0 +1,210 @@
+// Coastline — beach demonstrator catalogue, hourly slots, orders and mock payments.
+//
+// Conventions:
+// - UUID primary keys; timestamptz columns stored in UTC.
+// - Money is integer minor units (BDT poisha) plus an ISO currency code.
+// - Human-facing codes (beach point, sunbed, order) are immutable once issued.
+// - Occupancy is one row per sunbed per hour in `booking_slots`; the partial
+//   unique index that prevents double booking is added in the SQL migration
+//   because Prisma cannot express it.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  TOURIST
+  ADMIN
+}
+
+enum SunbedStatus {
+  AVAILABLE
+  OUT_OF_SERVICE
+  RETIRED
+}
+
+enum OrderStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum OrderItemStatus {
+  RESERVED
+  CHECKED_IN
+  CANCELLED
+}
+
+enum PaymentType {
+  CHARGE
+  REFUND
+}
+
+enum PaymentStatus {
+  SUCCEEDED
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  email     String?  @unique
+  role      UserRole @default(TOURIST)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  orders          Order[]      @relation("OrderTourist")
+  cancelledOrders Order[]      @relation("OrderCancelledBy")
+  checkedInItems  OrderItem[]  @relation("OrderItemCheckedInBy")
+  auditEvents     AuditEvent[]
+
+  @@map("users")
+}
+
+model BeachPoint {
+  id                      String   @id @default(uuid()) @db.Uuid
+  code                    String   @unique
+  name                    String
+  description             String?
+  latitude                Float
+  longitude               Float
+  openHour                Int      @map("open_hour")
+  closeHour               Int      @map("close_hour")
+  defaultHourlyPriceMinor Int      @map("default_hourly_price_minor")
+  currency                String   @default("BDT") @db.Char(3)
+  sortOrder               Int      @default(0) @map("sort_order")
+  isActive                Boolean  @default(true) @map("is_active")
+  createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  sunbeds Sunbed[]
+
+  @@map("beach_points")
+}
+
+model Sunbed {
+  id               String       @id @default(uuid()) @db.Uuid
+  beachPointId     String       @map("beach_point_id") @db.Uuid
+  seq              Int
+  code             String       @unique
+  hourlyPriceMinor Int          @map("hourly_price_minor")
+  currency         String       @default("BDT") @db.Char(3)
+  status           SunbedStatus @default(AVAILABLE)
+  note             String?
+  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  beachPoint BeachPoint  @relation(fields: [beachPointId], references: [id], onDelete: Restrict)
+  orderItems OrderItem[]
+  slots      BookingSlot[]
+
+  @@unique([beachPointId, seq])
+  @@index([beachPointId, status])
+  @@map("sunbeds")
+}
+
+model Order {
+  id           String      @id @default(uuid()) @db.Uuid
+  publicRef    String      @unique @map("public_ref")
+  touristId    String      @map("tourist_id") @db.Uuid
+  status       OrderStatus @default(CONFIRMED)
+  subtotalMinor Int        @map("subtotal_minor")
+  totalMinor   Int         @map("total_minor")
+  currency     String      @default("BDT") @db.Char(3)
+  placedAt     DateTime    @default(now()) @map("placed_at") @db.Timestamptz(6)
+  cancelledAt  DateTime?   @map("cancelled_at") @db.Timestamptz(6)
+  cancelReason String?     @map("cancel_reason")
+  cancelledById String?    @map("cancelled_by_id") @db.Uuid
+
+  tourist     User        @relation("OrderTourist", fields: [touristId], references: [id], onDelete: Restrict)
+  cancelledBy User?       @relation("OrderCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
+  items       OrderItem[]
+  payments    Payment[]
+
+  @@index([touristId, placedAt])
+  @@index([status, placedAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id               String          @id @default(uuid()) @db.Uuid
+  orderId          String          @map("order_id") @db.Uuid
+  sunbedId         String          @map("sunbed_id") @db.Uuid
+  beachPointCode   String          @map("beach_point_code")
+  beachPointName   String          @map("beach_point_name")
+  sunbedCode       String          @map("sunbed_code")
+  startAt          DateTime        @map("start_at") @db.Timestamptz(6)
+  endAt            DateTime        @map("end_at") @db.Timestamptz(6)
+  unitPriceMinor   Int             @map("unit_price_minor")
+  totalMinor       Int             @map("total_minor")
+  status           OrderItemStatus @default(RESERVED)
+  checkedInAt      DateTime?       @map("checked_in_at") @db.Timestamptz(6)
+  checkedInById    String?         @map("checked_in_by_id") @db.Uuid
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  order       Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sunbed      Sunbed        @relation(fields: [sunbedId], references: [id], onDelete: Restrict)
+  checkedInBy User?         @relation("OrderItemCheckedInBy", fields: [checkedInById], references: [id], onDelete: SetNull)
+  slots       BookingSlot[]
+
+  @@index([orderId])
+  @@index([sunbedId, startAt])
+  @@index([startAt, status])
+  @@map("order_items")
+}
+
+model BookingSlot {
+  id          String   @id @default(uuid()) @db.Uuid
+  orderItemId String   @map("order_item_id") @db.Uuid
+  sunbedId    String   @map("sunbed_id") @db.Uuid
+  slotStart   DateTime @map("slot_start") @db.Timestamptz(6)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  sunbed    Sunbed    @relation(fields: [sunbedId], references: [id], onDelete: Restrict)
+
+  @@unique([orderItemId, slotStart])
+  @@index([sunbedId, slotStart])
+  @@index([slotStart])
+  @@map("booking_slots")
+}
+
+model Payment {
+  id          String        @id @default(uuid()) @db.Uuid
+  orderId     String        @map("order_id") @db.Uuid
+  type        PaymentType
+  provider    String        @default("MOCK")
+  status      PaymentStatus @default(SUCCEEDED)
+  amountMinor Int           @map("amount_minor")
+  currency    String        @default("BDT") @db.Char(3)
+  externalRef String?       @unique @map("external_ref")
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@map("payments")
+}
+
+model AuditEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id")
+  details     Json?    @db.JsonB
+  requestId   String?  @map("request_id")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  actor User? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@map("audit_events")
+}
+
