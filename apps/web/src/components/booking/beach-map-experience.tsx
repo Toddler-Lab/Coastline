@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import type {
@@ -71,6 +71,7 @@ export function BeachMapExperience({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [nowMs, setNowMs] = useState(0);
+  const bookingPanelRef = useRef<HTMLDivElement | null>(null);
 
   const days = useMemo(() => dateStrip(today, 8), [today]);
 
@@ -220,6 +221,9 @@ export function BeachMapExperience({
 
   function selectPoint(code: string) {
     if (code === selectedCode) {
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+        bookingPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
       return;
     }
     setSelectedCode(code);
@@ -228,6 +232,12 @@ export function BeachMapExperience({
     setNotice(null);
     setErrorMessage(null);
     syncUrl(code, date);
+
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setTimeout(() => {
+        bookingPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 180);
+    }
   }
 
   function changeDate(next: string) {
@@ -461,7 +471,9 @@ export function BeachMapExperience({
               </p>
             }
           />
-          <BookingPanel variant="sheet" {...panelProps} />
+          <div ref={bookingPanelRef} id="sunbeds-panel" className="scroll-mt-4">
+            <BookingPanel variant="sheet" {...panelProps} />
+          </div>
         </section>
       </div>
     </main>

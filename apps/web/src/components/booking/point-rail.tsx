@@ -86,10 +86,10 @@ export function PointRail({
                   <span
                     className={cn(
                       'mt-0.5 block font-mono text-[8.5px] uppercase tracking-[0.12em]',
-                      selected ? 'text-sand' : 'text-mist/70',
+                      selected ? 'text-sand font-semibold' : 'text-mist/70',
                     )}
                   >
-                    {selected ? 'Selected' : 'per hour'}
+                    {selected ? 'Sunbeds open ↓' : 'Select beds →'}
                   </span>
                 </span>
               </button>
