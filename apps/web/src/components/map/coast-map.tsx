@@ -80,9 +80,9 @@ const BED_LABELS: Record<MapBedData['state'], string> = {
  */
 const CLUSTER_CODES = new Set(['SUG', 'KOL', 'LAB']);
 const CLUSTER_OFFSETS: Record<string, [number, number]> = {
-  SUG: [-34, -6],
-  KOL: [0, 8],
-  LAB: [34, -6],
+  LAB: [-28, -14],
+  SUG: [0, 0],
+  KOL: [28, 14],
 };
 const CLUSTER_ZOOM = 12.8;
 
@@ -303,7 +303,7 @@ export default function CoastMap({
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const target = { center: [point.longitude, point.latitude] as [number, number], zoom: 16.9 };
+    const target = { center: [point.longitude, point.latitude] as [number, number], zoom: 17.2 };
     if (reduced) {
       map.jumpTo(target);
     } else {
