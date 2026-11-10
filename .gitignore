@@ -23,3 +23,7 @@ test-results/
 *.log
 .DS_Store
 Thumbs.db
+
+# Generated web assets
+apps/web/public/maplibre-gl-worker.mjs
+
