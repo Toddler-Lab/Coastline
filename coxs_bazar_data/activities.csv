@@ -1,0 +1,10 @@
+﻿id,name,type,area,price_min_bdt,price_max_bdt,unit,duration_min,price_confidence,safety_note
+A01,Parasailing,water_sport,Dariyanagar / Inani,1500,2500,per ride,10,medium,Choose operators with life jackets and trained crew
+A02,Jet ski,water_sport,Kolatoli / Dariyanagar,,,per ride,,unverified,Reckless drivers reported near crowded areas
+A03,Banana boat,water_sport,Laboni / Inani,,,per ride,,unverified,
+A04,Horse riding (short),beach,Laboni / Sugandha,200,200,per ride,,low,Bargain; 2018 price
+A05,Horse riding (long),beach,Laboni / Sugandha,400,400,per ride,,low,Bargain; 2018 price
+A06,Wooden beach bed (double),beach,Main points,60,60,per hour,,low,2018 price
+A07,Bicycle rental,rental,Town,100,,per day (from),,low,
+A08,Beach bike,beach,Laboni-Kolatoli,,,per hour,,unverified,
+A09,Surfing,water_sport,Inani / Laboni,,,per session,,unverified,Board rental and lessons exist

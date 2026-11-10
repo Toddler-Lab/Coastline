@@ -1,0 +1,13 @@
+﻿id,name,area,tier,price_min_bdt_per_night,price_max_bdt_per_night,distance_to_beach_km,price_season_note,booking_platforms,verified
+H01,Hotel Sea Queen,Jhawtala,budget,1220,1460,,Aggregator low rate; varies by season,Trip.com;Booking,partial
+H02,Hotel Sea Cox,Cox's Bazar town,budget,1830,1830,,Aggregator low rate,Booking,partial
+H03,Lighthouse Family Retreat,Near Laboni,budget,1830,1830,1.05,From-price,Trip.com,partial
+H04,Royal Beach Resort,Near Laboni,budget,2810,2810,0.78,From-price,Trip.com,partial
+H05,Royal Pearl Suites,Cox's Bazar town,mid,3050,5490,1.74,From-price range,Trip.com;Booking,partial
+H06,Neeshorgo Hotel & Resort,Cox's Bazar town,mid,3780,3780,,From-price,Trip.com,partial
+H07,Best Western Heritage,Kolatoli,mid,4390,4390,,Sample date price,Travelocity,partial
+H08,Seagull Hotel Ltd,Hotel-Motel Zone,mid,4640,6340,,Range across platforms,Trip.com;Kayak,partial
+H09,Long Beach Hotel,Kolatoli,upscale,4880,11960,1.11,Very wide range by season,Trip.com;Booking,partial
+H10,Sayeman Beach Resort,Kolatoli,upscale,10740,10740,,From-price,Trip.com,partial
+H11,Royal Tulip Sea Pearl Beach Resort,Inani,resort,4150,18300,,Extremely wide range; check live price,Hotelscombined;Expedia,low
+H12,Mermaid Beach Resort,Pechardwip,resort,22570,22570,,Single December sample,Travelocity,low

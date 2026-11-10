@@ -1,0 +1,5 @@
+﻿id,name,hotel,nights,price_min_bdt_per_person,price_max_bdt_per_person,source,validity_note
+P01,3D2N Cox's Bazar,Grace Cox,2,13900,15000,Air Astra,Apr-Jul 2026; check inclusions
+P02,3D2N Cox's Bazar,Long Beach,2,15600,16500,Air Astra,Apr-Jul 2026; check inclusions
+P03,3D2N Cox's Bazar,Sea Pearl Beach Resort,2,17550,17550,Air Astra,Apr-May 2026; check inclusions
+P04,Extra night,Cox Deluxe Hill Side,1,2500,2500,Air Astra,Per person per extra night

@@ -1,0 +1,15 @@
+﻿id,name_en,name_bn,type,area,short_description,entry_fee_bdt,distance_note,best_season,family_friendly,tags,safety_note,verified
+D01,Laboni Point,লাবণী পয়েন্ট,beach,Cox's Bazar town,Most popular beach point; sunrise and sunset views,0,Town centre,Nov-Feb,yes,beach;sunset;horse_riding;jet_ski,Rough waves in summer; follow lifeguard flags,partial
+D02,Kolatoli Point,কলাতলী পয়েন্ট,beach,Cox's Bazar town,"Hotel-zone beach, jet skiing in front of Sayeman",0,Town centre,Nov-Feb,yes,beach;hotels;jet_ski,Rough waves in summer,partial
+D03,Sugandha Point,সুগন্ধা পয়েন্ট,beach,Cox's Bazar town,Most crowded beach point with the most facilities,0,Between Kolatoli and Laboni,Nov-Feb,yes,beach;crowded;shopping,Crowded on weekends and holidays,partial
+D04,Himchari National Park,হিমছড়ি জাতীয় উদ্যান,nature,12 km south of town,"Waterfall, greenery, hill-top view of the beach",,12 km south of Cox's Bazar,Nov-Feb,yes,waterfall;hill;nature,,no
+D05,Inani Beach,ইনানী সৈকত,beach,~35 km from Laboni,Quieter beach with rock formations; surfing and other water sports,0,~35 km from Laboni Point,Nov-Feb,yes,beach;quiet;surfing,,partial
+D06,Dariyanagar Beach,দরিয়ানগর সৈকত,beach,Between Laboni and Inani,"Water-sports hub: parasailing, jet ski, speedboat",0,On Marine Drive towards Inani,Nov-Feb,partial,parasailing;jet_ski;speedboat,Fatal parasailing accident reported; check operator safety gear,partial
+D07,Maheshkhali Island & Adinath Temple,মহেশখালী ও আদিনাথ মন্দির,island,15 min by boat,Hindu temple of Shiva on Mainak Hill; half-day trip,,15-minute motorboat ride,Nov-Feb,yes,island;temple;boat,,no
+D08,Saint Martin's Island,সেন্ট মার্টিন দ্বীপ,island,~3-4 h by ship,Coral island; needs travel pass; tickets sell out early in season,100,Ship from Nuniachhara jetty; fee = environmental fee,Nov-Feb,yes,island;coral;overnight,Travel pass mandatory; rough sea in summer,partial
+D09,Bangabandhu Sheikh Mujib Safari Park,বঙ্গবন্ধু শেখ মুজিব সাফারি পার্ক,wildlife,Dulahazara,"Tigers, lions, crocodiles, monkeys",,,Nov-Feb,yes,safari;animals;kids,,no
+D10,Burmese Market,বার্মিজ মার্কেট,shopping,Cox's Bazar town,Souvenirs and local goods,0,Town,All year,yes,shopping;souvenir,Bargain; compare prices,no
+D11,Cox's Bazar Lighthouse,কক্সবাজার লাইটহাউস,landmark,Near Laboni,"Coastal landmark, ~800 m from Laboni",,,All year,yes,landmark;history,,no
+D12,Cox's Bazar Buddhist Temple (Aggmeda Khyang),আগ্গমেধা খিয়াং,culture,Cox's Bazar town,Buddhist temple and pagodas,,,All year,yes,culture;temple,,no
+D13,Kutubdia Lighthouse,কুতুবদিয়া বাতিঘর,landmark,Kutubdia island,Island lighthouse,,,Nov-Feb,partial,island;lighthouse,,no
+D14,Marine Drive Road,মেরিন ড্রাইভ,scenic_drive,Cox's Bazar to Teknaf,"Coastal road connecting Laboni, Dariyanagar, Inani",0,,Nov-Feb,yes,drive;scenic,,no
