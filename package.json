@@ -10,6 +10,7 @@
     "pnpm": ">=9"
   },
   "scripts": {
+    "dev:api": "pnpm --filter @coastline/api^... build && pnpm --filter @coastline/api dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r --if-present test",
