@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: coastline-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: coastline_app
+      POSTGRES_PASSWORD: dev_0bac4f806eae423aa5869ebf7c2f2c927f08cb5d
+      POSTGRES_DB: coastline_dev
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
