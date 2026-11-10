@@ -7,3 +7,4 @@ export class CheckInDto implements CheckInRequest {
   @IsUUID('4', { each: true })
   itemIds?: string[];
 }
+

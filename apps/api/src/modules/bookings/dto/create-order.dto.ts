@@ -44,3 +44,4 @@ export class CreateOrderDto implements CreateOrderRequest {
   @IsIn(['MOCK'])
   paymentMethod?: 'MOCK';
 }
+

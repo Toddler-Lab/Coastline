@@ -6,3 +6,4 @@ export class ValidateTicketDto implements ValidateTicketRequest {
   @IsNotEmpty()
   payload!: string;
 }
+
