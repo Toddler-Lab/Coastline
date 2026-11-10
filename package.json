@@ -1,0 +1,22 @@
+{
+  "name": "coastline",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Coastline - Cox's Bazar beach services and discovery demonstrator",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.13.1",
+  "engines": {
+    "node": ">=22 <25",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r --if-present test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,yaml,yml}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10"
+  }
+}

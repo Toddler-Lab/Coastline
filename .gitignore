@@ -9,6 +9,10 @@ build/
 coverage/
 playwright-report/
 test-results/
+*.tsbuildinfo
+
+# Worktrees
+.worktrees/
 
 # Local environment and secrets
 .env

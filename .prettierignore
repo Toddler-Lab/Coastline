@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+pnpm-lock.yaml
+docs
+*.md
+packages/db/prisma/migrations
+
+# Rewritten by Next.js on every dev/build run
+apps/web/next-env.d.ts
+apps/web/tsconfig.json
