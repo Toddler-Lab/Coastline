@@ -133,27 +133,41 @@ export interface OrderWindow {
   timeLabel: string;
 }
 
-export function orderWindow(order: Pick<OrderDto, 'items'>): OrderWindow | null {
-  if (order.items.length === 0) {
-    return null;
-  }
-  const starts = order.items.map((item) => item.startAt).sort();
-  const ends = order.items.map((item) => item.endAt).sort();
-  const startAt = starts[0];
-  const endAt = ends[ends.length - 1];
-  const startKey = isoDateKey(startAt);
-  const endKey = isoDateKey(endAt);
-  const sameDhakaDay = startKey === endKey;
+export function orderWindow(
+  order: Pick<OrderDto, 'items'> & { hotelBookings?: OrderDto['hotelBookings'] },
+): OrderWindow | null {
+  if (order.items && order.items.length > 0) {
+    const starts = order.items.map((item) => item.startAt).sort();
+    const ends = order.items.map((item) => item.endAt).sort();
+    const startAt = starts[0];
+    const endAt = ends[ends.length - 1];
+    const startKey = isoDateKey(startAt);
+    const endKey = isoDateKey(endAt);
+    const sameDhakaDay = startKey === endKey;
 
-  return {
-    startAt,
-    endAt,
-    sameDhakaDay,
-    dateKey: startKey,
-    timeLabel: sameDhakaDay
-      ? `${formatIsoTime(startAt)}–${formatIsoTime(endAt)}`
-      : `${formatIsoTime(startAt)} → ${formatIsoTime(endAt)}`,
-  };
+    return {
+      startAt,
+      endAt,
+      sameDhakaDay,
+      dateKey: startKey,
+      timeLabel: sameDhakaDay
+        ? `${formatIsoTime(startAt)}–${formatIsoTime(endAt)}`
+        : `${formatIsoTime(startAt)} → ${formatIsoTime(endAt)}`,
+    };
+  }
+
+  if (order.hotelBookings && order.hotelBookings.length > 0) {
+    const booking = order.hotelBookings[0];
+    return {
+      startAt: `${booking.checkInDate}T14:00:00.000Z`,
+      endAt: `${booking.checkOutDate}T11:00:00.000Z`,
+      sameDhakaDay: false,
+      dateKey: booking.checkInDate,
+      timeLabel: `${booking.nights} ${booking.nights === 1 ? 'night' : 'nights'} · Out ${booking.checkOutDate}`,
+    };
+  }
+
+  return null;
 }
 
 /** Dhaka date key for an ISO instant, independent of the host timezone. */
@@ -161,15 +175,34 @@ export function isoDateKey(iso: string): string {
   return new Date(Date.parse(iso) + 6 * HOUR_MS).toISOString().slice(0, 10);
 }
 
-export function orderPhase(order: Pick<OrderDto, 'status' | 'items'>): OrderPhase {
+export function orderPhase(
+  order: Pick<OrderDto, 'status' | 'items'> & { hotelBookings?: OrderDto['hotelBookings'] },
+): OrderPhase {
   if (order.status === 'CANCELLED') {
     return 'CANCELLED';
   }
-  if (order.items.some((item) => item.phase === 'ACTIVE')) {
-    return 'ACTIVE';
+  if (order.items && order.items.length > 0) {
+    if (order.items.some((item) => item.phase === 'ACTIVE')) {
+      return 'ACTIVE';
+    }
+    if (order.items.some((item) => item.phase === 'UPCOMING')) {
+      return 'UPCOMING';
+    }
+    return 'PAST';
   }
-  if (order.items.some((item) => item.phase === 'UPCOMING')) {
-    return 'UPCOMING';
+  if (order.hotelBookings && order.hotelBookings.length > 0) {
+    const today = new Date().toISOString().slice(0, 10);
+    const anyActive = order.hotelBookings.some(
+      (b) => b.checkInDate <= today && today < b.checkOutDate,
+    );
+    if (anyActive) {
+      return 'ACTIVE';
+    }
+    const anyUpcoming = order.hotelBookings.some((b) => b.checkInDate > today);
+    if (anyUpcoming) {
+      return 'UPCOMING';
+    }
+    return 'PAST';
   }
   return 'PAST';
 }

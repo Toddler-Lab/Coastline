@@ -268,6 +268,56 @@ export default async function TicketPage({
           </aside>
 
           <div className="space-y-5">
+            {order.hotelBookings && order.hotelBookings.length > 0 ? (
+              <Panel className="overflow-hidden">
+                <div className="flex flex-wrap items-end justify-between gap-2 border-b border-line px-4 py-3.5 bg-surface/30">
+                  <div>
+                    <p className="label">Coastal Accommodation</p>
+                    <h2 className="mt-1 text-[20px] text-foam font-semibold">
+                      {order.hotelBookings[0].hotelName}
+                    </h2>
+                  </div>
+                  <Badge tone="sea">Verified Reservation</Badge>
+                </div>
+
+                <div className="divide-y divide-line">
+                  {order.hotelBookings.map((stay) => (
+                    <div key={stay.id} className="p-5 space-y-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[16px] font-medium text-foam">{stay.roomTypeName}</p>
+                          <p className="mt-0.5 text-[12px] text-mist">
+                            {stay.hotelName} · {stay.nights} {stay.nights === 1 ? 'Night' : 'Nights'}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] uppercase tracking-wider text-mist">Assigned:</span>
+                          <span className="rounded-lg border border-sea/40 bg-sea/10 px-3 py-1 font-mono text-[13px] font-bold text-sea">
+                            Room {stay.roomNumber}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 rounded-xl border border-line bg-abyss/40 p-3.5">
+                        <Detail label="Check-In" value={formatLongDateKey(stay.checkInDate)} />
+                        <Detail label="Check-Out" value={formatLongDateKey(stay.checkOutDate)} />
+                        <Detail label="Duration" value={`${stay.nights} ${stay.nights === 1 ? 'Night' : 'Nights'}`} />
+                        <Detail label="Nightly Rate" value={`${formatMoney(stay.nightlyPriceMinor)} / night`} />
+                      </div>
+
+                      <div className="flex items-baseline justify-between border-t border-line/70 pt-3">
+                        <p className="label">Total Stay Amount</p>
+                        <p className="font-mono text-[16px] font-bold text-foam">
+                          {formatMoney(stay.totalMinor)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Panel>
+            ) : null}
+
+            {order.items.length > 0 ? (
             <Panel className="overflow-hidden">
               <div className="flex flex-wrap items-end justify-between gap-2 border-b border-line px-4 py-3.5">
                 <div>
@@ -338,6 +388,7 @@ export default async function TicketPage({
                 })}
               </ul>
             </Panel>
+            ) : null}
 
             <Panel className="overflow-hidden">
               <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3.5">
