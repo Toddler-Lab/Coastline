@@ -26,17 +26,17 @@ export function BookingSummary({
   onPay: () => void;
 }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5 sm:space-y-3">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="label">Indicative total</p>
-          <p className="mt-1 text-[11px] text-mist">
+          <p className="mt-0.5 sm:mt-1 text-[11px] text-mist">
             {selectedBeds.length === 0
               ? 'No beds selected'
               : `${selectedBeds.length} ${selectedBeds.length === 1 ? 'bed' : 'beds'} × ${durationLabel(hours)}`}
           </p>
         </div>
-        <p className="font-display text-[28px] leading-none text-foam">
+        <p className="font-display text-[24px] sm:text-[28px] leading-none text-foam">
           {formatMoney(subtotalMinor)}
         </p>
       </div>

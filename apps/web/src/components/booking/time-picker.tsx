@@ -56,7 +56,7 @@ export function TimePicker({
   const anyStart = startOptions.some((option) => !option.disabled);
 
   return (
-    <section aria-labelledby={headingId} className="space-y-4">
+    <section aria-labelledby={headingId} className="space-y-3 sm:space-y-4">
       <div className="flex items-end justify-between gap-3">
         <h3 id={headingId} className="label text-foam/80">
           Time window
@@ -66,8 +66,8 @@ export function TimePicker({
         </span>
       </div>
 
-      <div className="grid grid-cols-[1fr_auto] items-end gap-3">
-        <div>
+      <div className="grid grid-cols-[1fr_auto] items-end gap-2.5 sm:gap-3">
+        <div className="min-w-0">
           <label htmlFor={selectId} className="label mb-1.5 block">
             Start
           </label>
@@ -76,7 +76,7 @@ export function TimePicker({
               id={selectId}
               value={startIso ?? ''}
               onChange={(event) => onStartChange(event.target.value)}
-              className="h-11 w-full appearance-none rounded-lg border border-line-strong bg-abyss/70 pl-3 pr-8 font-mono text-[12px] text-foam transition-colors focus:border-sea/60 focus:outline-none focus-visible:outline-2 focus-visible:outline-sea/70 disabled:opacity-50"
+              className="h-10 sm:h-11 w-full appearance-none rounded-lg border border-line-strong bg-abyss/70 pl-2.5 sm:pl-3 pr-7 sm:pr-8 font-mono text-[11.5px] sm:text-[12px] text-foam transition-colors focus:border-sea/60 focus:outline-none focus-visible:outline-2 focus-visible:outline-sea/70 disabled:opacity-50"
             >
               {startIso ? null : <option value="">No start time</option>}
               {startOptions.map(({ slot, disabled, suffix }) => (
@@ -89,7 +89,7 @@ export function TimePicker({
             <svg
               aria-hidden
               viewBox="0 0 12 12"
-              className="pointer-events-none absolute right-3 top-1/2 h-3 w-3 -translate-y-1/2 text-mist"
+              className="pointer-events-none absolute right-2.5 sm:right-3 top-1/2 h-3 w-3 -translate-y-1/2 text-mist"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.4"
@@ -99,7 +99,7 @@ export function TimePicker({
           </div>
         </div>
 
-        <div>
+        <div className="flex-none">
           <p className="label mb-1.5">Hours</p>
           <div role="group" aria-label="Booking duration in hours" className="flex gap-1">
             {Array.from({ length: MAX_HOURS_PER_ITEM }, (_, index) => index + 1).map((value) => {
@@ -117,9 +117,9 @@ export function TimePicker({
                   disabled={!fits || clashes}
                   onClick={() => onHoursChange(value)}
                   className={cn(
-                    'h-11 w-11 rounded-lg border font-mono text-[11px] transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+                    'h-10 w-8 sm:h-11 sm:w-10 rounded-lg border font-mono text-[10.5px] sm:text-[11px] transition-colors disabled:cursor-not-allowed disabled:opacity-40',
                     hours === value
-                      ? 'border-sea bg-sea text-abyss'
+                      ? 'border-sea bg-sea text-abyss font-semibold'
                       : 'border-line bg-abyss/45 text-mist hover:border-sea/45 hover:text-foam',
                   )}
                 >

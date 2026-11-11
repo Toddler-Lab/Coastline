@@ -34,6 +34,33 @@
 
 * {
   border-color: var(--color-line);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(111, 231, 210, 0.28) transparent;
+}
+
+/* Custom sleek dark scrollbar across browsers */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(111, 231, 210, 0.22);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(111, 231, 210, 0.45);
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 html {

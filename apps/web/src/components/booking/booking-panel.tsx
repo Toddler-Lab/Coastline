@@ -86,13 +86,10 @@ export function BookingPanel({
 
   return (
     <Panel
-      className={cn(
-        'flex min-h-0 flex-col overflow-hidden',
-        rail ? 'h-full' : 'max-h-[calc(100dvh-var(--header-height)-24px)]',
-      )}
+      className={cn('flex min-h-0 flex-col', rail ? 'h-full overflow-hidden' : 'h-auto')}
       aria-busy={isLoading || undefined}
     >
-      <div className="border-b border-line px-5 pb-4 pt-5">
+      <div className="flex-none border-b border-line px-4 pb-3 pt-3.5 sm:px-5 sm:pb-3.5 sm:pt-4">
         {point ? (
           <>
             <div className="flex items-start justify-between gap-3">
@@ -104,8 +101,10 @@ export function BookingPanel({
                 {point.freeBeds}/{point.totalBeds} free
               </Badge>
             </div>
-            <h2 className="mt-1.5 text-[24px]">{shortPointName(point.name)}</h2>
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-mist">
+            <h2 className="mt-1 text-[20px] sm:text-[22px] xl:text-[24px]">
+              {shortPointName(point.name)}
+            </h2>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[11px] text-mist">
               <span className="inline-flex items-center gap-1.5">
                 <Clock aria-hidden className="h-3 w-3 text-sea" />
                 {hourLabel(point.openHour)}–{hourLabel(point.closeHour)}
@@ -119,7 +118,7 @@ export function BookingPanel({
               </span>
             </div>
             {point.description ? (
-              <p className="mt-2 line-clamp-2 text-[12px] leading-relaxed text-mist">
+              <p className="mt-1.5 line-clamp-2 text-[11.5px] sm:text-[12px] leading-relaxed text-mist">
                 {point.description}
               </p>
             ) : null}
@@ -127,42 +126,50 @@ export function BookingPanel({
         ) : (
           <>
             <p className="label">Booking · 02</p>
-            <h2 className="mt-1.5 text-[24px]">Choose a stretch</h2>
-            <p className="mt-2 max-w-[34ch] text-[12px] leading-relaxed text-mist">
+            <h2 className="mt-1 text-[20px] sm:text-[22px] xl:text-[24px]">Choose a stretch</h2>
+            <p className="mt-1.5 max-w-[34ch] text-[11.5px] sm:text-[12px] leading-relaxed text-mist">
               Pick a numbered pin on the map, or a beach point in the list, to open its beds and
               hourly availability.
             </p>
           </>
         )}
 
-        <div className="mt-4">
+        <div className="mt-3 sm:mt-3.5">
           <DateStrip days={dateDays} selected={date} onSelect={onDateChange} />
         </div>
       </div>
 
-      <div className={cn('flex-1 overflow-y-auto px-5 py-4', rail ? 'min-h-0' : 'min-h-[360px]')}>
+      <div
+        className={cn(
+          rail
+            ? 'flex-1 min-h-0 overflow-y-auto px-4 py-3 sm:px-5 sm:py-3.5 overscroll-contain'
+            : 'px-4 py-4 sm:px-5',
+        )}
+      >
         {!point ? (
-          <div className="space-y-4">
-            <ol className="space-y-3">
+          <div className="space-y-2.5 sm:space-y-3">
+            <ol className="space-y-2 sm:space-y-2.5">
               {[
                 ['01', 'Pick a beach point', 'Six stretches from Sugandha down to Teknaf.'],
                 ['02', 'Choose beds and hours', 'Up to six beds, one shared start and duration.'],
                 ['03', 'Show the demo ticket', 'Pay by mock provider, then open the QR ticket.'],
               ].map(([step, title, body]) => (
-                <li key={step} className="flex gap-3">
+                <li key={step} className="flex gap-2.5 sm:gap-3">
                   <span className="mt-0.5 font-mono text-[10px] text-sea">{step}</span>
                   <span>
-                    <span className="block text-[12.5px] font-semibold text-foam">{title}</span>
-                    <span className="mt-0.5 block text-[11px] leading-relaxed text-mist">
+                    <span className="block text-[12px] sm:text-[12.5px] font-semibold text-foam">
+                      {title}
+                    </span>
+                    <span className="mt-0.5 block text-[10.5px] sm:text-[11px] leading-relaxed text-mist">
                       {body}
                     </span>
                   </span>
                 </li>
               ))}
             </ol>
-            <div className="rounded-xl border border-line bg-abyss/35 p-3">
+            <div className="rounded-xl border border-line bg-abyss/35 p-2.5 sm:p-3">
               <p className="label mb-1">Demo rules</p>
-              <p className="text-[11px] leading-relaxed text-mist">
+              <p className="text-[10.5px] sm:text-[11px] leading-relaxed text-mist">
                 Payments are simulated. Times shown in Asia/Dhaka (UTC+6), bookings up to 7 days
                 ahead, cancellation free until 60 minutes before the first hour.
               </p>
@@ -177,7 +184,7 @@ export function BookingPanel({
             onRetry={onRetry}
           />
         ) : detail ? (
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
             {notice ? (
               <div className="flex gap-2 rounded-xl border border-sea/25 bg-sea/5 px-3 py-2.5">
                 <Info aria-hidden className="mt-0.5 h-3.5 w-3.5 flex-none text-sea" />
@@ -225,7 +232,10 @@ export function BookingPanel({
       </div>
 
       {point && isLoading ? (
-        <div className="border-t border-line bg-deep/70 px-5 py-4" aria-hidden>
+        <div
+          className="flex-none border-t border-line bg-deep/70 px-4 py-3 sm:px-5 sm:py-3.5"
+          aria-hidden
+        >
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
               <Skeleton className="h-3 w-24" />
@@ -233,10 +243,10 @@ export function BookingPanel({
             </div>
             <Skeleton className="h-7 w-24" />
           </div>
-          <Skeleton className="mt-3 h-11 w-full rounded-full" />
+          <Skeleton className="mt-3 h-10 sm:h-11 w-full rounded-full" />
         </div>
       ) : point && detail && !detailErrorText ? (
-        <div className="border-t border-line bg-deep/70 px-5 py-4">
+        <div className="flex-none border-t border-line bg-deep/70 px-4 py-3 sm:px-5 sm:py-3.5">
           <BookingSummary
             selectedBeds={selectedBeds}
             hours={hours}

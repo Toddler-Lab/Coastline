@@ -99,17 +99,17 @@ export function BedPicker({
               disabled={!selected && !selectable}
               onClick={() => onToggle(bed.id)}
               className={cn(
-                'flex h-11 min-w-0 flex-col items-start justify-center rounded-lg border px-2 text-left transition-colors disabled:cursor-not-allowed',
+                'flex h-10 sm:h-11 min-w-0 flex-col items-start justify-center rounded-lg border px-1.5 sm:px-2 text-left transition-colors disabled:cursor-not-allowed',
                 STATE_CLASS[tone],
                 selected && 'disabled:opacity-100',
               )}
             >
-              <span className="w-full truncate font-mono text-[10.5px] leading-tight">
+              <span className="w-full truncate font-mono text-[10px] sm:text-[10.5px] leading-tight">
                 {bed.code}
               </span>
               <span
                 className={cn(
-                  'w-full truncate font-mono text-[7.5px] uppercase tracking-[0.1em]',
+                  'w-full truncate font-mono text-[7px] sm:text-[7.5px] uppercase tracking-[0.08em] sm:tracking-[0.1em]',
                   selected
                     ? 'text-sea/80'
                     : state === 'free'
@@ -128,7 +128,7 @@ export function BedPicker({
         })}
       </div>
 
-      <p className="mt-3 text-[10.5px] leading-relaxed text-mist/75">
+      <p className="mt-2.5 sm:mt-3 text-[10px] sm:text-[10.5px] leading-relaxed text-mist/75">
         Beds labelled out of service cannot be booked. Yours are already held by this persona for
         the selected hours.
       </p>

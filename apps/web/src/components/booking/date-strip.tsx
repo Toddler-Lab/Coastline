@@ -18,13 +18,13 @@ export function DateStrip({
 }) {
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between">
+      <div className="mb-1.5 flex items-center justify-between">
         <p className="label">{label}</p>
-        <p className="font-mono text-[8.5px] uppercase tracking-[0.12em] text-mist/70">
+        <p className="font-mono text-[8px] sm:text-[8.5px] uppercase tracking-[0.12em] text-mist/70">
           Dhaka · UTC+6
         </p>
       </div>
-      <div role="group" aria-label={label} className="grid grid-cols-8 gap-1">
+      <div role="group" aria-label={label} className="grid grid-cols-8 gap-1 sm:gap-1.5">
         {days.map((day) => {
           const active = day.key === selected;
           return (
@@ -35,7 +35,7 @@ export function DateStrip({
               aria-label={formatLongDateKey(day.key)}
               onClick={() => onSelect(day.key)}
               className={cn(
-                'flex h-14 min-w-0 flex-col items-center justify-center rounded-lg border transition-colors',
+                'flex h-11 sm:h-12 min-w-0 flex-col items-center justify-center rounded-lg border py-1 transition-colors',
                 active
                   ? 'border-sea bg-sea text-abyss'
                   : 'border-line bg-abyss/45 text-mist hover:border-sea/45 hover:text-foam',
@@ -43,18 +43,18 @@ export function DateStrip({
             >
               <span
                 className={cn(
-                  'font-mono text-[8px] uppercase tracking-[0.06em]',
+                  'font-mono text-[7px] sm:text-[8px] uppercase tracking-[0.04em] sm:tracking-[0.06em]',
                   active ? 'text-abyss/75' : 'text-mist/75',
                 )}
               >
                 {day.weekday}
               </span>
-              <span className="font-display text-[16px] font-semibold leading-tight">
+              <span className="font-display text-[13.5px] sm:text-[15px] font-semibold leading-tight">
                 {day.day}
               </span>
               <span
                 className={cn(
-                  'font-mono text-[7.5px] uppercase tracking-[0.08em]',
+                  'font-mono text-[6.5px] sm:text-[7.5px] uppercase tracking-[0.06em] sm:tracking-[0.08em]',
                   active ? 'text-abyss/70' : 'text-mist/60',
                 )}
               >

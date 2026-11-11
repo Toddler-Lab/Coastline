@@ -17,31 +17,33 @@ export function BedLegend({
   windowLabel,
   className,
   compact = false,
+  unstyled = false,
 }: {
   windowLabel?: string;
   className?: string;
   compact?: boolean;
+  unstyled?: boolean;
 }) {
   return (
     <div
       className={cn(
-        'rounded-xl border border-line bg-abyss/72 px-3 py-2 backdrop-blur-md',
-        compact ? 'space-y-1' : 'space-y-2',
+        !unstyled && 'rounded-xl border border-line bg-abyss/72 px-3 py-2 backdrop-blur-md',
+        compact ? 'space-y-1' : 'space-y-1.5',
         className,
       )}
     >
-      <ul className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      <ul className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
         {ITEMS.map((item) => (
-          <li key={item.key} className="flex items-center gap-1.5">
+          <li key={item.key} className="flex items-center gap-1.5 min-w-0">
             <span aria-hidden className={cn('state-dot', item.dot)} />
-            <span className="font-mono text-[9px] uppercase tracking-[0.1em] text-mist">
+            <span className="font-mono text-[8.5px] uppercase tracking-[0.08em] text-mist whitespace-nowrap">
               {item.label}
             </span>
           </li>
         ))}
       </ul>
       {windowLabel ? (
-        <p className="font-mono text-[8.5px] uppercase tracking-[0.12em] text-mist/70">
+        <p className="font-mono text-[8px] uppercase tracking-[0.1em] text-mist/70 truncate">
           Bed states for {windowLabel} · Dhaka time
         </p>
       ) : null}

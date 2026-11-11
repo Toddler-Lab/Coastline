@@ -415,7 +415,7 @@ export function BeachMapExperience({
     dateLabel: formatDateKey(date),
   };
 
-  const legend = <BedLegend windowLabel={windowReady ? windowText : undefined} compact />;
+  const legend = <BedLegend windowLabel={windowReady ? windowText : undefined} compact unstyled />;
 
   return (
     <main className="relative">
@@ -432,7 +432,7 @@ export function BeachMapExperience({
           />
 
           <div className="pointer-events-none absolute left-3 top-3 z-10 lg:hidden">
-            <div className="corner-ticks rounded-lg border border-line bg-abyss/78 px-2.5 py-1.5 backdrop-blur-md">
+            <div className="rounded-lg border border-line bg-abyss/78 px-2.5 py-1.5 backdrop-blur-md">
               <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-mist">
                 Coastline · survey 01
               </p>
@@ -449,10 +449,10 @@ export function BeachMapExperience({
           />
 
           <div className="pointer-events-none absolute inset-0 z-30 hidden lg:block">
-            <div className="pointer-events-auto absolute bottom-4 left-4 top-4 w-[304px]">
-              <PointRail {...railProps} className="h-full" footer={legend} />
+            <div className="pointer-events-auto absolute bottom-4 left-4 top-4 w-[280px] xl:w-[304px]">
+              <PointRail {...railProps} className="h-full" footer={legend} direction="right" />
             </div>
-            <div className="pointer-events-auto absolute bottom-28 right-4 top-4 w-[392px]">
+            <div className="pointer-events-auto absolute bottom-4 right-4 top-4 w-[340px] xl:w-[384px] 2xl:w-[392px]">
               <BookingPanel variant="rail" {...panelProps} />
             </div>
           </div>
@@ -463,6 +463,7 @@ export function BeachMapExperience({
           <div aria-hidden className="mx-auto mb-4 h-1 w-10 rounded-full bg-line-strong" />
           <PointRail
             {...railProps}
+            direction="down"
             className="mb-3"
             listClassName="max-h-[248px]"
             footer={
