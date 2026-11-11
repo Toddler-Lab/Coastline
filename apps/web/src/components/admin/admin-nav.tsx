@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, MapPin, Ticket } from 'lucide-react';
+import { LayoutDashboard, MapPin, Ticket, UtensilsCrossed } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 const ITEMS = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true },
   { href: '/admin/points', label: 'Beach points', icon: MapPin, exact: false },
   { href: '/admin/bookings', label: 'Bookings & check-in', icon: Ticket, exact: false },
+  { href: '/admin/dining', label: 'Dining', icon: UtensilsCrossed, exact: false },
 ] as const;
 
 export function AdminNav() {
