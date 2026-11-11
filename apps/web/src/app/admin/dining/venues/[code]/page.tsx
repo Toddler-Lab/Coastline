@@ -69,8 +69,8 @@ export default async function AdminDiningVenuePage({
           <>
             {VENUE_KIND_LABELS[venue.kind]}
             {venue.beachPointName ? ` at ${venue.beachPointName}` : ' in town'}. Changes apply
-            immediately and are audit-logged; existing reservations and food orders keep the
-            prices and deposits they were booked with.
+            immediately and are audit-logged; existing reservations and food orders keep the prices
+            and deposits they were booked with.
           </>
         }
         actions={

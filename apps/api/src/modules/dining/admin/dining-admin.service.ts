@@ -135,7 +135,10 @@ export class DiningAdminService {
         issues.push({ field: 'openHour', message: 'openHour must be a whole hour from 0 to 23.' });
       }
       if (next.closeHour !== undefined && !isIntInRange(next.closeHour, 1, 24)) {
-        issues.push({ field: 'closeHour', message: 'closeHour must be a whole hour from 1 to 24.' });
+        issues.push({
+          field: 'closeHour',
+          message: 'closeHour must be a whole hour from 1 to 24.',
+        });
       }
       const openHour = next.openHour ?? venue.openHour;
       const closeHour = next.closeHour ?? venue.closeHour;

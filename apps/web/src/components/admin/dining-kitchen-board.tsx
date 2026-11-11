@@ -144,7 +144,9 @@ export function DiningKitchenBoard({
             onChange={(event) => {
               const next = event.target.value;
               router.replace(
-                next ? `/admin/dining/kitchen?venueCode=${encodeURIComponent(next)}` : '/admin/dining/kitchen',
+                next
+                  ? `/admin/dining/kitchen?venueCode=${encodeURIComponent(next)}`
+                  : '/admin/dining/kitchen',
                 { scroll: false },
               );
             }}
@@ -199,14 +201,9 @@ export function DiningKitchenBoard({
                   const next = nextKitchenStatus(order.status);
                   const busy = pending === order.publicRef;
                   const advanceTo =
-                    next && next !== 'PLACED'
-                      ? (next as Exclude<FoodOrderStatus, 'PLACED'>)
-                      : null;
+                    next && next !== 'PLACED' ? (next as Exclude<FoodOrderStatus, 'PLACED'>) : null;
                   return (
-                    <li
-                      key={order.id}
-                      className="rounded-xl border border-line bg-abyss/40 p-3"
-                    >
+                    <li key={order.id} className="rounded-xl border border-line bg-abyss/40 p-3">
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <p className="font-mono text-[11px] text-sea">{order.publicRef}</p>

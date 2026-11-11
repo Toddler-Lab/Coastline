@@ -224,7 +224,10 @@ describeDb('dining table reservations', () => {
     });
 
     it.each([
-      ['not on the hour', { startsAt: new Date(Date.parse(dhakaAt(2, 12)) + 30 * 60_000).toISOString() }],
+      [
+        'not on the hour',
+        { startsAt: new Date(Date.parse(dhakaAt(2, 12)) + 30 * 60_000).toISOString() },
+      ],
       ['in the past', { startsAt: dhakaAt(-1, 12) }],
       ['beyond the advance window', { startsAt: dhakaAt(8, 12) }],
       ['zero hours', { hours: 0 }],
@@ -354,7 +357,9 @@ describeDb('dining table reservations', () => {
         ['CHARGE', MAIN_DEPOSIT_MINOR],
         ['REFUND', MAIN_DEPOSIT_MINOR],
       ]);
-      expect(await prisma.tableSlot.count({ where: { reservationId: r.id, isActive: true } })).toBe(0);
+      expect(await prisma.tableSlot.count({ where: { reservationId: r.id, isActive: true } })).toBe(
+        0,
+      );
       // Rows are kept: slots deactivated, never deleted.
       expect(await prisma.tableSlot.count({ where: { reservationId: r.id } })).toBe(2);
       const audit = await prisma.auditEvent.findFirst({
@@ -383,7 +388,9 @@ describeDb('dining table reservations', () => {
           .send({});
       await cancel().expect(201);
       await cancel().expect(409);
-      expect(await prisma.payment.count({ where: { reservationId: r.id, type: 'REFUND' } })).toBe(1);
+      expect(await prisma.payment.count({ where: { reservationId: r.id, type: 'REFUND' } })).toBe(
+        1,
+      );
     });
 
     it('parallel cancels refund exactly once', async () => {
@@ -397,7 +404,9 @@ describeDb('dining table reservations', () => {
         ),
       );
       expect(results.map((x) => x.status).sort()).toEqual([201, 409]);
-      expect(await prisma.payment.count({ where: { reservationId: r.id, type: 'REFUND' } })).toBe(1);
+      expect(await prisma.payment.count({ where: { reservationId: r.id, type: 'REFUND' } })).toBe(
+        1,
+      );
     });
 
     it('another tourist gets 403, an admin on the tourist route gets 403, anonymous 401', async () => {
@@ -439,7 +448,9 @@ describeDb('dining table reservations', () => {
         tourist: { id: TEST_USERS.tourist, name: 'Test Tourist' },
       });
       expect(a.payments.filter((p) => p.type === 'REFUND')).toHaveLength(1);
-      expect(await prisma.tableSlot.count({ where: { reservationId: r.id, isActive: true } })).toBe(0);
+      expect(await prisma.tableSlot.count({ where: { reservationId: r.id, isActive: true } })).toBe(
+        0,
+      );
       const audit = await prisma.auditEvent.findFirst({
         where: { entityId: r.id, action: AuditActions.RESERVATION_CANCELLED },
       });
@@ -462,7 +473,10 @@ describeDb('dining table reservations', () => {
   describe('admin', () => {
     it('admin endpoints reject tourists (403) and anonymous (401)', async () => {
       const r = await placed();
-      await http().get(`${API}/admin/dining/reservations`).set(auth(TEST_USERS.tourist)).expect(403);
+      await http()
+        .get(`${API}/admin/dining/reservations`)
+        .set(auth(TEST_USERS.tourist))
+        .expect(403);
       await http().get(`${API}/admin/dining/reservations`).expect(401);
       await http()
         .post(`${API}/admin/dining/reservations/${r.publicRef}/check-in`)

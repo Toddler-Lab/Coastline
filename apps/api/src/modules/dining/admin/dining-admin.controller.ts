@@ -23,7 +23,9 @@ export class DiningAdminController {
   constructor(private readonly service: DiningAdminService) {}
 
   @Get('overview')
-  async overview(@Query() query: DiningOverviewQueryDto): Promise<{ data: DiningAdminOverviewDto }> {
+  async overview(
+    @Query() query: DiningOverviewQueryDto,
+  ): Promise<{ data: DiningAdminOverviewDto }> {
     return { data: await this.service.getOverview(query.date) };
   }
 

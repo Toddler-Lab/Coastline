@@ -455,7 +455,9 @@ export class ReservationsService {
 
   private assertConfirmed(status: string, publicRef: string): void {
     if (status !== 'CONFIRMED') {
-      throw conflict(`Reservation ${publicRef} is already ${status.toLowerCase().replace('_', ' ')}.`);
+      throw conflict(
+        `Reservation ${publicRef} is already ${status.toLowerCase().replace('_', ' ')}.`,
+      );
     }
   }
 
@@ -469,7 +471,12 @@ export class ReservationsService {
       const now = new Date();
       const { count } = await tx.tableReservation.updateMany({
         where: { id: reservationId, status: 'CONFIRMED' },
-        data: { status: 'CANCELLED', cancelledAt: now, cancelReason: reason, cancelledById: actor.id },
+        data: {
+          status: 'CANCELLED',
+          cancelledAt: now,
+          cancelReason: reason,
+          cancelledById: actor.id,
+        },
       });
       if (count !== 1) {
         throw conflict('This reservation changed while cancelling. Reload and retry.');

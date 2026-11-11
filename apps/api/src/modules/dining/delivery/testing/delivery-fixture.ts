@@ -74,7 +74,13 @@ export async function seedDeliveryVenues(prisma: PrismaService): Promise<void> {
       { id: FOOD_IDS.kolTea, ...kol, name: 'Lemon tea', priceMinor: KOL_PRICES.tea },
       { id: FOOD_IDS.kolCoconut, ...kol, name: 'Green coconut', priceMinor: KOL_PRICES.coconut },
       { id: FOOD_IDS.kolFry, ...kol, name: 'Loitta fry', priceMinor: KOL_PRICES.fry },
-      { id: FOOD_IDS.kolSoldOut, ...kol, name: 'Crab curry', priceMinor: 60000, isAvailable: false },
+      {
+        id: FOOD_IDS.kolSoldOut,
+        ...kol,
+        name: 'Crab curry',
+        priceMinor: 60000,
+        isAvailable: false,
+      },
       {
         id: FOOD_IDS.sugPrawn,
         venueId: FOOD_IDS.sugVenue,

@@ -147,7 +147,10 @@ export function VenueDetailView({ venue, viewer, dhakaHour }: VenueDetailViewPro
                   <dt className="text-mist">Phone</dt>
                   <dd className="text-foam">
                     {venue.contactPhone ? (
-                      <a href={`tel:${venue.contactPhone.replace(/\s+/g, '')}`} className="hover:underline">
+                      <a
+                        href={`tel:${venue.contactPhone.replace(/\s+/g, '')}`}
+                        className="hover:underline"
+                      >
                         {venue.contactPhone}
                       </a>
                     ) : (

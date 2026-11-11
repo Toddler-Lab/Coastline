@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { MAX_RESERVATION_ADVANCE_DAYS, type DiningAdminOverviewDto } from '@coastline/api-contracts';
+import {
+  MAX_RESERVATION_ADVANCE_DAYS,
+  type DiningAdminOverviewDto,
+} from '@coastline/api-contracts';
 import { CalendarClock, ChefHat, Store, UtensilsCrossed, Wallet } from 'lucide-react';
 import { AdminDateJump } from '@/components/admin/admin-date-jump';
 import { AdminPageHeader } from '@/components/admin/admin-page-header';
@@ -129,7 +132,10 @@ export default async function AdminDiningPage({
           />
         </div>
       ) : (
-        <ErrorState title="Dining overview unavailable" message={failure ?? 'The API did not answer.'} />
+        <ErrorState
+          title="Dining overview unavailable"
+          message={failure ?? 'The API did not answer.'}
+        />
       )}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_310px]">

@@ -106,9 +106,6 @@ export function orderableItems(venue: DiningVenueDetail): MenuItemDto[] {
 }
 
 /** Display-only estimate; the API prices the order from the database. */
-export function cartTotalMinor(
-  items: MenuItemDto[],
-  quantities: Record<string, number>,
-): number {
+export function cartTotalMinor(items: MenuItemDto[], quantities: Record<string, number>): number {
   return items.reduce((sum, item) => sum + item.priceMinor * (quantities[item.id] ?? 0), 0);
 }

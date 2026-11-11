@@ -31,11 +31,7 @@ function initialQueryFrom(params: SearchParams): DiningVenueQuery {
   return query;
 }
 
-export default async function FoodPage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
+export default async function FoodPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const [viewer, params] = await Promise.all([getViewer(), searchParams]);
   const dhakaHour = toDhaka(new Date()).getUTCHours();
 

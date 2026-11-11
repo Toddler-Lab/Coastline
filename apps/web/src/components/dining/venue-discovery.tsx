@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Bike, CalendarCheck, Compass, Utensils } from 'lucide-react';
-import type { DiningVenueKind, DiningVenueQuery, DiningVenueSummary } from '@coastline/api-contracts';
+import type {
+  DiningVenueKind,
+  DiningVenueQuery,
+  DiningVenueSummary,
+} from '@coastline/api-contracts';
 import { DINING_VENUE_KINDS } from '@coastline/api-contracts';
 import { filterVenues } from '@/lib/dining/catalogue';
 import { cn } from '@/lib/cn';

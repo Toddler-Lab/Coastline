@@ -7,10 +7,7 @@ import { ApiError, serverApi } from '@/lib/api';
 import { getViewer } from '@/lib/session';
 import { durationLabel, paymentTypeLabel, phasePresentation } from '@/lib/booking';
 import { formatDateTime, formatIsoDate, formatIsoTime, formatMoney } from '@/lib/format';
-import {
-  reservationHours,
-  reservationStatusPresentation,
-} from '@/lib/dining/reservations';
+import { reservationHours, reservationStatusPresentation } from '@/lib/dining/reservations';
 import { ApiOffline } from '@/components/booking/api-offline';
 import { TicketQr } from '@/components/booking/ticket-qr';
 import { ReservationCancel } from '@/components/dining/reservation-cancel';
@@ -159,8 +156,8 @@ export default async function ReservationPage({
                           : 'Reservation ended'}
                     </p>
                     <p className="mt-1 text-[11px] leading-relaxed text-mist">
-                      The QR code is only shown while the reservation is confirmed and upcoming.
-                      The reference above still works for the desk.
+                      The QR code is only shown while the reservation is confirmed and upcoming. The
+                      reference above still works for the desk.
                     </p>
                   </div>
                 )}

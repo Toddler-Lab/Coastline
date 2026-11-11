@@ -26,11 +26,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function VenueDetailPage({
-  params,
-}: {
-  params: Promise<{ code: string }>;
-}) {
+export default async function VenueDetailPage({ params }: { params: Promise<{ code: string }> }) {
   const [{ code }, viewer] = await Promise.all([params, getViewer()]);
   const dhakaHour = toDhaka(new Date()).getUTCHours();
 

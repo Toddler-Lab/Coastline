@@ -71,7 +71,12 @@ describeDb('sunbed food delivery', () => {
   const placeOk = async (body: Record<string, unknown> = {}) =>
     (await place(TEST_USERS.tourist, body).expect(201)).body.data as FoodOrderDto;
 
-  const setStatus = (ref: string, status: string, user: string = TEST_USERS.admin, reason?: string) =>
+  const setStatus = (
+    ref: string,
+    status: string,
+    user: string = TEST_USERS.admin,
+    reason?: string,
+  ) =>
     http()
       .post(`${API}/admin/dining/food-orders/${ref}/status`)
       .set(auth(user))
@@ -111,9 +116,7 @@ describeDb('sunbed food delivery', () => {
         .set(auth(TEST_USERS.tourist))
         .expect(200);
       const beds = res.body.data as DeliverableBedDto[];
-      expect(beds.map((b) => b.orderItemId).sort()).toEqual(
-        [bedId, checkedIn.orderItemId].sort(),
-      );
+      expect(beds.map((b) => b.orderItemId).sort()).toEqual([bedId, checkedIn.orderItemId].sort());
       const kol = beds.find((b) => b.orderItemId === bedId)!;
       expect(kol).toMatchObject({
         sunbedCode: 'KOL-001',
@@ -353,7 +356,10 @@ describeDb('sunbed food delivery', () => {
       await http().get(path).set(auth(TEST_USERS.admin)).expect(200);
       await http().get(path).set(auth(TEST_USERS.otherTourist)).expect(404);
       await http().get(path).expect(401);
-      await http().get(`${API}/dining/food-orders/FO-NOPE`).set(auth(TEST_USERS.tourist)).expect(404);
+      await http()
+        .get(`${API}/dining/food-orders/FO-NOPE`)
+        .set(auth(TEST_USERS.tourist))
+        .expect(404);
     });
 
     it('/me lists only the caller’s orders', async () => {
@@ -506,7 +512,12 @@ describeDb('sunbed food delivery', () => {
 
     it('admin cancel from PLACED refunds and audits food_order.cancelled', async () => {
       const order = await placeOk();
-      const res = await setStatus(order.publicRef, 'CANCELLED', TEST_USERS.admin, 'Out of fish').expect(201);
+      const res = await setStatus(
+        order.publicRef,
+        'CANCELLED',
+        TEST_USERS.admin,
+        'Out of fish',
+      ).expect(201);
       const cancelled = res.body.data as AdminFoodOrderDto;
       expect(cancelled).toMatchObject({ status: 'CANCELLED', cancelReason: 'Out of fish' });
       expect(cancelled.payments.map((p) => p.type)).toEqual(['CHARGE', 'REFUND']);

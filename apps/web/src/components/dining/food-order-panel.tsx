@@ -12,7 +12,12 @@ import type {
 } from '@coastline/api-contracts';
 import { ApiError, clientApi } from '@/lib/api';
 import { formatMoney, hourLabel, toDhaka } from '@/lib/format';
-import { cartTotalMinor, foodOrderHref, formatDhakaClock, orderableItems } from '@/lib/dining/delivery';
+import {
+  cartTotalMinor,
+  foodOrderHref,
+  formatDhakaClock,
+  orderableItems,
+} from '@/lib/dining/delivery';
 import { FoodCart } from '@/components/dining/food-cart';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonClass } from '@/components/ui/button';
@@ -157,9 +162,7 @@ function TouristFoodOrder({ venue }: { venue: DiningVenueDetail }) {
         <div className="flex items-start gap-2.5">
           <CircleCheck aria-hidden className="mt-0.5 h-4 w-4 flex-none text-success" />
           <div>
-            <p className="text-[13px] font-semibold text-foam">
-              Order {placed.publicRef} placed
-            </p>
+            <p className="text-[13px] font-semibold text-foam">Order {placed.publicRef} placed</p>
             <p className="mt-1 text-[11.5px] leading-relaxed text-mist">
               {placed.venue.name} will bring it to sunbed {placed.delivery.sunbedCode} at{' '}
               {placed.delivery.beachPointName}. Demo charge of {formatMoney(placed.totalMinor)}{' '}
@@ -203,9 +206,9 @@ function TouristFoodOrder({ venue }: { venue: DiningVenueDetail }) {
           <MapPin aria-hidden className="mt-0.5 h-4 w-4 flex-none text-sea" />
           <p className="text-[12px] leading-relaxed text-mist">
             Delivery goes to a sunbed you have booked
-            {venue.beachPointName ? ` at ${venue.beachPointName}` : ' at this venue’s beach'}, during
-            its booked hours. You have no sunbed booking there right now — book a bed first, then
-            come back to order.
+            {venue.beachPointName ? ` at ${venue.beachPointName}` : ' at this venue’s beach'},
+            during its booked hours. You have no sunbed booking there right now — book a bed first,
+            then come back to order.
           </p>
         </div>
         <Link href={mapHref} className={buttonClass('secondary', 'md')}>
@@ -260,7 +263,12 @@ function TouristFoodOrder({ venue }: { venue: DiningVenueDetail }) {
             <UtensilsCrossed aria-hidden className="h-3 w-3" />
             Menu
           </p>
-          <FoodCart items={items} quantities={quantities} onChange={setQuantity} disabled={pending} />
+          <FoodCart
+            items={items}
+            quantities={quantities}
+            onChange={setQuantity}
+            disabled={pending}
+          />
         </div>
       )}
 

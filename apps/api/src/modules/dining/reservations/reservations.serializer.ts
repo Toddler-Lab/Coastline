@@ -1,8 +1,4 @@
-import type {
-  AdminReservationDto,
-  OrderPhase,
-  ReservationDto,
-} from '@coastline/api-contracts';
+import type { AdminReservationDto, OrderPhase, ReservationDto } from '@coastline/api-contracts';
 import type {
   Payment as PrismaPayment,
   TableReservation as PrismaReservation,

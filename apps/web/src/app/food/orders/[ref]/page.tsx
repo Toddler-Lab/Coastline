@@ -187,7 +187,9 @@ export default async function FoodOrderPage({ params }: { params: Promise<{ ref:
                       {line.quantity} × {formatMoney(line.unitPriceMinor)}
                     </p>
                   </div>
-                  <p className="font-mono text-[12.5px] text-foam">{formatMoney(line.totalMinor)}</p>
+                  <p className="font-mono text-[12.5px] text-foam">
+                    {formatMoney(line.totalMinor)}
+                  </p>
                 </li>
               ))}
             </ul>

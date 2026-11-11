@@ -349,7 +349,13 @@ export class FoodOrdersService {
    */
   private async applyTransition(
     tx: Tx,
-    order: { id: string; publicRef: string; status: FoodOrderStatus; totalMinor: number; currency: string },
+    order: {
+      id: string;
+      publicRef: string;
+      status: FoodOrderStatus;
+      totalMinor: number;
+      currency: string;
+    },
     target: FoodOrderStatus,
     actor: Actor,
     options: { reason: string | null; requestId?: string },
@@ -380,7 +386,9 @@ export class FoodOrdersService {
       data,
     });
     if (result.count !== 1) {
-      throw conflict(`Food order ${order.publicRef} was just updated by someone else. Reload and try again.`);
+      throw conflict(
+        `Food order ${order.publicRef} was just updated by someone else. Reload and try again.`,
+      );
     }
 
     if (target === 'CANCELLED') {

@@ -13,8 +13,11 @@ import { hourLabel } from '@/lib/format';
 
 export type Tone = 'neutral' | 'sea' | 'sand' | 'success' | 'warn' | 'danger';
 
-export const OPEN_FOOD_ORDER_STATUSES = ['PLACED', 'PREPARING', 'READY'] as const satisfies
-  readonly FoodOrderStatus[];
+export const OPEN_FOOD_ORDER_STATUSES = [
+  'PLACED',
+  'PREPARING',
+  'READY',
+] as const satisfies readonly FoodOrderStatus[];
 export type OpenFoodOrderStatus = (typeof OPEN_FOOD_ORDER_STATUSES)[number];
 
 /** Kitchen refresh cadence; light enough for a demo laptop. */
@@ -121,7 +124,11 @@ export function parseWholeNumber(value: string): number | null {
 
 export function diningErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
-    if (error.status === 404 && error.code === 'NOT_FOUND' && /Cannot (GET|POST)/.test(error.message)) {
+    if (
+      error.status === 404 &&
+      error.code === 'NOT_FOUND' &&
+      /Cannot (GET|POST)/.test(error.message)
+    ) {
       return 'This dining endpoint is not available on the API yet.';
     }
     return error.message;
@@ -142,7 +149,9 @@ export function diningErrorDetails(error: unknown): string[] {
     if (Array.isArray(issues)) {
       return issues
         .map((issue) =>
-          issue && typeof issue === 'object' && typeof (issue as { message?: unknown }).message === 'string'
+          issue &&
+          typeof issue === 'object' &&
+          typeof (issue as { message?: unknown }).message === 'string'
             ? (issue as { message: string }).message
             : null,
         )

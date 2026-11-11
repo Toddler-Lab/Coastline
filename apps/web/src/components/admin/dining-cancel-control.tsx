@@ -30,7 +30,12 @@ export function DiningCancelControl({
 
   if (!open) {
     return (
-      <Button variant="danger" size="sm" disabled={disabled || pending} onClick={() => setOpen(true)}>
+      <Button
+        variant="danger"
+        size="sm"
+        disabled={disabled || pending}
+        onClick={() => setOpen(true)}
+      >
         <X aria-hidden className="h-3.5 w-3.5" />
         {label}
       </Button>

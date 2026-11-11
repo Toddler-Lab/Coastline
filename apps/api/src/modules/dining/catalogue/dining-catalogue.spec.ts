@@ -188,7 +188,11 @@ describeDb('dining catalogue API', () => {
       expect(venue.menu[0].sortOrder).toBe(1);
 
       const grill = venue.menu[0];
-      expect(grill.items.map((i) => i.name)).toEqual(['Pomfret Grill', 'Loitta Fry', 'Crab Masala']);
+      expect(grill.items.map((i) => i.name)).toEqual([
+        'Pomfret Grill',
+        'Loitta Fry',
+        'Crab Masala',
+      ]);
       expect(grill.items[0]).toEqual({
         id: expect.any(String),
         categoryId: grill.id,
