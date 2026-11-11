@@ -160,6 +160,7 @@ export interface OrderDto {
   cancelledAt: string | null;
   cancelReason: string | null;
   items: OrderItemDto[];
+  hotelBookings?: HotelBookingDto[];
   payments: PaymentDto[];
   ticket: TicketDto | null;
   canCancel: boolean;
@@ -274,6 +275,111 @@ export interface ValidateTicketRequest {
 
 export interface AvailabilityQuery {
   date?: string;
+}
+
+export const HOTEL_ZONES = [
+  'KOLATOLI',
+  'SUGANDHA',
+  'LABONI',
+  'HIMCHARI',
+  'PECHARDWIP',
+  'INANI',
+] as const;
+export type HotelZone = (typeof HOTEL_ZONES)[number];
+
+export const HOTEL_ROOM_STATUSES = ['AVAILABLE', 'MAINTENANCE', 'RETIRED'] as const;
+export type HotelRoomStatus = (typeof HOTEL_ROOM_STATUSES)[number];
+
+export interface RoomTypeDto {
+  id: string;
+  hotelId: string;
+  name: string;
+  code: string;
+  description: string | null;
+  maxGuests: number;
+  bedConfig: string;
+  basePriceMinor: number;
+  currency: string;
+  amenities: string[];
+  images: string[];
+  sortOrder: number;
+  availableRooms: number;
+  sampleRoomNumber?: string;
+}
+
+export interface HotelSummaryDto {
+  id: string;
+  slug: string;
+  name: string;
+  banglaName: string | null;
+  zone: HotelZone;
+  address: string;
+  latitude: number;
+  longitude: number;
+  starRating: number;
+  featuredImage: string;
+  description: string;
+  phone: string;
+  email: string | null;
+  nearestBeachCode: string;
+  distanceMeters: number;
+  isFeatured: boolean;
+  minPriceMinor: number;
+  totalRooms: number;
+  availableRoomsCount: number;
+}
+
+export interface HotelDetailDto extends HotelSummaryDto {
+  galleryImages: string[];
+  amenities: string[];
+  checkInTime: string;
+  checkOutTime: string;
+  roomTypes: RoomTypeDto[];
+}
+
+export interface HotelBookingDto {
+  id: string;
+  orderId: string;
+  hotelId: string;
+  hotelName: string;
+  hotelSlug: string;
+  roomTypeId: string;
+  roomTypeName: string;
+  roomId: string;
+  roomNumber: string;
+  checkInDate: string;
+  checkOutDate: string;
+  nights: number;
+  guestsCount: number;
+  nightlyPriceMinor: number;
+  totalMinor: number;
+  currency: string;
+  status: OrderItemStatus;
+  checkedInAt: string | null;
+}
+
+export interface CreateHotelBookingItem {
+  hotelId: string;
+  roomTypeId: string;
+  checkInDate: string;
+  checkOutDate: string;
+  guestsCount?: number;
+}
+
+export interface CreateHotelOrderRequest {
+  booking: CreateHotelBookingItem;
+  touristName?: string;
+  touristEmail?: string;
+  touristPhone?: string;
+}
+
+export interface HotelAvailabilityQuery {
+  checkInDate?: string;
+  checkOutDate?: string;
+  zone?: HotelZone;
+  minPrice?: number;
+  maxPrice?: number;
+  starRating?: number;
 }
 
 /** Dhaka is UTC+6 all year; no daylight saving. */

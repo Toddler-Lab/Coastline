@@ -28,6 +28,21 @@ enum SunbedStatus {
   RETIRED
 }
 
+enum HotelZone {
+  KOLATOLI
+  SUGANDHA
+  LABONI
+  HIMCHARI
+  PECHARDWIP
+  INANI
+}
+
+enum HotelRoomStatus {
+  AVAILABLE
+  MAINTENANCE
+  RETIRED
+}
+
 enum OrderStatus {
   CONFIRMED
   CANCELLED
@@ -57,10 +72,11 @@ model User {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  orders          Order[]      @relation("OrderTourist")
-  cancelledOrders Order[]      @relation("OrderCancelledBy")
-  checkedInItems  OrderItem[]  @relation("OrderItemCheckedInBy")
-  auditEvents     AuditEvent[]
+  orders                 Order[]        @relation("OrderTourist")
+  cancelledOrders        Order[]        @relation("OrderCancelledBy")
+  checkedInItems         OrderItem[]    @relation("OrderItemCheckedInBy")
+  checkedInHotelBookings HotelBooking[] @relation("HotelBookingCheckedInBy")
+  auditEvents            AuditEvent[]
 
   @@map("users")
 }
@@ -120,10 +136,11 @@ model Order {
   cancelReason String?     @map("cancel_reason")
   cancelledById String?    @map("cancelled_by_id") @db.Uuid
 
-  tourist     User        @relation("OrderTourist", fields: [touristId], references: [id], onDelete: Restrict)
-  cancelledBy User?       @relation("OrderCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
-  items       OrderItem[]
-  payments    Payment[]
+  tourist       User           @relation("OrderTourist", fields: [touristId], references: [id], onDelete: Restrict)
+  cancelledBy   User?          @relation("OrderCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
+  items         OrderItem[]
+  hotelBookings HotelBooking[]
+  payments      Payment[]
 
   @@index([touristId, placedAt])
   @@index([status, placedAt])
@@ -206,5 +223,137 @@ model AuditEvent {
   @@index([entityType, entityId, createdAt])
   @@index([actorUserId, createdAt])
   @@map("audit_events")
+}
+
+model Hotel {
+  id               String          @id @default(uuid()) @db.Uuid
+  slug             String          @unique
+  name             String
+  banglaName       String?         @map("bangla_name")
+  zone             HotelZone
+  address          String
+  latitude         Float
+  longitude        Float
+  starRating       Int             @default(3) @map("star_rating")
+  featuredImage    String          @map("featured_image")
+  galleryImages    Json            @default("[]") @map("gallery_images")
+  description      String
+  phone            String
+  email            String?
+  checkInTime      String          @default("14:00") @map("check_in_time")
+  checkOutTime     String          @default("11:00") @map("check_out_time")
+  amenities        Json            @default("[]")
+  nearestBeachCode String          @map("nearest_beach_code")
+  distanceMeters   Int             @map("distance_meters")
+  isFeatured       Boolean         @default(false) @map("is_featured")
+  isActive         Boolean         @default(true) @map("is_active")
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  roomTypes        RoomType[]
+  hotelRooms       HotelRoom[]
+  hotelBookings    HotelBooking[]
+
+  @@index([zone, isActive])
+  @@index([isFeatured])
+  @@map("hotels")
+}
+
+model RoomType {
+  id             String          @id @default(uuid()) @db.Uuid
+  hotelId        String          @map("hotel_id") @db.Uuid
+  name           String
+  code           String
+  description    String?
+  maxGuests      Int             @default(2) @map("max_guests")
+  bedConfig      String          @map("bed_config")
+  basePriceMinor Int             @map("base_price_minor")
+  currency       String          @default("BDT") @db.Char(3)
+  amenities      Json            @default("[]")
+  images         Json            @default("[]")
+  sortOrder      Int             @default(0) @map("sort_order")
+  isActive       Boolean         @default(true) @map("is_active")
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  hotel          Hotel           @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  rooms          HotelRoom[]
+  hotelBookings  HotelBooking[]
+
+  @@unique([hotelId, code])
+  @@index([hotelId, isActive])
+  @@map("room_types")
+}
+
+model HotelRoom {
+  id             String          @id @default(uuid()) @db.Uuid
+  hotelId        String          @map("hotel_id") @db.Uuid
+  roomTypeId     String          @map("room_type_id") @db.Uuid
+  roomNumber     String          @map("room_number")
+  floor          String?
+  status         HotelRoomStatus @default(AVAILABLE)
+  isActive       Boolean         @default(true) @map("is_active")
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  hotel          Hotel           @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  roomType       RoomType        @relation(fields: [roomTypeId], references: [id], onDelete: Restrict)
+  hotelBookings  HotelBooking[]
+  nightsStayed   HotelRoomNight[]
+
+  @@unique([hotelId, roomNumber])
+  @@index([roomTypeId, status])
+  @@map("hotel_rooms")
+}
+
+model HotelBooking {
+  id                String            @id @default(uuid()) @db.Uuid
+  orderId           String            @map("order_id") @db.Uuid
+  hotelId           String            @map("hotel_id") @db.Uuid
+  roomTypeId        String            @map("room_type_id") @db.Uuid
+  roomId            String            @map("room_id") @db.Uuid
+  hotelName         String            @map("hotel_name")
+  hotelSlug         String            @map("hotel_slug")
+  roomTypeName      String            @map("room_type_name")
+  roomNumber        String            @map("room_number")
+  checkInDate       String            @map("check_in_date")
+  checkOutDate      String            @map("check_out_date")
+  nights            Int               @map("nights")
+  guestsCount       Int               @default(2) @map("guests_count")
+  nightlyPriceMinor Int               @map("nightly_price_minor")
+  totalMinor        Int               @map("total_minor")
+  currency          String            @default("BDT") @db.Char(3)
+  status            OrderItemStatus   @default(RESERVED)
+  checkedInAt       DateTime?         @map("checked_in_at") @db.Timestamptz(6)
+  checkedInById     String?           @map("checked_in_by_id") @db.Uuid
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  order             Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  hotel             Hotel             @relation(fields: [hotelId], references: [id], onDelete: Restrict)
+  roomType          RoomType          @relation(fields: [roomTypeId], references: [id], onDelete: Restrict)
+  room              HotelRoom         @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  checkedInBy       User?             @relation("HotelBookingCheckedInBy", fields: [checkedInById], references: [id], onDelete: SetNull)
+  nightsStayed      HotelRoomNight[]
+
+  @@index([orderId])
+  @@index([roomId, checkInDate])
+  @@index([hotelId, status])
+  @@map("hotel_bookings")
+}
+
+model HotelRoomNight {
+  id              String            @id @default(uuid()) @db.Uuid
+  hotelBookingId  String            @map("hotel_booking_id") @db.Uuid
+  roomId          String            @map("room_id") @db.Uuid
+  stayDate        String            @map("stay_date")
+  isActive        Boolean           @default(true) @map("is_active")
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  hotelBooking    HotelBooking      @relation(fields: [hotelBookingId], references: [id], onDelete: Cascade)
+  room            HotelRoom         @relation(fields: [roomId], references: [id], onDelete: Restrict)
+
+  @@unique([hotelBookingId, stayDate])
+  @@index([roomId, stayDate])
+  @@map("hotel_room_nights")
 }
 

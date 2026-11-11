@@ -7,6 +7,7 @@
  */
 import process from 'node:process';
 import { PrismaClient } from '../src/index';
+import { HOTELS } from './hotels-seed';
 
 const prisma = new PrismaClient();
 
@@ -269,6 +270,112 @@ async function main(): Promise<void> {
     }
   }
 
+  // Seed hotels, room types, and rooms
+  for (const hotel of HOTELS) {
+    const hotelRecord = await prisma.hotel.upsert({
+      where: { slug: hotel.slug },
+      update: {
+        name: hotel.name,
+        banglaName: hotel.banglaName,
+        zone: hotel.zone,
+        address: hotel.address,
+        latitude: hotel.latitude,
+        longitude: hotel.longitude,
+        starRating: hotel.starRating,
+        featuredImage: hotel.featuredImage,
+        galleryImages: hotel.galleryImages,
+        description: hotel.description,
+        phone: hotel.phone,
+        email: hotel.email,
+        checkInTime: hotel.checkInTime,
+        checkOutTime: hotel.checkOutTime,
+        amenities: hotel.amenities,
+        nearestBeachCode: hotel.nearestBeachCode,
+        distanceMeters: hotel.distanceMeters,
+        isFeatured: hotel.isFeatured,
+        isActive: true,
+      },
+      create: {
+        slug: hotel.slug,
+        name: hotel.name,
+        banglaName: hotel.banglaName,
+        zone: hotel.zone,
+        address: hotel.address,
+        latitude: hotel.latitude,
+        longitude: hotel.longitude,
+        starRating: hotel.starRating,
+        featuredImage: hotel.featuredImage,
+        galleryImages: hotel.galleryImages,
+        description: hotel.description,
+        phone: hotel.phone,
+        email: hotel.email,
+        checkInTime: hotel.checkInTime,
+        checkOutTime: hotel.checkOutTime,
+        amenities: hotel.amenities,
+        nearestBeachCode: hotel.nearestBeachCode,
+        distanceMeters: hotel.distanceMeters,
+        isFeatured: hotel.isFeatured,
+      },
+    });
+
+    for (let i = 0; i < hotel.roomTypes.length; i++) {
+      const rt = hotel.roomTypes[i];
+      const roomTypeRecord = await prisma.roomType.upsert({
+        where: {
+          hotelId_code: {
+            hotelId: hotelRecord.id,
+            code: rt.code,
+          },
+        },
+        update: {
+          name: rt.name,
+          description: rt.description,
+          maxGuests: rt.maxGuests,
+          bedConfig: rt.bedConfig,
+          basePriceMinor: rt.basePriceMinor,
+          amenities: rt.amenities,
+          images: rt.images,
+          sortOrder: i,
+          isActive: true,
+        },
+        create: {
+          hotelId: hotelRecord.id,
+          code: rt.code,
+          name: rt.name,
+          description: rt.description,
+          maxGuests: rt.maxGuests,
+          bedConfig: rt.bedConfig,
+          basePriceMinor: rt.basePriceMinor,
+          amenities: rt.amenities,
+          images: rt.images,
+          sortOrder: i,
+        },
+      });
+
+      for (const roomNum of rt.rooms) {
+        await prisma.hotelRoom.upsert({
+          where: {
+            hotelId_roomNumber: {
+              hotelId: hotelRecord.id,
+              roomNumber: roomNum,
+            },
+          },
+          update: {
+            roomTypeId: roomTypeRecord.id,
+            status: 'AVAILABLE',
+            isActive: true,
+          },
+          create: {
+            hotelId: hotelRecord.id,
+            roomTypeId: roomTypeRecord.id,
+            roomNumber: roomNum,
+            status: 'AVAILABLE',
+          },
+        });
+      }
+    }
+  }
+
   // Demo bookings are disposable; catalogue rows above are preserved.
   await prisma.order.deleteMany();
 
@@ -356,14 +463,86 @@ async function main(): Promise<void> {
     }
   }
 
+  // Demo hotel bookings
+  const sayeman = await prisma.hotel.findUnique({
+    where: { slug: 'sayeman-beach-resort' },
+    include: {
+      roomTypes: {
+        where: { code: 'SAY-DLX-SEA' },
+        include: { rooms: { where: { roomNumber: '301' } } },
+      },
+    },
+  });
+
+  if (sayeman && sayeman.roomTypes[0] && sayeman.roomTypes[0].rooms[0]) {
+    const rt = sayeman.roomTypes[0];
+    const room = rt.rooms[0];
+    const checkIn = today;
+    const checkOut = new Date(Date.parse(`${today}T00:00:00.000Z`) + 2 * 86_400_000).toISOString().slice(0, 10);
+    const nights = 2;
+    const totalMinor = rt.basePriceMinor * nights;
+
+    const hotelOrder = await prisma.order.create({
+      data: {
+        publicRef: 'HOTEL-001',
+        touristId: USERS[1].id,
+        status: 'CONFIRMED',
+        subtotalMinor: totalMinor,
+        totalMinor: totalMinor,
+        placedAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
+        payments: {
+          create: {
+            type: 'CHARGE',
+            amountMinor: totalMinor,
+            externalRef: 'MOCK-HOTEL-001',
+          },
+        },
+        hotelBookings: {
+          create: {
+            hotelId: sayeman.id,
+            roomTypeId: rt.id,
+            roomId: room.id,
+            hotelName: sayeman.name,
+            hotelSlug: sayeman.slug,
+            roomTypeName: rt.name,
+            roomNumber: room.roomNumber,
+            checkInDate: checkIn,
+            checkOutDate: checkOut,
+            nights,
+            guestsCount: 2,
+            nightlyPriceMinor: rt.basePriceMinor,
+            totalMinor,
+            status: 'RESERVED',
+            nightsStayed: {
+              create: [
+                {
+                  roomId: room.id,
+                  stayDate: checkIn,
+                },
+                {
+                  roomId: room.id,
+                  stayDate: new Date(Date.parse(`${today}T00:00:00.000Z`) + 1 * 86_400_000).toISOString().slice(0, 10),
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+  }
+
   const counts = {
     users: await prisma.user.count(),
     points: await prisma.beachPoint.count(),
     sunbeds: await prisma.sunbed.count(),
+    hotels: await prisma.hotel.count(),
+    roomTypes: await prisma.roomType.count(),
+    hotelRooms: await prisma.hotelRoom.count(),
     orders: await prisma.order.count(),
+    hotelBookings: await prisma.hotelBooking.count(),
   };
   console.log(
-    `Seeded ${counts.points} beach points, ${counts.sunbeds} sunbeds, ${counts.orders} demo orders, ${counts.users} users.`,
+    `Seeded ${counts.points} beach points, ${counts.sunbeds} sunbeds, ${counts.hotels} hotels, ${counts.roomTypes} room types, ${counts.hotelRooms} rooms, ${counts.orders} orders (${counts.hotelBookings} hotel stays).`,
   );
 }
 
