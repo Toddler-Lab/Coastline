@@ -42,7 +42,9 @@ export async function createTestApp(): Promise<INestApplication> {
 
 export async function resetDatabase(prisma: PrismaService): Promise<void> {
   await prisma.$executeRawUnsafe(
-    `TRUNCATE TABLE "audit_events", "payments", "booking_slots", "hotel_room_nights",
+    `TRUNCATE TABLE "audit_events", "payments", "food_order_items", "food_orders",
+      "table_slots", "table_reservations", "dining_tables", "menu_items",
+      "menu_categories", "dining_venues", "booking_slots", "hotel_room_nights",
       "order_items", "hotel_bookings", "hotel_rooms", "room_types", "hotels",
       "orders", "sunbeds", "beach_points", "users" RESTART IDENTITY CASCADE`,
   );

@@ -63,6 +63,26 @@ enum PaymentStatus {
   SUCCEEDED
 }
 
+enum DiningVenueKind {
+  RESTAURANT
+  SEAFOOD_KITCHEN
+  BEACH_STALL
+}
+
+enum ReservationStatus {
+  CONFIRMED
+  CHECKED_IN
+  CANCELLED
+}
+
+enum FoodOrderStatus {
+  PLACED
+  PREPARING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
 model User {
   id        String   @id @default(uuid()) @db.Uuid
   name      String
@@ -77,6 +97,14 @@ model User {
   checkedInItems         OrderItem[]    @relation("OrderItemCheckedInBy")
   checkedInHotelBookings HotelBooking[] @relation("HotelBookingCheckedInBy")
   auditEvents            AuditEvent[]
+
+  // Dining
+  managedVenues          DiningVenue[]      @relation("VenueVendor")
+  reservations           TableReservation[] @relation("ReservationTourist")
+  cancelledReservations  TableReservation[] @relation("ReservationCancelledBy")
+  checkedInReservations  TableReservation[] @relation("ReservationCheckedInBy")
+  foodOrders             FoodOrder[]        @relation("FoodOrderTourist")
+  cancelledFoodOrders    FoodOrder[]        @relation("FoodOrderCancelledBy")
 
   @@map("users")
 }
@@ -97,7 +125,8 @@ model BeachPoint {
   createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt               DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  sunbeds Sunbed[]
+  sunbeds      Sunbed[]
+  diningVenues DiningVenue[]
 
   @@map("beach_points")
 }
@@ -167,6 +196,7 @@ model OrderItem {
   sunbed      Sunbed        @relation(fields: [sunbedId], references: [id], onDelete: Restrict)
   checkedInBy User?         @relation("OrderItemCheckedInBy", fields: [checkedInById], references: [id], onDelete: SetNull)
   slots       BookingSlot[]
+  foodOrders  FoodOrder[]
 
   @@index([orderId])
   @@index([sunbedId, startAt])
@@ -193,7 +223,10 @@ model BookingSlot {
 
 model Payment {
   id          String        @id @default(uuid()) @db.Uuid
-  orderId     String        @map("order_id") @db.Uuid
+  // Exactly one parent is set (CHECK payments_single_parent_check in SQL).
+  orderId       String?       @map("order_id") @db.Uuid
+  reservationId String?       @map("reservation_id") @db.Uuid
+  foodOrderId   String?       @map("food_order_id") @db.Uuid
   type        PaymentType
   provider    String        @default("MOCK")
   status      PaymentStatus @default(SUCCEEDED)
@@ -202,9 +235,13 @@ model Payment {
   externalRef String?       @unique @map("external_ref")
   createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order       Order?            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  reservation TableReservation? @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  foodOrder   FoodOrder?        @relation(fields: [foodOrderId], references: [id], onDelete: Cascade)
 
   @@index([orderId, createdAt])
+  @@index([reservationId, createdAt])
+  @@index([foodOrderId, createdAt])
   @@map("payments")
 }
 
@@ -357,3 +394,220 @@ model HotelRoomNight {
   @@map("hotel_room_nights")
 }
 
+// ---------------------------------------------------------------------------
+// Dining
+//
+// - Venues are admin-managed. `vendorUserId` is reserved for a future vendor
+//   role (null = platform-managed); no code reads it yet.
+// - Table occupancy is one row per table per hour in `table_slots`; a partial
+//   unique index (SQL migration) prevents double booking, like `booking_slots`.
+// - Food delivery targets a tourist's own sunbed booking (`order_items`) at the
+//   venue's beach point. Names, codes and prices are snapshotted on the order.
+// ---------------------------------------------------------------------------
+
+model DiningVenue {
+  id                      String          @id @default(uuid()) @db.Uuid
+  code                    String          @unique
+  name                    String
+  nameBn                  String?         @map("name_bn")
+  kind                    DiningVenueKind
+  description             String?
+  address                 String?
+  contactPhone            String?         @map("contact_phone")
+  imageUrl                String?         @map("image_url")
+  cuisineTags             String[]        @default([]) @map("cuisine_tags")
+  beachPointId            String?         @map("beach_point_id") @db.Uuid
+  openHour                Int             @map("open_hour")
+  closeHour               Int             @map("close_hour")
+  reservationsEnabled     Boolean         @default(false) @map("reservations_enabled")
+  deliveryEnabled         Boolean         @default(false) @map("delivery_enabled")
+  reservationDepositMinor Int             @default(0) @map("reservation_deposit_minor")
+  currency                String          @default("BDT") @db.Char(3)
+  sortOrder               Int             @default(0) @map("sort_order")
+  isActive                Boolean         @default(true) @map("is_active")
+  vendorUserId            String?         @map("vendor_user_id") @db.Uuid
+  createdAt               DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  beachPoint   BeachPoint?        @relation(fields: [beachPointId], references: [id], onDelete: Restrict)
+  vendor       User?              @relation("VenueVendor", fields: [vendorUserId], references: [id], onDelete: SetNull)
+  categories   MenuCategory[]
+  menuItems    MenuItem[]
+  tables       DiningTable[]
+  reservations TableReservation[]
+  foodOrders   FoodOrder[]
+
+  @@index([beachPointId, isActive])
+  @@index([kind, isActive])
+  @@map("dining_venues")
+}
+
+model MenuCategory {
+  id        String   @id @default(uuid()) @db.Uuid
+  venueId   String   @map("venue_id") @db.Uuid
+  name      String
+  nameBn    String?  @map("name_bn")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  venue DiningVenue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  items MenuItem[]
+
+  @@unique([venueId, name])
+  @@unique([id, venueId])
+  @@map("menu_categories")
+}
+
+model MenuItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  venueId     String   @map("venue_id") @db.Uuid
+  categoryId  String   @map("category_id") @db.Uuid
+  name        String
+  nameBn      String?  @map("name_bn")
+  description String?
+  priceMinor  Int      @map("price_minor")
+  currency    String   @default("BDT") @db.Char(3)
+  isAvailable Boolean  @default(true) @map("is_available")
+  sortOrder   Int      @default(0) @map("sort_order")
+  imageUrl    String?  @map("image_url")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  venue          DiningVenue     @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  // Composite FK guarantees the category belongs to the same venue.
+  category       MenuCategory    @relation(fields: [categoryId, venueId], references: [id, venueId], onDelete: Cascade)
+  foodOrderItems FoodOrderItem[]
+
+  @@index([venueId, isAvailable])
+  @@index([categoryId, sortOrder])
+  @@map("menu_items")
+}
+
+model DiningTable {
+  id        String   @id @default(uuid()) @db.Uuid
+  venueId   String   @map("venue_id") @db.Uuid
+  code      String   @unique
+  seats     Int
+  isActive  Boolean  @default(true) @map("is_active")
+  note      String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  venue        DiningVenue        @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  reservations TableReservation[]
+  slots        TableSlot[]
+
+  @@index([venueId, isActive])
+  @@map("dining_tables")
+}
+
+model TableReservation {
+  id            String            @id @default(uuid()) @db.Uuid
+  publicRef     String            @unique @map("public_ref")
+  touristId     String            @map("tourist_id") @db.Uuid
+  venueId       String            @map("venue_id") @db.Uuid
+  tableId       String            @map("table_id") @db.Uuid
+  venueCode     String            @map("venue_code")
+  venueName     String            @map("venue_name")
+  tableCode     String            @map("table_code")
+  partySize     Int               @map("party_size")
+  startAt       DateTime          @map("start_at") @db.Timestamptz(6)
+  endAt         DateTime          @map("end_at") @db.Timestamptz(6)
+  status        ReservationStatus @default(CONFIRMED)
+  depositMinor  Int               @default(0) @map("deposit_minor")
+  currency      String            @default("BDT") @db.Char(3)
+  note          String?
+  placedAt      DateTime          @default(now()) @map("placed_at") @db.Timestamptz(6)
+  cancelledAt   DateTime?         @map("cancelled_at") @db.Timestamptz(6)
+  cancelReason  String?           @map("cancel_reason")
+  cancelledById String?           @map("cancelled_by_id") @db.Uuid
+  checkedInAt   DateTime?         @map("checked_in_at") @db.Timestamptz(6)
+  checkedInById String?           @map("checked_in_by_id") @db.Uuid
+
+  tourist     User        @relation("ReservationTourist", fields: [touristId], references: [id], onDelete: Restrict)
+  venue       DiningVenue @relation(fields: [venueId], references: [id], onDelete: Restrict)
+  table       DiningTable @relation(fields: [tableId], references: [id], onDelete: Restrict)
+  cancelledBy User?       @relation("ReservationCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
+  checkedInBy User?       @relation("ReservationCheckedInBy", fields: [checkedInById], references: [id], onDelete: SetNull)
+  slots       TableSlot[]
+  payments    Payment[]
+
+  @@index([touristId, placedAt])
+  @@index([venueId, startAt])
+  @@index([tableId, startAt])
+  @@index([status, startAt])
+  @@map("table_reservations")
+}
+
+model TableSlot {
+  id            String   @id @default(uuid()) @db.Uuid
+  reservationId String   @map("reservation_id") @db.Uuid
+  tableId       String   @map("table_id") @db.Uuid
+  slotStart     DateTime @map("slot_start") @db.Timestamptz(6)
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  reservation TableReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  table       DiningTable      @relation(fields: [tableId], references: [id], onDelete: Restrict)
+
+  @@unique([reservationId, slotStart])
+  @@index([tableId, slotStart])
+  @@index([slotStart])
+  @@map("table_slots")
+}
+
+model FoodOrder {
+  id             String          @id @default(uuid()) @db.Uuid
+  publicRef      String          @unique @map("public_ref")
+  touristId      String          @map("tourist_id") @db.Uuid
+  venueId        String          @map("venue_id") @db.Uuid
+  orderItemId    String          @map("order_item_id") @db.Uuid
+  venueCode      String          @map("venue_code")
+  venueName      String          @map("venue_name")
+  sunbedCode     String          @map("sunbed_code")
+  beachPointCode String          @map("beach_point_code")
+  beachPointName String          @map("beach_point_name")
+  status         FoodOrderStatus @default(PLACED)
+  subtotalMinor  Int             @map("subtotal_minor")
+  totalMinor     Int             @map("total_minor")
+  currency       String          @default("BDT") @db.Char(3)
+  note           String?
+  placedAt       DateTime        @default(now()) @map("placed_at") @db.Timestamptz(6)
+  preparingAt    DateTime?       @map("preparing_at") @db.Timestamptz(6)
+  readyAt        DateTime?       @map("ready_at") @db.Timestamptz(6)
+  deliveredAt    DateTime?       @map("delivered_at") @db.Timestamptz(6)
+  cancelledAt    DateTime?       @map("cancelled_at") @db.Timestamptz(6)
+  cancelReason   String?         @map("cancel_reason")
+  cancelledById  String?         @map("cancelled_by_id") @db.Uuid
+  updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tourist     User            @relation("FoodOrderTourist", fields: [touristId], references: [id], onDelete: Restrict)
+  venue       DiningVenue     @relation(fields: [venueId], references: [id], onDelete: Restrict)
+  orderItem   OrderItem       @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+  cancelledBy User?           @relation("FoodOrderCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
+  items       FoodOrderItem[]
+  payments    Payment[]
+
+  @@index([touristId, placedAt])
+  @@index([venueId, status, placedAt])
+  @@index([orderItemId])
+  @@map("food_orders")
+}
+
+model FoodOrderItem {
+  id             String   @id @default(uuid()) @db.Uuid
+  foodOrderId    String   @map("food_order_id") @db.Uuid
+  menuItemId     String   @map("menu_item_id") @db.Uuid
+  itemName       String   @map("item_name")
+  unitPriceMinor Int      @map("unit_price_minor")
+  quantity       Int
+  totalMinor     Int      @map("total_minor")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  foodOrder FoodOrder @relation(fields: [foodOrderId], references: [id], onDelete: Cascade)
+  menuItem  MenuItem  @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+
+  @@index([foodOrderId])
+  @@index([menuItemId])
+  @@map("food_order_items")
+}

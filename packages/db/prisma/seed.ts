@@ -8,6 +8,7 @@
 import process from 'node:process';
 import { PrismaClient } from '../src/index';
 import { HOTELS } from './hotels-seed';
+import { seedDining } from './seed-dining';
 
 const prisma = new PrismaClient();
 
@@ -375,8 +376,12 @@ async function main(): Promise<void> {
       }
     }
   }
+  await seedDining(prisma, pointIds);
 
   // Demo bookings are disposable; catalogue rows above are preserved.
+  // Food orders reference sunbed bookings (RESTRICT), so they go first.
+  await prisma.foodOrder.deleteMany();
+  await prisma.tableReservation.deleteMany();
   await prisma.order.deleteMany();
 
   const beds = await prisma.sunbed.findMany({
@@ -540,9 +545,11 @@ async function main(): Promise<void> {
     hotelRooms: await prisma.hotelRoom.count(),
     orders: await prisma.order.count(),
     hotelBookings: await prisma.hotelBooking.count(),
+    venues: await prisma.diningVenue.count(),
+    menuItems: await prisma.menuItem.count(),
   };
   console.log(
-    `Seeded ${counts.points} beach points, ${counts.sunbeds} sunbeds, ${counts.hotels} hotels, ${counts.roomTypes} room types, ${counts.hotelRooms} rooms, ${counts.orders} orders (${counts.hotelBookings} hotel stays).`,
+    `Seeded ${counts.points} beach points, ${counts.sunbeds} sunbeds, ${counts.hotels} hotels, ${counts.roomTypes} room types, ${counts.hotelRooms} rooms, ${counts.orders} orders (${counts.hotelBookings} hotel stays), ${counts.venues} dining venues, ${counts.menuItems} menu items.`,
   );
 }
 

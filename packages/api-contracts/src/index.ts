@@ -384,3 +384,276 @@ export interface HotelAvailabilityQuery {
 
 /** Dhaka is UTC+6 all year; no daylight saving. */
 export const DHAKA_OFFSET_MINUTES = 360;
+
+/* -------------------------------------------------------------------------- */
+/* Dining                                                                     */
+/*                                                                            */
+/* Shared sections are frozen by the dining foundation. Each stream owns one  */
+/* section below and may extend it; do not edit another stream's section.     */
+/* -------------------------------------------------------------------------- */
+
+// ---- Shared dining constants ----------------------------------------------
+
+export const DINING_VENUE_KINDS = ['RESTAURANT', 'SEAFOOD_KITCHEN', 'BEACH_STALL'] as const;
+export type DiningVenueKind = (typeof DINING_VENUE_KINDS)[number];
+
+export const RESERVATION_STATUSES = ['CONFIRMED', 'CHECKED_IN', 'CANCELLED'] as const;
+export type ReservationStatus = (typeof RESERVATION_STATUSES)[number];
+
+export const FOOD_ORDER_STATUSES = [
+  'PLACED',
+  'PREPARING',
+  'READY',
+  'DELIVERED',
+  'CANCELLED',
+] as const;
+export type FoodOrderStatus = (typeof FOOD_ORDER_STATUSES)[number];
+
+/** Allowed forward moves for kitchen staff. A tourist may cancel only from PLACED. */
+export const FOOD_ORDER_TRANSITIONS: Record<FoodOrderStatus, readonly FoodOrderStatus[]> = {
+  PLACED: ['PREPARING', 'CANCELLED'],
+  PREPARING: ['READY'],
+  READY: ['DELIVERED'],
+  DELIVERED: [],
+  CANCELLED: [],
+};
+
+export const MAX_RESERVATION_HOURS = 3;
+export const MAX_RESERVATION_ADVANCE_DAYS = 7;
+export const MAX_FOOD_ORDER_LINES = 12;
+export const MAX_FOOD_ITEM_QUANTITY = 10;
+
+export interface DiningPaymentRefs {
+  /** Mock payments only; present when a deposit or charge was taken. */
+  payments: PaymentDto[];
+}
+
+// ---- Stream A: venue and menu catalogue ------------------------------------
+
+export interface MenuItemDto {
+  id: string;
+  categoryId: string;
+  name: string;
+  nameBn: string | null;
+  description: string | null;
+  priceMinor: number;
+  currency: string;
+  isAvailable: boolean;
+  imageUrl: string | null;
+}
+
+export interface MenuCategoryDto {
+  id: string;
+  name: string;
+  nameBn: string | null;
+  sortOrder: number;
+  items: MenuItemDto[];
+}
+
+export interface DiningVenueSummary {
+  id: string;
+  code: string;
+  name: string;
+  nameBn: string | null;
+  kind: DiningVenueKind;
+  description: string | null;
+  imageUrl: string | null;
+  cuisineTags: string[];
+  /** Beach point the venue sits at or delivers to; null for town venues. */
+  beachPointCode: string | null;
+  beachPointName: string | null;
+  openHour: number;
+  closeHour: number;
+  reservationsEnabled: boolean;
+  deliveryEnabled: boolean;
+  /** Cheapest available menu item, null when the menu is empty. */
+  priceFromMinor: number | null;
+  currency: string;
+}
+
+export interface DiningVenueDetail extends DiningVenueSummary {
+  address: string | null;
+  contactPhone: string | null;
+  reservationDepositMinor: number;
+  menu: MenuCategoryDto[];
+}
+
+export interface DiningVenueQuery {
+  kind?: DiningVenueKind;
+  beachPointCode?: string;
+  reservable?: boolean;
+  delivers?: boolean;
+}
+
+// ---- Stream B: table reservations -------------------------------------------
+
+export interface TableSlotAvailability {
+  startsAt: string;
+  hour: number;
+  label: string;
+  available: boolean;
+}
+
+export interface TableAvailability {
+  id: string;
+  code: string;
+  seats: number;
+  slots: TableSlotAvailability[];
+}
+
+export interface TableAvailabilityDto {
+  venueCode: string;
+  date: string;
+  openHour: number;
+  closeHour: number;
+  depositMinor: number;
+  currency: string;
+  tables: TableAvailability[];
+}
+
+export interface CreateReservationRequest {
+  tableId: string;
+  /** ISO instant, must be on the hour. */
+  startsAt: string;
+  hours: number;
+  partySize: number;
+  note?: string;
+  /** Only the mock provider exists; ignored when the deposit is zero. */
+  paymentMethod?: 'MOCK';
+}
+
+export interface CancelReservationRequest {
+  reason?: string;
+}
+
+export interface ReservationDto extends DiningPaymentRefs {
+  id: string;
+  publicRef: string;
+  status: ReservationStatus;
+  venue: { code: string; name: string };
+  table: { code: string };
+  partySize: number;
+  startAt: string;
+  endAt: string;
+  phase: OrderPhase;
+  depositMinor: number;
+  currency: string;
+  note: string | null;
+  placedAt: string;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  checkedInAt: string | null;
+  ticket: TicketDto | null;
+  canCancel: boolean;
+}
+
+export interface AdminReservationDto extends ReservationDto {
+  tourist: { id: string; name: string; email: string | null };
+}
+
+export interface ReservationListDto {
+  reservations: ReservationDto[];
+}
+
+// ---- Stream C: sunbed food delivery ----------------------------------------
+
+/** A sunbed booking the tourist may currently order food to. */
+export interface DeliverableBedDto {
+  orderItemId: string;
+  sunbedCode: string;
+  beachPointCode: string;
+  beachPointName: string;
+  startAt: string;
+  endAt: string;
+  status: OrderItemStatus;
+}
+
+export interface CreateFoodOrderLine {
+  menuItemId: string;
+  quantity: number;
+}
+
+export interface CreateFoodOrderRequest {
+  /** The tourist's own sunbed booking line (`OrderItemDto.id`). */
+  orderItemId: string;
+  venueId: string;
+  lines: CreateFoodOrderLine[];
+  note?: string;
+  paymentMethod?: 'MOCK';
+}
+
+export interface CancelFoodOrderRequest {
+  reason?: string;
+}
+
+export interface FoodOrderLineDto {
+  id: string;
+  menuItemId: string;
+  name: string;
+  unitPriceMinor: number;
+  quantity: number;
+  totalMinor: number;
+}
+
+export interface FoodOrderDto extends DiningPaymentRefs {
+  id: string;
+  publicRef: string;
+  status: FoodOrderStatus;
+  venue: { code: string; name: string };
+  delivery: { sunbedCode: string; beachPointCode: string; beachPointName: string };
+  lines: FoodOrderLineDto[];
+  subtotalMinor: number;
+  totalMinor: number;
+  currency: string;
+  note: string | null;
+  placedAt: string;
+  preparingAt: string | null;
+  readyAt: string | null;
+  deliveredAt: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  canCancel: boolean;
+}
+
+export interface AdminFoodOrderDto extends FoodOrderDto {
+  tourist: { id: string; name: string; email: string | null };
+}
+
+export interface FoodOrderListDto {
+  orders: FoodOrderDto[];
+}
+
+// ---- Stream D: dining administration ---------------------------------------
+
+export interface UpdateMenuItemRequest {
+  name?: string;
+  nameBn?: string | null;
+  description?: string | null;
+  priceMinor?: number;
+  isAvailable?: boolean;
+  sortOrder?: number;
+}
+
+export interface UpdateDiningVenueRequest {
+  description?: string | null;
+  openHour?: number;
+  closeHour?: number;
+  reservationsEnabled?: boolean;
+  deliveryEnabled?: boolean;
+  reservationDepositMinor?: number;
+  isActive?: boolean;
+}
+
+export interface UpdateFoodOrderStatusRequest {
+  status: Exclude<FoodOrderStatus, 'PLACED'>;
+  reason?: string;
+}
+
+export interface DiningAdminOverviewDto {
+  date: string;
+  venueCount: number;
+  reservationsToday: number;
+  openFoodOrders: number;
+  foodRevenueMinor: number;
+  currency: string;
+}

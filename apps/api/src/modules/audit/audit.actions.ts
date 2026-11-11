@@ -6,4 +6,12 @@ export const AuditActions = {
   ORDER_PLACED: 'order.placed',
   ORDER_CANCELLED: 'order.cancelled',
   ORDER_CHECKED_IN: 'order.checked_in',
+  DINING_VENUE_UPDATED: 'dining_venue.updated',
+  MENU_ITEM_UPDATED: 'menu_item.updated',
+  RESERVATION_PLACED: 'reservation.placed',
+  RESERVATION_CANCELLED: 'reservation.cancelled',
+  RESERVATION_CHECKED_IN: 'reservation.checked_in',
+  FOOD_ORDER_PLACED: 'food_order.placed',
+  FOOD_ORDER_STATUS_CHANGED: 'food_order.status_changed',
+  FOOD_ORDER_CANCELLED: 'food_order.cancelled',
 } as const;
