@@ -557,6 +557,18 @@ export interface ReservationListDto {
   reservations: ReservationDto[];
 }
 
+export interface AdminReservationQuery {
+  /** Dhaka date key (YYYY-MM-DD) the reservation starts on. */
+  date?: string;
+  venueCode?: string;
+  status?: ReservationStatus;
+}
+
+/** Tourist cancellation closes this many minutes before the reserved start. */
+export const RESERVATION_CANCEL_CUTOFF_MINUTES = 60;
+/** Admin check-in opens this many minutes before the start and closes at the end. */
+export const RESERVATION_CHECK_IN_EARLY_MINUTES = 30;
+
 // ---- Stream C: sunbed food delivery ----------------------------------------
 
 /** A sunbed booking the tourist may currently order food to. */
