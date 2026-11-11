@@ -1,59 +1,112 @@
 import type { Metadata } from 'next';
-import { Utensils } from 'lucide-react';
-import { UnderDevelopmentModule } from '@/components/ui/under-development-module';
+import type { DiningVenueQuery, DiningVenueSummary } from '@coastline/api-contracts';
+import { ApiError, serverApi } from '@/lib/api';
+import { venuesPath, isVenueKind } from '@/lib/dining/catalogue';
+import { toDhaka } from '@/lib/format';
+import { getViewer } from '@/lib/session';
+import { ApiOffline } from '@/components/booking/api-offline';
+import { VenueDiscovery } from '@/components/dining/venue-discovery';
+import { SiteFooter } from '@/components/site/site-footer';
 
 export const metadata: Metadata = {
-  title: 'Beach Dining & Food (Coming Soon)',
-  description: 'Cox’s Bazar beachside seafood, authentic local dining, and hygienic street food directory.',
+  title: 'Beach dining · Seafood kitchens, restaurants and beach stalls',
+  description:
+    'Discover Cox’s Bazar seafood kitchens, Bengali restaurants and beach stalls. Reserve a table or order to your sunbed. Prices are indicative demo prices.',
 };
 
-export default function FoodPage() {
+type SearchParams = { [key: string]: string | string[] | undefined };
+
+function first(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function initialQueryFrom(params: SearchParams): DiningVenueQuery {
+  const query: DiningVenueQuery = {};
+  const kind = first(params.kind);
+  if (isVenueKind(kind)) query.kind = kind;
+  const point = first(params.beachPointCode);
+  if (point && /^[A-Za-z0-9-]{1,32}$/.test(point)) query.beachPointCode = point.toUpperCase();
+  if (first(params.reservable) === 'true') query.reservable = true;
+  if (first(params.delivers) === 'true') query.delivers = true;
+  return query;
+}
+
+export default async function FoodPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const [viewer, params] = await Promise.all([getViewer(), searchParams]);
+  const dhakaHour = toDhaka(new Date()).getUTCHours();
+
+  let venues: DiningVenueSummary[] | null = null;
+  let errorMessage = 'The dining API is offline. Start the API on port 3001, then try again.';
+  try {
+    // Load the full active list once; filters are applied in the browser.
+    venues = await serverApi<DiningVenueSummary[]>(venuesPath(), viewer.userId);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      errorMessage = error.message;
+    }
+  }
+
   return (
-    <UnderDevelopmentModule
-      moduleKey="food"
-      title="Food & Beach Dining"
-      bengaliTitle="সি-ফুড ও রেস্তোরাঁ সেবা"
-      icon={Utensils}
-      tagline="Authentic Bay of Bengal fresh seafood, hygienic vendor standards & fixed price menus."
-      description="Discover verified seafood kitchens, traditional Bengali cuisine, and licensed beach stalls across Sugandha Point, Laboni Market, and Kolatoli with authentic ingredient checks."
-      phaseLabel="Phase 3 · Vendor Directory"
-      indicativeTariff="BDT 180 – 1,200 / meal"
-      mockStats={[
-        { label: 'Seafood Kitchens', value: '85+ Vendors' },
-        { label: 'Hygiene Inspections', value: 'Monthly Audit' },
-        { label: 'Menu Standards', value: 'Fixed Price Rules' },
-        { label: 'Ordering Mode', value: 'QR Dine-in / Takeaway' },
-      ]}
-      highlights={[
-        {
-          title: 'Fresh Catch Quality Grades',
-          desc: 'Koral, Rupchanda, Vetki, Lobster, and Crab with daily market pricing benchmarks and weight measurement enforcement.',
-          badge: 'Daily Market Rate',
-        },
-        {
-          title: 'Hygienic Beach Food Stalls',
-          desc: 'Licensed kitkot snack stalls and evening seafood fry shops verified by the district tourism health taskforce.',
-          badge: 'Health Certified',
-        },
-        {
-          title: 'Direct Sunbed Delivery',
-          desc: 'Order coconut water, hot tea, snacks, and lunch directly delivered to your booked sunbed via QR code on your bed ticket.',
-          badge: 'Kitkot Service',
-        },
-        {
-          title: 'Transparent Weight Billing',
-          desc: 'Digital weighing scale compliance check: fish and seafood weighed live in front of the customer before cooking.',
-          badge: 'No Scams',
-        },
-        {
-          title: 'Local Delicacies & Shutki',
-          desc: 'Authentic Cox’s Bazar Loitta fry, Shutki bhorta, and traditional coastal recipes with local restaurant recommendations.',
-        },
-        {
-          title: 'Evening Food Street Map',
-          desc: 'Interactive food map of Sugandha and Kolatoli evening night market strips with opening hours and seating capacity.',
-        },
-      ]}
-    />
+    <>
+      <main className="mx-auto w-full max-w-[1280px] px-4 pb-20 pt-8 sm:px-6">
+        <div className="flex flex-col gap-4 border-b border-line pb-8 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-md border border-sea/30 bg-sea/10 px-2 py-0.5 font-mono text-[11px] uppercase tracking-wider text-sea">
+                Beach dining
+              </span>
+              <span className="rounded-md border border-sand/30 bg-sand/10 px-2 py-0.5 font-mono text-[11px] text-sand">
+                Indicative demo prices · Simulated payments
+              </span>
+            </div>
+            <h1 className="mt-3 font-display text-[32px] leading-tight text-foam sm:text-[40px]">
+              Eat by the Bay of Bengal
+            </h1>
+            <p className="mt-0.5 text-[15px] text-mist" lang="bn">
+              সি-ফুড ও রেস্তোরাঁ
+            </p>
+            <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-mist">
+              Seafood kitchens, Bengali restaurants and beach stalls near the Cox’s Bazar sunbed
+              lines. Browse menus, reserve a table, or have snacks delivered to the sunbed you
+              booked.
+            </p>
+          </div>
+
+          {venues ? (
+            <div className="flex flex-wrap gap-2 text-[12px] text-mist sm:text-right">
+              <div className="rounded-xl border border-line bg-surface/50 px-3.5 py-2">
+                <span className="block font-mono text-[18px] font-bold text-foam">
+                  {venues.length}
+                </span>
+                <span className="text-[11px]">Listed venues</span>
+              </div>
+              <div className="rounded-xl border border-line bg-surface/50 px-3.5 py-2">
+                <span className="block font-mono text-[18px] font-bold text-sea">
+                  {venues.filter((venue) => venue.deliveryEnabled).length}
+                </span>
+                <span className="text-[11px]">Deliver to sunbeds</span>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="mt-8">
+          {venues ? (
+            <VenueDiscovery
+              venues={venues}
+              initialQuery={initialQueryFrom(params)}
+              dhakaHour={dhakaHour}
+            />
+          ) : (
+            <ApiOffline title="Could not load dining venues" message={errorMessage} />
+          )}
+        </div>
+      </main>
+      <SiteFooter />
+    </>
   );
 }
