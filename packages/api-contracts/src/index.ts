@@ -659,3 +659,32 @@ export interface DiningAdminOverviewDto {
   foodRevenueMinor: number;
   currency: string;
 }
+
+/** Menu item as the admin editor sees it: adds the sort key the public menu only implies. */
+export interface AdminMenuItemDto extends MenuItemDto {
+  sortOrder: number;
+}
+
+export interface AdminMenuCategoryDto extends MenuCategoryDto {
+  items: AdminMenuItemDto[];
+}
+
+/**
+ * `DiningVenueDetail` plus admin-only fields. Includes inactive venues and
+ * unavailable menu items; still assignable to `DiningVenueDetail`.
+ */
+export interface DiningAdminVenueDto extends DiningVenueDetail {
+  isActive: boolean;
+  sortOrder: number;
+  menu: AdminMenuCategoryDto[];
+}
+
+/** Server-side bounds for the admin editors (the web form mirrors them). */
+export const DINING_ADMIN_LIMITS = {
+  descriptionMaxLength: 1000,
+  menuItemNameMaxLength: 120,
+  menuItemDescriptionMaxLength: 500,
+  maxDepositMinor: 10_000_000,
+  maxMenuPriceMinor: 10_000_000,
+  maxSortOrder: 10_000,
+} as const;
