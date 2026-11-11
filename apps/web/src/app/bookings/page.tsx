@@ -7,6 +7,8 @@ import { getViewer } from '@/lib/session';
 import { orderPhase, orderWindow } from '@/lib/booking';
 import { ApiOffline } from '@/components/booking/api-offline';
 import { BookingCard } from '@/components/booking/booking-card';
+import { MyFoodOrders } from '@/components/dining/my-food-orders';
+import { MyReservations } from '@/components/dining/my-reservations';
 import { Badge } from '@/components/ui/badge';
 import { buttonClass } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/states';
@@ -107,6 +109,9 @@ export default async function BookingsPage() {
           />
         </div>
       )}
+      {/* Dining sections render nothing until they have rows. */}
+      <MyReservations userId={viewer.userId} />
+      <MyFoodOrders userId={viewer.userId} />
     </PageFrame>
   );
 }
