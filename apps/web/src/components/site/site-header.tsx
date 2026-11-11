@@ -28,7 +28,7 @@ interface NavItem {
 function navFor(role: 'TOURIST' | 'ADMIN' | undefined): NavItem[] {
   const items: NavItem[] = [
     { href: '/', label: 'Beach map', shortLabel: 'Map', icon: Map, exact: true },
-    { href: '/hotels', label: 'Hotels', shortLabel: 'Hotels', icon: Hotel, exact: false, isDev: true },
+    { href: '/hotels', label: 'Hotels', shortLabel: 'Hotels', icon: Hotel, exact: false },
     { href: '/food', label: 'Dining', shortLabel: 'Dining', icon: Utensils, exact: false, isDev: true },
     { href: '/rides', label: 'Rides', shortLabel: 'Rides', icon: Car, exact: false, isDev: true },
     { href: '/activities', label: 'Water sports', shortLabel: 'Sports', icon: Waves, exact: false, isDev: true },
