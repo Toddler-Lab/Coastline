@@ -349,6 +349,8 @@ export interface HotelBookingDto {
   roomNumber: string;
   checkInDate: string;
   checkOutDate: string;
+  /** Dhaka wall-clock check-in time snapshotted from the hotel, "HH:mm". */
+  checkInTime: string;
   nights: number;
   guestsCount: number;
   nightlyPriceMinor: number;

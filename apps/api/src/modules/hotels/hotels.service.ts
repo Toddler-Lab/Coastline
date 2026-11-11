@@ -10,7 +10,7 @@ import { Prisma } from '@coastline/db';
 import type { Actor } from '../../common/auth/actor';
 import { conflict, forbidden, notFound, unprocessable } from '../../common/errors/api-errors';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { dhakaDateKey } from '../../common/time/dhaka';
+import { dhakaDateKey, isDateKey } from '../../common/time/dhaka';
 import { AuditActions } from '../audit/audit.actions';
 import { AuditService } from '../audit/audit.service';
 import { serializeOrder } from '../bookings/orders.serializer';
@@ -37,6 +37,12 @@ function getDateRange(checkIn: string, checkOut: string): string[] {
   return dates;
 }
 
+function assertDateKey(value: string | undefined, field: string): void {
+  if (value !== undefined && !isDateKey(value)) {
+    throw unprocessable(`${field} must be a valid calendar date (YYYY-MM-DD).`);
+  }
+}
+
 @Injectable()
 export class HotelsService {
   constructor(
@@ -46,6 +52,9 @@ export class HotelsService {
   ) {}
 
   async listHotels(query: HotelQueryDto): Promise<HotelSummaryDto[]> {
+    assertDateKey(query.checkInDate, 'checkInDate');
+    assertDateKey(query.checkOutDate, 'checkOutDate');
+
     const where: Prisma.HotelWhereInput = { isActive: true };
     if (query.zone) {
       where.zone = query.zone;
@@ -135,6 +144,9 @@ export class HotelsService {
     checkInDate?: string,
     checkOutDate?: string,
   ): Promise<HotelDetailDto> {
+    assertDateKey(checkInDate, 'checkInDate');
+    assertDateKey(checkOutDate, 'checkOutDate');
+
     const hotel = await this.prisma.hotel.findUnique({
       where: { slug },
       include: {
@@ -230,6 +242,15 @@ export class HotelsService {
     dto: CreateHotelOrderDto,
     requestId?: string,
   ): Promise<OrderDto> {
+    if (actor.role !== 'TOURIST') {
+      throw forbidden(
+        'Admins cannot place tourist bookings. Switch persona to a tourist in the header.',
+      );
+    }
+
+    assertDateKey(dto.checkInDate, 'checkInDate');
+    assertDateKey(dto.checkOutDate, 'checkOutDate');
+
     if (dto.checkOutDate <= dto.checkInDate) {
       throw unprocessable('Check-out date must be strictly after check-in date.');
     }
@@ -262,6 +283,11 @@ export class HotelsService {
       throw conflict('No active rooms available in this category.');
     }
 
+    const guestsCount = dto.guestsCount ?? Math.min(2, roomType.maxGuests);
+    if (guestsCount > roomType.maxGuests) {
+      throw unprocessable(`${roomType.name} sleeps at most ${roomType.maxGuests} guests.`);
+    }
+
     // Find occupied rooms for these dates
     const occupiedRows = await this.prisma.hotelRoomNight.findMany({
       where: {
@@ -272,102 +298,112 @@ export class HotelsService {
       select: { roomId: true },
     });
     const occupiedSet = new Set(occupiedRows.map((r) => r.roomId));
-    const candidateRoom = roomType.rooms.find((r) => !occupiedSet.has(r.id));
+    const candidates = roomType.rooms.filter((r) => !occupiedSet.has(r.id));
 
-    if (!candidateRoom) {
+    if (candidates.length === 0) {
       throw conflict(
         `All ${roomType.name} rooms are fully booked for ${dto.checkInDate} to ${dto.checkOutDate}.`,
       );
     }
 
     const totalMinor = roomType.basePriceMinor * stayNights.length;
-    const publicRef = generateHotelRef(dto.checkInDate);
 
-    try {
-      const createdOrder = await this.prisma.$transaction(async (tx) => {
-        const order = await tx.order.create({
-          data: {
-            publicRef,
-            touristId: actor.id,
-            status: 'CONFIRMED',
-            subtotalMinor: totalMinor,
-            totalMinor,
-            currency: 'BDT',
-            hotelBookings: {
-              create: {
-                hotelId: roomType.hotelId,
-                roomTypeId: roomType.id,
-                roomId: candidateRoom.id,
-                hotelName: roomType.hotel.name,
-                hotelSlug: roomType.hotel.slug,
-                roomTypeName: roomType.name,
-                roomNumber: candidateRoom.roomNumber,
-                checkInDate: dto.checkInDate,
-                checkOutDate: dto.checkOutDate,
-                nights: stayNights.length,
-                guestsCount: dto.guestsCount || 2,
-                nightlyPriceMinor: roomType.basePriceMinor,
-                totalMinor,
-                currency: 'BDT',
-                status: 'RESERVED',
-                nightsStayed: {
-                  create: stayNights.map((date) => ({
-                    roomId: candidateRoom.id,
-                    stayDate: date,
-                    isActive: true,
-                  })),
+    // Concurrent guests can win the room we picked. The partial unique index on
+    // active room-nights decides the race; on a loss, try the next free room.
+    for (const candidateRoom of candidates) {
+      const publicRef = generateHotelRef(dto.checkInDate);
+
+      try {
+        const createdOrder = await this.prisma.$transaction(async (tx) => {
+          const order = await tx.order.create({
+            data: {
+              publicRef,
+              touristId: actor.id,
+              status: 'CONFIRMED',
+              subtotalMinor: totalMinor,
+              totalMinor,
+              currency: 'BDT',
+              hotelBookings: {
+                create: {
+                  hotelId: roomType.hotelId,
+                  roomTypeId: roomType.id,
+                  roomId: candidateRoom.id,
+                  hotelName: roomType.hotel.name,
+                  hotelSlug: roomType.hotel.slug,
+                  roomTypeName: roomType.name,
+                  roomNumber: candidateRoom.roomNumber,
+                  checkInDate: dto.checkInDate,
+                  checkOutDate: dto.checkOutDate,
+                  checkInTime: roomType.hotel.checkInTime,
+                  nights: stayNights.length,
+                  guestsCount,
+                  nightlyPriceMinor: roomType.basePriceMinor,
+                  totalMinor,
+                  currency: 'BDT',
+                  status: 'RESERVED',
+                  nightsStayed: {
+                    create: stayNights.map((date) => ({
+                      roomId: candidateRoom.id,
+                      stayDate: date,
+                      isActive: true,
+                    })),
+                  },
+                },
+              },
+              payments: {
+                create: {
+                  type: 'CHARGE',
+                  provider: 'MOCK',
+                  status: 'SUCCEEDED',
+                  amountMinor: totalMinor,
+                  currency: 'BDT',
+                  externalRef: `MOCK-${publicRef}`,
                 },
               },
             },
-            payments: {
-              create: {
-                type: 'CHARGE',
-                provider: 'MOCK',
-                status: 'SUCCEEDED',
-                amountMinor: totalMinor,
-                currency: 'BDT',
-                externalRef: `MOCK-${publicRef}`,
-              },
+            include: {
+              items: true,
+              hotelBookings: true,
+              payments: true,
+              tourist: true,
             },
-          },
-          include: {
-            items: true,
-            hotelBookings: true,
-            payments: true,
-            tourist: true,
-          },
+          });
+
+          await this.audit.record(
+            {
+              actorUserId: actor.id,
+              action: AuditActions.ORDER_PLACED,
+              entityType: 'hotel_order',
+              entityId: order.id,
+              details: {
+                publicRef: order.publicRef,
+                hotel: roomType.hotel.name,
+                roomType: roomType.name,
+                roomNumber: candidateRoom.roomNumber,
+                checkIn: dto.checkInDate,
+                checkOut: dto.checkOutDate,
+                nights: stayNights.length,
+                totalMinor,
+              },
+              requestId,
+            },
+            tx,
+          );
+
+          return order;
         });
 
-        await this.audit.record(
-          {
-            actorUserId: actor.id,
-            action: AuditActions.ORDER_PLACED,
-            entityType: 'hotel_order',
-            entityId: order.id,
-            details: {
-              publicRef: order.publicRef,
-              hotel: roomType.hotel.name,
-              roomType: roomType.name,
-              roomNumber: candidateRoom.roomNumber,
-              checkIn: dto.checkInDate,
-              checkOut: dto.checkOutDate,
-              nights: stayNights.length,
-              totalMinor,
-            },
-            requestId,
-          },
-          tx,
-        );
-
-        return order;
-      });
-
-      return serializeOrder(createdOrder, this.ticketService);
-    } catch (err: unknown) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        throw conflict('That room was just reserved by another guest. Please try again.');
+        return serializeOrder(createdOrder, this.ticketService);
+      } catch (err: unknown) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+          continue;
+        }
+        throw err;
       }
-      throw err;
     }
+
+    throw conflict(
+      `All ${roomType.name} rooms were just reserved by other guests for ${dto.checkInDate} to ${dto.checkOutDate}.`,
+    );
   }
 }

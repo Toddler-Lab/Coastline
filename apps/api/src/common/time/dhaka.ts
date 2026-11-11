@@ -97,6 +97,20 @@ export function phaseFor(
   return 'PAST';
 }
 
+/**
+ * UTC instant of a Dhaka wall-clock "HH:mm" on a Dhaka date. A malformed time
+ * falls back to the platform default hotel check-in of 14:00.
+ */
+export function dhakaDateTimeToUtc(dateKey: string, time: string): Date {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(time);
+  const hour = match ? Number(match[1]) : 14;
+  const minute = match ? Number(match[2]) : 0;
+  const valid = hour < 24 && minute < 60;
+  return new Date(
+    dhakaHourToUtc(dateKey, valid ? hour : 14).getTime() + (valid ? minute : 0) * 60_000,
+  );
+}
+
 export function canCancel(startAt: Date, status: string, now: Date = new Date()): boolean {
   return status === 'CONFIRMED' && now.getTime() <= startAt.getTime() - 60 * 60 * 1000;
 }

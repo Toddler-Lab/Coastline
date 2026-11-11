@@ -23,6 +23,11 @@ Cancellation is free before the slot starts; inventory is restored exactly once 
 issued because payment is simulated. Cancellation after the start is rejected. The applicable policy
 is snapshotted on the booking.
 
+Hotel stays follow the same rule against the hotel's check-in time on the check-in date (snapshotted
+on the booking as Dhaka wall-clock `HH:mm`, default 14:00): a tourist may cancel until 60 minutes
+before it; an admin may cancel later. Cancelling releases the room nights exactly once and records
+the mock refund. Admin check-in marks hotel stays `CHECKED_IN` the same way as sunbed lines.
+
 The race for the last unit yields exactly one success. Availability never goes negative; the losing
 request receives `409` with safe availability refresh guidance.
 

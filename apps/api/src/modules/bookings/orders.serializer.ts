@@ -12,7 +12,7 @@ import type {
   Payment as PrismaPayment,
   User as PrismaUser,
 } from '@coastline/db';
-import { canCancel, phaseFor } from '../../common/time/dhaka';
+import { canCancel, dhakaDateTimeToUtc, phaseFor } from '../../common/time/dhaka';
 import type { TicketService } from './ticket.service';
 
 export type OrderWithRelations = PrismaOrder & {
@@ -21,6 +21,23 @@ export type OrderWithRelations = PrismaOrder & {
   payments: PrismaPayment[];
   tourist?: PrismaUser;
 };
+
+/**
+ * Start of the earliest sunbed hour or hotel check-in in the order, or `now`
+ * for an order with neither. Drives the tourist cancellation cutoff.
+ */
+export function earliestOrderStart(
+  order: Pick<OrderWithRelations, 'items' | 'hotelBookings'>,
+  now: Date = new Date(),
+): Date {
+  const starts = [
+    ...order.items.map((item) => item.startAt.getTime()),
+    ...(order.hotelBookings ?? []).map((stay) =>
+      dhakaDateTimeToUtc(stay.checkInDate, stay.checkInTime).getTime(),
+    ),
+  ];
+  return starts.length > 0 ? new Date(Math.min(...starts)) : now;
+}
 
 export function serializeHotelBooking(booking: PrismaHotelBooking): HotelBookingDto {
   return {
@@ -35,6 +52,7 @@ export function serializeHotelBooking(booking: PrismaHotelBooking): HotelBooking
     roomNumber: booking.roomNumber,
     checkInDate: booking.checkInDate,
     checkOutDate: booking.checkOutDate,
+    checkInTime: booking.checkInTime,
     nights: booking.nights,
     guestsCount: booking.guestsCount,
     nightlyPriceMinor: booking.nightlyPriceMinor,
@@ -91,10 +109,7 @@ export function serializeOrder(
   const hotelBookings = (order.hotelBookings ?? []).map(serializeHotelBooking);
   const payments = order.payments.map((p) => serializePayment(p));
 
-  const earliestStart =
-    order.items.length > 0
-      ? new Date(Math.min(...order.items.map((item) => item.startAt.getTime())))
-      : new Date();
+  const earliestStart = earliestOrderStart(order, now);
 
   const cancellable = canCancel(earliestStart, order.status, now);
 

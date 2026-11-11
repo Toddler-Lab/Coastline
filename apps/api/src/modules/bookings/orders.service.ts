@@ -29,6 +29,7 @@ import type { CancelOrderDto } from './dto/cancel-order.dto';
 import type { CheckInDto } from './dto/check-in.dto';
 import type { CreateOrderDto } from './dto/create-order.dto';
 import {
+  earliestOrderStart,
   serializeAdminOrder,
   serializeOrder,
   type OrderWithRelations,
@@ -327,10 +328,8 @@ export class OrdersService {
       throw unprocessable(`Booking ${publicRef} is already ${order.status.toLowerCase()}.`);
     }
 
-    const earliestStart =
-      order.items.length > 0
-        ? new Date(Math.min(...order.items.map((i) => i.startAt.getTime())))
-        : new Date();
+    // Sunbed hours and hotel check-in both count towards the cancellation cutoff.
+    const earliestStart = earliestOrderStart(order);
 
     if (actor.role !== 'ADMIN' && !canCancel(earliestStart, order.status)) {
       throw unprocessable('Bookings can only be cancelled up to 60 minutes before the start time.');
@@ -347,6 +346,17 @@ export class OrdersService {
 
       await tx.bookingSlot.updateMany({
         where: { orderItem: { orderId: order.id } },
+        data: { isActive: false },
+      });
+
+      // Release the hotel room nights so the room can be booked again.
+      await tx.hotelBooking.updateMany({
+        where: { orderId: order.id },
+        data: { status: 'CANCELLED' },
+      });
+
+      await tx.hotelRoomNight.updateMany({
+        where: { hotelBooking: { orderId: order.id } },
         data: { isActive: false },
       });
 
@@ -372,6 +382,7 @@ export class OrdersService {
         },
         include: {
           items: true,
+          hotelBookings: true,
           payments: true,
           tourist: true,
         },
@@ -449,7 +460,7 @@ export class OrdersService {
   ): Promise<AdminOrderDto> {
     const order = await this.prisma.order.findUnique({
       where: { publicRef },
-      include: { items: true, payments: true, tourist: true },
+      include: { items: true, hotelBookings: true, payments: true, tourist: true },
     });
 
     if (!order) {
@@ -460,13 +471,25 @@ export class OrdersService {
     }
 
     const now = new Date();
-    const itemIds = dto.itemIds && dto.itemIds.length > 0
-      ? dto.itemIds
-      : order.items.filter((i) => i.status === 'RESERVED').map((i) => i.id);
+    const requestedIds = dto.itemIds && dto.itemIds.length > 0 ? dto.itemIds : null;
+    const itemIds =
+      requestedIds ?? order.items.filter((i) => i.status === 'RESERVED').map((i) => i.id);
+    // Hotel stays are checked in through the same call; ids may name a stay.
+    const hotelBookingIds =
+      requestedIds ?? order.hotelBookings.filter((s) => s.status === 'RESERVED').map((s) => s.id);
 
     await this.prisma.$transaction(async (tx) => {
       await tx.orderItem.updateMany({
         where: { id: { in: itemIds }, orderId: order.id },
+        data: {
+          status: 'CHECKED_IN',
+          checkedInAt: now,
+          checkedInById: actor.id,
+        },
+      });
+
+      await tx.hotelBooking.updateMany({
+        where: { id: { in: hotelBookingIds }, orderId: order.id, status: 'RESERVED' },
         data: {
           status: 'CHECKED_IN',
           checkedInAt: now,
@@ -480,7 +503,7 @@ export class OrdersService {
           action: AuditActions.ORDER_CHECKED_IN,
           entityType: 'order',
           entityId: order.id,
-          details: { publicRef: order.publicRef, itemIds },
+          details: { publicRef: order.publicRef, itemIds, hotelBookingIds },
           requestId,
         },
         tx,

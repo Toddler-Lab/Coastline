@@ -355,6 +355,7 @@ model HotelBooking {
   roomNumber        String            @map("room_number")
   checkInDate       String            @map("check_in_date")
   checkOutDate      String            @map("check_out_date")
+  checkInTime       String            @default("14:00") @map("check_in_time")
   nights            Int               @map("nights")
   guestsCount       Int               @default(2) @map("guests_count")
   nightlyPriceMinor Int               @map("nightly_price_minor")
