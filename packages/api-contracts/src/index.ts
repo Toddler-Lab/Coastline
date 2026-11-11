@@ -637,6 +637,14 @@ export interface FoodOrderListDto {
   orders: FoodOrderDto[];
 }
 
+/** Kitchen board filters for `GET /admin/dining/food-orders`. */
+export interface AdminFoodOrderQuery {
+  venueCode?: string;
+  status?: FoodOrderStatus;
+  /** Asia/Dhaka calendar date (YYYY-MM-DD) the order was placed on. */
+  date?: string;
+}
+
 // ---- Stream D: dining administration ---------------------------------------
 
 export interface UpdateMenuItemRequest {
