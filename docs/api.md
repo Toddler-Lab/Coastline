@@ -60,6 +60,28 @@ details.
 
 **Operations:** `GET /health/live`, `GET /health/ready`.
 
+**Dining (implemented demo, under `/api/v1`, all `{ data }`):**
+
+- Public: `GET /dining/venues?kind=&beachPointCode=&reservable=&delivers=`,
+  `GET /dining/venues/{code}` (venue + menu), `GET /dining/venues/{code}/availability?date=`.
+- Tourist: `POST /dining/reservations`, `GET /dining/reservations/me`,
+  `GET /dining/reservations/{ref}`, `POST /dining/reservations/{ref}/cancel`,
+  `GET /dining/delivery/beds`, `POST /dining/food-orders`, `GET /dining/food-orders/me`,
+  `GET /dining/food-orders/{ref}`, `POST /dining/food-orders/{ref}/cancel`. An owner or admin may
+  read a reservation or food order; another tourist receives `404`.
+- Admin: `GET /admin/dining/overview?date=`, `GET /admin/dining/venues`,
+  `PATCH /admin/dining/venues/{code}`, `PATCH /admin/dining/menu-items/{id}`,
+  `GET /admin/dining/reservations?date=&venueCode=&status=`,
+  `POST /admin/dining/reservations/{ref}/check-in`, `POST /admin/dining/reservations/{ref}/cancel`,
+  `GET /admin/dining/food-orders?venueCode=&status=&date=`,
+  `POST /admin/dining/food-orders/{ref}/status`.
+
+Malformed bodies or unknown fields return `400`; business-rule violations (time windows, limits,
+venue state, impossible dates) return `422`; state conflicts (slot taken, illegal food-order
+transition, already cancelled/checked in) return `409`. Reservation QR tickets are signed with the
+shared ticket service, but `POST /admin/tickets/validate` only resolves sunbed orders; dining
+check-in uses the reservation check-in endpoint.
+
 There are no upload endpoints, notification endpoints or real payment/government endpoints.
 
 ## 3. Domain behavior

@@ -31,6 +31,33 @@ the mock refund. Admin check-in marks hotel stays `CHECKED_IN` the same way as s
 The race for the last unit yields exactly one success. Availability never goes negative; the losing
 request receives `409` with safe availability refresh guidance.
 
+### Dining (simulated)
+
+Venue opening hours are Asia/Dhaka wall-clock hours `[open_hour, close_hour)`. Inactive venues are
+hidden from tourists and cannot take reservations or orders. Kitchen and venue management is
+`ADMIN`-only; there is no vendor role in MVP.
+
+**Table reservations** are 1–3 whole hours on the hour, in the future, at most 7 days ahead, inside
+opening hours, with `party_size <= seats`. Creation runs in one transaction: it snapshots venue,
+table, deposit and currency, inserts one `table_slots` row per hour and, when the venue deposit is
+above zero, records a mock `CHARGE`. The partial unique index on active `(table_id, slot_start)`
+decides races: the loser receives `409`. States are `CONFIRMED → CHECKED_IN | CANCELLED`. A tourist
+may cancel until 60 minutes before the start; an admin may cancel at any time before check-in.
+Cancelling deactivates the slots (rows are kept) and records the deposit refund as a mock `REFUND`
+reversal. Admin check-in is allowed from 30 minutes before the start until the end.
+
+**Sunbed food delivery** goes only to the tourist's own sunbed booking line that is confirmed or
+checked in and whose window contains now, from an open, delivering venue at the same beach point.
+Prices and names come from the database and are snapshotted on the order lines; there is no delivery
+fee. A mock `CHARGE` is recorded at placement. States follow
+`PLACED → PREPARING → READY → DELIVERED`, with `PLACED → CANCELLED` as the only cancellation.
+Each status change is a conditional update on the current status, so two racing changes cannot both
+succeed; illegal moves return `409`. Cancellation (tourist or admin, from `PLACED` only) records a
+mock `REFUND` reversal. Menu price changes never alter placed orders.
+
+Reservation and food-order placement, cancellation, check-in, kitchen status changes and venue/menu
+edits append audit events.
+
 ## 2. Tariff governance
 
 A tariff version stores amount, currency, `rate_type`, unit, effective window, rationale, source

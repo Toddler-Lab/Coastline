@@ -16,6 +16,18 @@
 
 There are no media, document-upload or notification tables in MVP.
 
+**Dining (implemented, migration `20261111100000_dining_foundation`):** `dining_venues` (optional
+beach point, Dhaka opening hours, reservation/delivery toggles, deposit in minor units),
+`menu_categories`, `menu_items` (composite FK keeps an item's category in the same venue),
+`dining_tables`, `table_reservations` (snapshots venue/table names, deposit and currency),
+`table_slots` (one row per reserved table-hour; a partial unique index on active
+`(table_id, slot_start)` prevents double booking), `food_orders` (linked to the sunbed
+`order_items` row it is delivered to; snapshots venue, bed and beach point) and `food_order_items`
+(snapshots item name and unit price). A `payments` row belongs to exactly one of a sunbed order,
+table reservation or food order (`CHECK num_nonnulls(...) = 1`). Known gap: the payment foreign keys
+to reservations and food orders are `ON DELETE CASCADE`; application code never deletes those
+parents, and a follow-up migration should change them to `RESTRICT`.
+
 ## 2. Relationships
 
 A provider has memberships and listings. A listing belongs to a provider, zone and category and has

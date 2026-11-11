@@ -70,6 +70,12 @@ dispatch; fare references are indicative and must state assumptions. Only servic
 booking mode of `SLOT_CAPACITY` or `QUANTITY` are bookable; directory and referral entries use
 `INQUIRY_ONLY`.
 
+Dining extends the food/vendor directory in the demo: visitors browse venues and menus, reserve a
+table by the hour with an optional demo deposit, and order food to a sunbed they have booked at the
+same beach point; staff (admin persona) run a reservation desk and a kitchen queue. Deposits,
+charges, refunds and revenue figures are simulated and labelled as such; menu prices are indicative
+demo values, not benchmarked or authoritative tariffs.
+
 ## 6. Non-functional requirements
 
 TypeScript; PostgreSQL constraints and transactional consistency; API authorization; auditable

@@ -96,13 +96,19 @@
    - Beach point configuration and status dashboard at `/admin/points`.
    - Seamless Persona Switcher in the top navigation to instantly toggle between Tourist and Admin roles.
 
+6. **Food & Beach Dining (`/food`)** — demo, all money simulated:
+   - Venue discovery with filters (venue type, beach point, "reserve a table", "delivers to your sunbed") and venue pages with menus at `/food/[code]`.
+   - Hourly table reservations (1–3 hours, up to 7 days ahead) with a demo deposit, race-safe table-hour locking, a QR ticket and cancellation until 60 minutes before the start.
+   - Food delivery to a sunbed the tourist has currently booked at the same beach point, with server-side pricing, order tracking (`Placed → Preparing → Ready → Delivered`) and cancellation while still placed.
+   - Reservations and food orders appear on `/bookings`.
+   - Operations desk at `/admin/dining`: overview, venue and menu editing, reservation check-in and a kitchen queue.
+
 ---
 
 ### Future Modules (In Development)
 
 The navigation menu provides full architectural templates and specifications for future modules:
 - 🏨 **Hotels & Coastal Resorts (`/hotels`)**: Government-benchmarked room tariffs, direct hotel contact directory, verified amenities, and anti-gouging provenance.
-- 🍽️ **Food & Beach Dining (`/food`)**: Certified seafood kitchen directory, transparent live-weight billing, and direct-to-sunbed kitkot refreshments.
 - 🛺 **Rides & Beach Transport (`/rides`)**: Fixed-fare electric Tomtoms, open-top 4WD Chander Gari Marine Drive safari jeeps, and driver ID verification.
 - 🏄 **Water Sports & Sea Adventures (`/activities`)**: Licensed Jet ski wave running, coastal parasailing flights, and surfing academy reservations with tide alert safety integration.
 
@@ -232,7 +238,9 @@ Once started, the following services are available:
 | **My Bookings** | [http://localhost:3000/bookings](http://localhost:3000/bookings) | User QR tickets, active stays, and cancellation drawer |
 | **Desk Check-in Console** | [http://localhost:3000/admin/bookings](http://localhost:3000/admin/bookings) | Ticket scanner and attendant check-in portal |
 | **Beach Points Admin** | [http://localhost:3000/admin/points](http://localhost:3000/admin/points) | Beach point status and sunbed maintenance controls |
-| **Future Modules** | [http://localhost:3000/hotels](http://localhost:3000/hotels) | Hotels, Dining (`/food`), Rides (`/rides`), Sports (`/activities`) |
+| **Dining** | [http://localhost:3000/food](http://localhost:3000/food) | Venues and menus, table reservations, food delivery to your sunbed |
+| **Dining Operations** | [http://localhost:3000/admin/dining](http://localhost:3000/admin/dining) | Overview, venue/menu editing, reservation desk, kitchen queue (admin persona) |
+| **Future Modules** | [http://localhost:3000/rides](http://localhost:3000/rides) | Rides (`/rides`), Sports (`/activities`) |
 | **REST API Base** | [http://localhost:3001/api/v1](http://localhost:3001/api/v1) | Backend REST API endpoints |
 | **Swagger / OpenAPI** | [http://localhost:3001/api/docs](http://localhost:3001/api/docs) | Interactive API documentation and test harness |
 | **API Health Checks** | [http://localhost:3001/api/v1/health/live](http://localhost:3001/api/v1/health/live) | Kubernetes/Docker liveness & readiness probes |
@@ -319,6 +327,13 @@ The API is fully documented with OpenAPI/Swagger at [http://localhost:3001/api/d
 - `POST /api/v1/admin/orders/:orderRef/check-in` — Manual attendant check-in for an arriving tourist.
 - `POST /api/v1/admin/tickets/validate` — Validate a scanned QR ticket code and verify cryptographic signature.
 - `GET /api/v1/admin/overview` — Operational summary metrics (total bookings, active check-ins, simulated revenue).
+
+### Dining
+- `GET /api/v1/dining/venues` and `GET /api/v1/dining/venues/:code` — Venue directory and venue menu.
+- `GET /api/v1/dining/venues/:code/availability?date=` — Hourly table availability for a Dhaka date.
+- `POST /api/v1/dining/reservations`, `GET /api/v1/dining/reservations/me`, `POST /api/v1/dining/reservations/:ref/cancel` — Table reservations (demo deposit).
+- `GET /api/v1/dining/delivery/beds`, `POST /api/v1/dining/food-orders`, `GET /api/v1/dining/food-orders/me`, `POST /api/v1/dining/food-orders/:ref/cancel` — Food delivery to a booked sunbed (demo charge).
+- `/api/v1/admin/dining/*` — Overview, venue/menu edits, reservation check-in/cancel and kitchen status changes. Full list in [docs/api.md](docs/api.md).
 
 ### Identity & Health
 - `GET /api/v1/identity/personas` — List available demo user profiles.
