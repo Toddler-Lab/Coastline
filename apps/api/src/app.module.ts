@@ -11,6 +11,7 @@ import { HealthModule } from './health/health.module';
 import { IdentityModule } from './modules/identity/identity.module';
 import { CatalogueModule } from './modules/catalogue/catalogue.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
+import { HotelsModule } from './modules/hotels/hotels.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { BookingsModule } from './modules/bookings/bookings.module';
     IdentityModule,
     CatalogueModule,
     BookingsModule,
+    HotelsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: DemoAuthGuard },

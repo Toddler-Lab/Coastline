@@ -267,6 +267,7 @@ export class OrdersService {
       where: { publicRef },
       include: {
         items: true,
+        hotelBookings: true,
         payments: true,
         tourist: true,
       },
@@ -289,6 +290,7 @@ export class OrdersService {
       orderBy: { placedAt: 'desc' },
       include: {
         items: true,
+        hotelBookings: true,
         payments: true,
         tourist: true,
       },
@@ -307,6 +309,7 @@ export class OrdersService {
       where: { publicRef },
       include: {
         items: true,
+        hotelBookings: true,
         payments: true,
         tourist: true,
       },
@@ -426,6 +429,7 @@ export class OrdersService {
       take: 100,
       include: {
         items: true,
+        hotelBookings: true,
         payments: true,
         tourist: true,
       },
@@ -485,7 +489,7 @@ export class OrdersService {
 
     const refreshed = await this.prisma.order.findUniqueOrThrow({
       where: { id: order.id },
-      include: { items: true, payments: true, tourist: true },
+      include: { items: true, hotelBookings: true, payments: true, tourist: true },
     });
 
     return serializeAdminOrder(refreshed, this.ticketService);
@@ -499,7 +503,7 @@ export class OrdersService {
 
     const order = await this.prisma.order.findUnique({
       where: { publicRef: verified.publicRef },
-      include: { items: true, payments: true, tourist: true },
+      include: { items: true, hotelBookings: true, payments: true, tourist: true },
     });
 
     if (!order) {

@@ -42,7 +42,8 @@ export async function createTestApp(): Promise<INestApplication> {
 
 export async function resetDatabase(prisma: PrismaService): Promise<void> {
   await prisma.$executeRawUnsafe(
-    `TRUNCATE TABLE "audit_events", "payments", "booking_slots", "order_items",
+    `TRUNCATE TABLE "audit_events", "payments", "booking_slots", "hotel_room_nights",
+      "order_items", "hotel_bookings", "hotel_rooms", "room_types", "hotels",
       "orders", "sunbeds", "beach_points", "users" RESTART IDENTITY CASCADE`,
   );
 }
@@ -143,4 +144,67 @@ export async function seedTestCatalogue(prisma: PrismaService): Promise<void> {
       },
     ],
   });
+
+  const hotel = await prisma.hotel.create({
+    data: {
+      slug: 'sayeman-beach-resort',
+      name: 'Sayeman Beach Resort',
+      banglaName: 'সায়মন বিচ রিসোর্ট',
+      zone: 'KOLATOLI',
+      address: 'Marine Drive Road, Kolatoli Beach, Cox’s Bazar',
+      latitude: 21.4143,
+      longitude: 91.9843,
+      starRating: 5,
+      featuredImage: 'https://images.unsplash.com/photo-1566073771259-6a8506099945',
+      galleryImages: ['https://images.unsplash.com/photo-1582719508461-905c673771fd'],
+      description: 'Iconic heritage luxury property situated directly on Kolatoli beachfront.',
+      phone: '+880 1755-691917',
+      email: 'reservation@sayemanresort.com',
+      amenities: ['Beachfront Infinity Pool', '100% Generator Backup'],
+      nearestBeachCode: 'KOL',
+      distanceMeters: 50,
+      isFeatured: true,
+    },
+  });
+
+  const rt = await prisma.roomType.create({
+    data: {
+      hotelId: hotel.id,
+      code: 'SAY-DLX-SEA',
+      name: 'Deluxe Sea View Room',
+      description: 'Spacious king-bed bedroom with balcony.',
+      maxGuests: 2,
+      bedConfig: '1 King Bed',
+      basePriceMinor: 1250000,
+      amenities: ['Sea View Balcony', 'King Bed'],
+      images: [],
+      sortOrder: 0,
+    },
+  });
+
+  await prisma.hotelRoom.createMany({
+    data: [
+      { hotelId: hotel.id, roomTypeId: rt.id, roomNumber: '301', status: 'AVAILABLE' },
+      { hotelId: hotel.id, roomTypeId: rt.id, roomNumber: '302', status: 'AVAILABLE' },
+    ],
+  });
+
+  for (let i = 2; i <= 10; i++) {
+    await prisma.hotel.create({
+      data: {
+        slug: `hotel-demo-${i}`,
+        name: `Hotel Demo ${i}`,
+        zone: 'SUGANDHA',
+        address: 'Hotel-Motel Zone',
+        latitude: 21.425,
+        longitude: 91.977,
+        starRating: 4,
+        featuredImage: 'https://images.unsplash.com/photo-1566073771259-6a8506099945',
+        description: 'Demo coastal stay.',
+        phone: '+880 1700-000000',
+        nearestBeachCode: 'SUG',
+        distanceMeters: 200,
+      },
+    });
+  }
 }

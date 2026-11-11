@@ -1,10 +1,12 @@
 import type {
   AdminOrderDto,
+  HotelBookingDto,
   OrderDto,
   OrderItemDto,
   PaymentDto,
 } from '@coastline/api-contracts';
 import type {
+  HotelBooking as PrismaHotelBooking,
   Order as PrismaOrder,
   OrderItem as PrismaOrderItem,
   Payment as PrismaPayment,
@@ -15,9 +17,33 @@ import type { TicketService } from './ticket.service';
 
 export type OrderWithRelations = PrismaOrder & {
   items: PrismaOrderItem[];
+  hotelBookings?: PrismaHotelBooking[];
   payments: PrismaPayment[];
   tourist?: PrismaUser;
 };
+
+export function serializeHotelBooking(booking: PrismaHotelBooking): HotelBookingDto {
+  return {
+    id: booking.id,
+    orderId: booking.orderId,
+    hotelId: booking.hotelId,
+    hotelName: booking.hotelName,
+    hotelSlug: booking.hotelSlug,
+    roomTypeId: booking.roomTypeId,
+    roomTypeName: booking.roomTypeName,
+    roomId: booking.roomId,
+    roomNumber: booking.roomNumber,
+    checkInDate: booking.checkInDate,
+    checkOutDate: booking.checkOutDate,
+    nights: booking.nights,
+    guestsCount: booking.guestsCount,
+    nightlyPriceMinor: booking.nightlyPriceMinor,
+    totalMinor: booking.totalMinor,
+    currency: booking.currency.trim(),
+    status: booking.status,
+    checkedInAt: booking.checkedInAt ? booking.checkedInAt.toISOString() : null,
+  };
+}
 
 export function serializeItem(
   item: PrismaOrderItem,
@@ -62,6 +88,7 @@ export function serializeOrder(
   now: Date = new Date(),
 ): OrderDto {
   const items = order.items.map((item) => serializeItem(item, order.status, now));
+  const hotelBookings = (order.hotelBookings ?? []).map(serializeHotelBooking);
   const payments = order.payments.map((p) => serializePayment(p));
 
   const earliestStart =
@@ -82,6 +109,7 @@ export function serializeOrder(
     cancelledAt: order.cancelledAt ? order.cancelledAt.toISOString() : null,
     cancelReason: order.cancelReason,
     items,
+    hotelBookings,
     payments,
     ticket: ticketService.ticketFor(order.publicRef, order.status),
     canCancel: cancellable,
