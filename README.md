@@ -187,15 +187,26 @@ DATABASE_URL=postgresql://coastline_app:dev_0bac4f806eae423aa5869ebf7c2f2c927f08
 TEST_DATABASE_URL=postgresql://coastline_app:dev_0bac4f806eae423aa5869ebf7c2f2c927f08cb5d@127.0.0.1:5432/coastline_test?schema=public
 ```
 
-### 3. Start PostgreSQL Database
+### 3. Start PostgreSQL Database (Docker)
 
-Use the included Docker Compose configuration:
+The project database runs in Docker, so everyone gets the same PostgreSQL 16 setup. Docker Desktop
+must be running. One command starts it and makes sure both databases exist (`coastline_dev` and
+`coastline_test`):
 
 ```bash
-docker compose -f infra/compose.yaml up -d
+pnpm db:up
 ```
 
-*(Alternatively, ensure your local PostgreSQL 16+ server is running with the credentials specified in your `.env` file).*
+> **Port 5432 already in use?** A native PostgreSQL install often uses 5432. Add
+> `POSTGRES_PORT=5433` to your `.env` and use `5433` in `DATABASE_URL` and `TEST_DATABASE_URL`;
+> `pnpm db:up` publishes the container on that port. Do not stop or change your native PostgreSQL.
+
+Other database commands: `pnpm db:down` stops the container (data is kept in a Docker volume),
+`pnpm db:setup` starts it, applies migrations and seeds demo data in one go.
+
+> **After every `git pull`:** run `pnpm install` and `pnpm db:migrate`. New migrations and
+> dependencies are the usual reason a fresh pull does not start. Also compare your `.env` with
+> `.env.example`: new settings are added there, and `.env` is not committed.
 
 ### 4. Run Migrations & Seed Data
 
@@ -276,6 +287,9 @@ Run these from the repository root:
 | `pnpm test` | Runs the full Vitest unit and integration test suite |
 | `pnpm format` | Formats all files across the repository with Prettier |
 | `pnpm format:check`| Checks formatting compliance across all files |
+| `pnpm db:up` | Starts the Docker PostgreSQL and creates the dev and test databases |
+| `pnpm db:down` | Stops the Docker PostgreSQL (data is kept) |
+| `pnpm db:setup` | `db:up` + migrations + seed in one command |
 | `pnpm db:generate` | Generates the Prisma Client |
 | `pnpm db:migrate` | Runs database migrations |
 | `pnpm db:seed` | Populates database with beach points, sunbeds, and demo orders |

@@ -1,3 +1,11 @@
+# Local development PostgreSQL. Start it with `pnpm db:up` (see README).
+#
+# Host port: defaults to 5432. If a native PostgreSQL already uses 5432, set
+# POSTGRES_PORT in the repository `.env` (for example 5433) and use the same
+# port in DATABASE_URL / TEST_DATABASE_URL. `pnpm db:up` reads that file.
+#
+# The development database is created on first start. `pnpm db:up` also makes
+# sure the test database exists, so it works on volumes created earlier.
 services:
   postgres:
     image: postgres:16-alpine
@@ -8,9 +16,14 @@ services:
       POSTGRES_PASSWORD: dev_0bac4f806eae423aa5869ebf7c2f2c927f08cb5d
       POSTGRES_DB: coastline_dev
     ports:
-      - '5432:5432'
+      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U coastline_app -d coastline_dev']
+      interval: 3s
+      timeout: 3s
+      retries: 20
 
 volumes:
   postgres_data:

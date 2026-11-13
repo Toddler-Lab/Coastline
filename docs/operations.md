@@ -14,7 +14,9 @@ Never commit secrets. Startup must reject demo mode or seeded demo credentials i
 ## 2. Local development
 
 Use Node.js 22 LTS and pnpm workspaces. Start PostgreSQL with Docker Compose from
-`infra/compose.yaml`; PostGIS is optional. Apply migrations before starting the API.
+`infra/compose.yaml` with `pnpm db:up` (it also creates the test database; set `POSTGRES_PORT` in
+`.env` if 5432 is taken). PostGIS is optional. Run `pnpm db:migrate` after every pull and before
+starting the API.
 
 When the scaffold is added, expose root scripts for install, dev, lint, typecheck, test, test:e2e,
 build, migrate, seed and reset. Use pnpm workspace filters for per-app commands. Turborepo is not
