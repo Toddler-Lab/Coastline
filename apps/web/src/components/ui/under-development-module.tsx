@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { ArrowLeft, Clock, Construction, Sparkles, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { Panel } from '@/components/ui/panel';
@@ -73,18 +71,12 @@ export function UnderDevelopmentModule({
                 <span className="font-mono text-[9.5px] uppercase tracking-[0.2em] text-sand">
                   {bengaliTitle}
                 </span>
-                <h1 className="text-2xl font-bold tracking-tight text-foam sm:text-3xl">
-                  {title}
-                </h1>
+                <h1 className="text-2xl font-bold tracking-tight text-foam sm:text-3xl">{title}</h1>
               </div>
             </div>
 
-            <p className="mt-4 text-[14px] font-medium text-foam/90 sm:text-[15px]">
-              {tagline}
-            </p>
-            <p className="mt-2 text-[13px] leading-relaxed text-mist">
-              {description}
-            </p>
+            <p className="mt-4 text-[14px] font-medium text-foam/90 sm:text-[15px]">{tagline}</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-mist">{description}</p>
 
             {indicativeTariff ? (
               <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-line bg-abyss/40 px-3 py-1.5 font-mono text-[11px] text-mist">
@@ -102,9 +94,7 @@ export function UnderDevelopmentModule({
                   <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-mist">
                     {stat.label}
                   </p>
-                  <p className="mt-1 font-mono text-[15px] font-semibold text-foam">
-                    {stat.value}
-                  </p>
+                  <p className="mt-1 font-mono text-[15px] font-semibold text-foam">{stat.value}</p>
                 </div>
               ))}
             </div>
@@ -114,9 +104,7 @@ export function UnderDevelopmentModule({
         {/* Planned Features & Architecture Preview */}
         <div className="mt-8">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-[16px] font-semibold text-foam">
-              Planned Feature Roadmap & Specs
-            </h2>
+            <h2 className="text-[16px] font-semibold text-foam">Planned Feature Roadmap & Specs</h2>
             <span className="flex items-center gap-1.5 font-mono text-[9.5px] text-mist">
               <Clock className="h-3 w-3 text-sea" />
               PRD FR-01 · FR-05
@@ -134,9 +122,7 @@ export function UnderDevelopmentModule({
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-2 text-[11.5px] leading-relaxed text-mist">
-                  {h.desc}
-                </p>
+                <p className="mt-2 text-[11.5px] leading-relaxed text-mist">{h.desc}</p>
               </Panel>
             ))}
           </div>
@@ -151,8 +137,10 @@ export function UnderDevelopmentModule({
                 Demonstrator in Active Development
               </h4>
               <p className="mt-1 text-[12px] leading-relaxed text-mist">
-                The <strong>Sunbed Booking & Coastline Map</strong> module is currently live and fully functional.
-                This module ({title}) is being integrated into the API contracts, PostgreSQL schema, and provider moderation workflows according to the 12-week delivery roadmap.
+                The <strong>Sunbed Booking & Coastline Map</strong> module is currently live and
+                fully functional. This module ({title}) is being integrated into the API contracts,
+                PostgreSQL schema, and provider moderation workflows according to the 12-week
+                delivery roadmap.
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <Link href="/" className={buttonClass('primary', 'sm')}>
