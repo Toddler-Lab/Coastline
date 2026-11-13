@@ -19,6 +19,31 @@ details.
 
 ## 2. Endpoint inventory
 
+### 2.1 Implemented today
+
+Read from the controllers on `dev` (2026-11-13). All are under `/api/v1` and return `{ data }`.
+
+- **Catalogue:** `GET /beach-points?date=`, `GET /beach-points/{code}?date=`.
+- **Sunbed orders:** `POST /orders`, `GET /orders/me`, `GET /orders`, `GET /orders/{ref}`,
+  `POST /orders/{ref}/cancel`.
+- **Hotels:** `GET /hotels`, `GET /hotels/{slug}`, `POST /hotels/bookings`.
+- **Dining:** listed under "Dining" below.
+- **Operations:** `GET /admin/overview`, `GET /admin/beach-points`, `GET /admin/orders`,
+  `POST /admin/orders/{ref}/cancel`, `POST /admin/orders/{ref}/check-in`,
+  `POST /admin/tickets/validate`, and the `/admin/dining/*` routes below.
+- **Identity:** `GET /session`, `GET /demo/users` (seeded accounts, only while
+  `DEMO_AUTH_ENABLED=true`). The caller is identified by the `x-demo-user-id` header.
+- **Health:** `GET /health/live`, `GET /health/ready`, outside the version prefix.
+
+Creating an order, hotel booking, reservation or food order reserves inventory and records the
+charge in one transaction; there is no separate hold step yet. No endpoint reads an
+`Idempotency-Key` yet. Both are addressed in [implementation-plan.md](implementation-plan.md)
+(WP-07, WP-08).
+
+### 2.2 Target inventory
+
+The lists below are the target API. Items not in 2.1 are planned.
+
 **Public:** `GET /zones`, `GET /categories`, `GET /listings`, `GET /listings/{publicId}`,
 `GET /tariffs`, `GET /procurement/notices`, `GET /procurement/notices/{publicId}`.
 
@@ -26,7 +51,7 @@ details.
 
 **Visitor:** `POST /holds`, `POST /bookings` (confirm), `GET /bookings`,
 `GET /bookings/{publicRef}`, `POST /bookings/{publicRef}/cancel`,
-`POST /demo-payments/{publicRef}/simulate`.
+`GET /payments/methods`, `POST /payments/{publicRef}/pay`.
 
 **Provider:** `POST/GET/PATCH /provider/listings`, `GET /provider/listings/{id}`,
 `POST /provider/listings/{id}/submit`, `POST/GET/PATCH /provider/listings/{id}/products`,
@@ -44,7 +69,7 @@ details.
 `POST /admin/procurement/notices/{id}/publish`, `POST /admin/procurement/notices/{id}/close`,
 `POST /procurement/bids`, `POST /admin/procurement/bids/{id}/evaluations`,
 `POST /admin/procurement/notices/{id}/recommendation`,
-`POST /admin/procurement/recommendations/{id}/approve-demo`.
+`POST /admin/procurement/recommendations/{id}/approve`.
 
 **Contracts:** `GET /admin/contracts`, `GET /admin/contracts/{id}`,
 `POST /admin/contracts/{id}/dues`.
@@ -60,7 +85,7 @@ details.
 
 **Operations:** `GET /health/live`, `GET /health/ready`.
 
-**Dining (implemented demo, under `/api/v1`, all `{ data }`):**
+**Dining (implemented, under `/api/v1`, all `{ data }`):**
 
 - Public: `GET /dining/venues?kind=&beachPointCode=&reservable=&delivers=`,
   `GET /dining/venues/{code}` (venue + menu), `GET /dining/venues/{code}/availability?date=`.
@@ -82,18 +107,32 @@ transition, already cancelled/checked in) return `409`. Reservation QR tickets a
 shared ticket service, but `POST /admin/tickets/validate` only resolves sunbed orders; dining
 check-in uses the reservation check-in endpoint.
 
-There are no upload endpoints, notification endpoints or real payment/government endpoints.
+There are no upload endpoints, notification endpoints, payment-gateway callbacks or government
+endpoints.
+
+**Payments.** Charges and refunds go through the payment-provider port described in
+[workflows.md](workflows.md) section 2. `GET /payments/methods` returns the methods checkout may
+offer (`BKASH`, `NAGAD`, `CARD`) so the web and Android clients never hard-code them. Requests name
+a method; the provider is chosen and recorded by the server and is never accepted from the client.
+No endpoint accepts card numbers, CVVs, wallet PINs or one-time codes. Implemented order,
+reservation and food-order endpoints currently accept `paymentMethod: 'MOCK'`; replacing it with
+the method values above is a breaking contract change tracked in
+[implementation-plan.md](implementation-plan.md) (WP-07, switched in the web app by WP-14).
+
+**Clients.** The same `/api/v1` serves the website and the planned Android app. Android models are
+generated from the OpenAPI document, so DTO names and enums are part of the mobile contract.
 
 ## 3. Domain behavior
 
 The server derives all prices, availability and permitted state transitions. Provider ID comes from
 authorized membership, not trusted request input. Public catalogue returns only approved active
-listing versions and internally approved effective tariffs. Booking and payment simulation are
+listing versions and internally approved effective rates. Booking and payment commands are
 idempotent. A conflict such as sold-out inventory returns `409` with safe availability refresh
-guidance.
+guidance and identifies the unit that was lost, so the client can keep the rest of the selection.
 
-Booking commands follow `HELD → CONFIRMED | CANCELLED | EXPIRED`. Cancellation before start restores
-inventory once and is free; cancellation after start is rejected. Confirmation never charges.
+Booking commands follow `HELD → CONFIRMED | CANCELLED | EXPIRED`. Cancellation before the cut-off
+restores inventory once, is free and records a full refund; later cancellation is rejected for
+visitors. Confirmation charges through the payment provider exactly once.
 
 ## 4. Security and versioning
 
@@ -105,9 +144,9 @@ routes. Health endpoints are specified in [operations.md](operations.md).
 ## 5. Representative response types
 
 Listing exposes public reference, approved content, provider display info, zone/category, products,
-indicative tariff provenance, image URLs, terms and `last_verified_at`.
+rate source and verification date, image URLs, terms and `last_verified_at`.
 
 Booking exposes public reference, lifecycle state, item price snapshots, hold expiry, cancellation
-policy, simulated-payment label and tariff provenance.
+policy and cut-off time, payment method and status, and rate source.
 
-Finance responses and CSV exports include the demo watermark and `generated_at`.
+Finance responses and CSV exports include `generated_at` and each record's payment provider.

@@ -5,17 +5,21 @@ relevant to the assigned task; [README.md](README.md) maps work areas to docs.
 
 ## Current state
 
-The repository is a directory skeleton plus documentation. There is no package manifest,
-application code, dependency install or working command yet. Do not assume a script, framework
-configuration or database exists. When a task asks for documentation or structure only, do not add
-application code.
+The repository is a working pnpm monorepo: the web app, the API, the Prisma schema with migrations
+and seeds, and tests. Sunbed booking, dining, hotels and the operations pages are implemented; the
+root `package.json` lists the commands that exist. The web interface is being rebuilt to
+[docs/design.md](docs/design.md), which is the target for all UI work. When a task asks for
+documentation or structure only, do not add application code.
 
 ## Read first
 
 1. This file.
 2. The work-area table in [README.md](README.md).
 3. The matching guide under `docs/`.
-4. The relevant code, schema and tests.
+4. For redesign work, your work package in
+   [docs/implementation-plan.md](docs/implementation-plan.md): it names the files, tests and
+   completion test, and its ground rules apply.
+5. The relevant code, schema and tests.
 
 Do not load every guide by default. For cross-cutting work, read only the guides that intersect.
 
@@ -35,10 +39,18 @@ transitions.
 
 ## Invariants
 
-- Proposal-stage demonstrator only. No official government service/endorsement, legally
-  authoritative tariffs, binding procurement/contract, or real monetary transaction.
-- Mark internal approvals, indicative prices, mock payments, prototype revenue and dues as
-  demo/simulated wherever shown, including exports.
+- Coastline is built as a publishable product run by an independent operator. Never imply
+  government endorsement, legally authoritative tariffs, police or regulator verification, or
+  binding procurement/contracts. The independence statement lives in the footer and on `/about`.
+- No user-facing surface (pages, toasts, emails, exports, metadata) uses the words demo, mock,
+  fake, simulated, sandbox, prototype, proposal or persona. The full list and replacements are in
+  [docs/design.md](docs/design.md) section 12. The one exception: finance views and exports show
+  each record's payment provider as a data field, so unsettled records are not read as collected
+  money.
+- Payments go through the payment-provider port. The only adapter today is the sandbox adapter: it
+  approves and refunds without moving money, and it must behave and read exactly like a live
+  provider. While it is active, never render or accept card numbers, CVVs, wallet PINs or one-time
+  codes. A live gateway adapter is a separate, reviewed change.
 - Validate every boundary with shared contracts. Never trust client price, role, provider ID or
   derived values.
 - Store money as integer minor units plus an ISO currency. Store timestamps in UTC and present
@@ -48,9 +60,12 @@ transitions.
 - Append audit events for privileged transitions. Never delete audit or ledger rows; correct by
   reversal.
 - Check migrations in and never rewrite an applied migration.
-- Keep secrets, real personal data and payment credentials out of logs, fixtures and the demo.
-- MVP has no file uploads, notifications or real map/payment/government integration. Listing images
-  use seeded or remote URLs.
+- Keep secrets, real personal data and payment credentials out of logs, fixtures and seeds.
+- There are no file uploads, notifications or live payment-gateway/government integrations yet.
+  Listing images use seeded or remote URLs.
+- UI work follows [docs/design.md](docs/design.md): role-named design tokens only, Material window
+  size classes, and the same route, token and component names as the planned Android (Kotlin,
+  Compose) app.
 
 ## Execution expectations
 
@@ -60,4 +75,5 @@ validation, permissions, inventory, ledger and state transitions. Run the checks
 exist and report the commands and real results, including assumptions and gaps.
 
 Do not invent public policy or authority. Escalate only when a missing decision changes legal
-authority, real money, privacy obligations, government participation or pilot geography.
+authority, real money (including enabling a live payment adapter), privacy obligations, government
+participation or pilot geography.

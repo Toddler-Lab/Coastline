@@ -8,7 +8,7 @@
 - **Providers:** `providers`, `provider_memberships`.
 - **Catalogue:** `zones`, `service_categories`, `listings`, `listing_versions`, `products`.
 - **Governance:** `tariff_schedules`, `tariff_versions`.
-- **Inventory/bookings:** `inventory_slots`, `bookings`, `booking_items`, `demo_payments`.
+- **Inventory/bookings:** `inventory_slots`, `bookings`, `booking_items`, `payments`.
 - **Procurement:** `procurement_notices`, `procurement_lots`, `suppliers`, `bids`, `evaluations`,
   `contracts`, `contract_dues`.
 - **Finance:** `fee_rules`, `journal_entries`, `journal_lines`.
@@ -24,7 +24,11 @@ beach point, Dhaka opening hours, reservation/delivery toggles, deposit in minor
 `(table_id, slot_start)` prevents double booking), `food_orders` (linked to the sunbed
 `order_items` row it is delivered to; snapshots venue, bed and beach point) and `food_order_items`
 (snapshots item name and unit price). A `payments` row belongs to exactly one of a sunbed order,
-table reservation or food order (`CHECK num_nonnulls(...) = 1`). Known gap: the payment foreign keys
+table reservation or food order (`CHECK num_nonnulls(...) = 1`) and records its provider, method,
+amount, status and external reference. The `provider` column currently defaults to `MOCK` and
+seeded external references start with `MOCK-`; a new migration renames the value to `SANDBOX` and
+adds the method values (`BKASH`, `NAGAD`, `CARD`). Applied migrations are not rewritten. No payment
+credential is ever stored. Known gap: the payment foreign keys
 to reservations and food orders are `ON DELETE CASCADE`; application code never deletes those
 parents, and a follow-up migration should change them to `RESTRICT`.
 
@@ -34,7 +38,7 @@ A provider has memberships and listings. A listing belongs to a provider, zone a
 versions. A listing has products; a product has a tariff schedule and inventory slots. A booking
 belongs to a visitor and provider and has one item snapshot referencing a product, slot and tariff
 version. A procurement notice has lots; a lot has bids; a bid has evaluations; an award
-recommendation can create a draft contract; a contract has manually entered demo dues. Journal
+recommendation can create a draft contract; a contract has manually entered dues. Journal
 entries link to a source type/id and contain journal lines. Audit events link an actor and entity.
 
 ## 3. Key fields and constraints
@@ -62,8 +66,8 @@ entries link to a source type/id and contain journal lines. Audit events link an
   applicable rule.
 - `journal_lines` have account, debit_minor, credit_minor and currency. Posting rejects any entry
   that does not balance per currency; a deferred constraint or trigger may be added as defense.
-- `contract_dues` are manually entered demo amounts linked to a contract; they are never calculated
-  by the application.
+- `contract_dues` are manually entered amounts linked to a contract; they are never calculated by
+  the application.
 - `audit_events` store actor, action, entity, entity_id, time, reason, request_id and safe
   before/after JSON. Procurement conflict declarations use
   `action = EVALUATOR_CONFLICT_DECLARED`.
@@ -87,6 +91,6 @@ reservation. Never rely only on application-level validation for invariants.
 
 ## 6. Data lifecycle
 
-Demo data is synthetic and resettable only in explicitly guarded demo/local environments. Before
+Seeded data is synthetic and resettable only in explicitly guarded local/staging environments. Before
 production, define retention, archival, deletion/access workflows and backup policy. Do not put
 secrets, credentials or real payment data in the schema.

@@ -1,7 +1,7 @@
 # Smart Cox’s Bazar (Coastline)
 
-> **Proposal-Stage Demonstrator · Bay of Bengal Coastal Services Platform**  
-> *Smart digital discovery, shoreline sunbed reservation, and regulatory governance demonstrator for the Cox’s Bazar 120 km coastal corridor.*
+> **Bay of Bengal Coastal Services Platform**  
+> *Discover and book sunbeds, dining and hotel stays along the Cox’s Bazar 120 km coastal corridor, with tickets, desk check-in and operations tools.*
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16.4-black.svg)](https://nextjs.org/)
@@ -14,8 +14,10 @@
 ---
 
 > [!IMPORTANT]
-> **Proposal Demo — Simulated Operations Only**  
-> This platform is a technology proposal and demonstrator. Tariffs, booking orders, mock payment gateways, merchant revenue, desk check-ins, and administrative approvals are simulated. No real money is collected or owed, and no official government endorsement, legally binding procurement, or regulatory authority is implied.
+> **Developer note: payments and affiliation**  
+> Payments run through a payment-provider port whose only adapter today is a sandbox adapter: checkout, receipts and refunds work end to end, and no money moves. The interface does not label this, so do not deploy publicly in this mode without a deliberate decision (see [docs/operations.md](docs/operations.md)). Coastline is an independent platform; nothing in the product may imply government endorsement or official tariffs.
+>
+> **Interface redesign in progress.** The target design for the website and the planned Android app is [docs/design.md](docs/design.md). Screens and copy described below reflect the current build until the redesign phases in [docs/delivery-plan.md](docs/delivery-plan.md) land.
 
 ---
 
@@ -34,7 +36,7 @@
   - [4. Run Migrations & Seed Data](#4-run-migrations--seed-data)
   - [5. Run the Application](#5-run-the-application)
 - [Application URLs & Access Points](#application-urls--access-points)
-- [Demo Personas](#demo-personas)
+- [Seeded Accounts](#seeded-accounts)
 - [Workspace Commands & Scripts](#workspace-commands--scripts)
 - [Testing & Quality Assurance](#testing--quality-assurance)
 - [REST API Reference](#rest-api-reference)
@@ -49,7 +51,7 @@
 **Coastline** addresses critical challenges faced by tourists and municipal authorities in Cox's Bazar, Bangladesh—home to the world's longest unbroken natural sandy sea beach:
 - **Price Transparency**: Eliminates arbitrary overcharging with fixed, benchmarked hourly bed rates.
 - **Shoreline Sunbed Management**: Live real-time visibility of sunbed rows across 6 certified beach points.
-- **Instant Booking & QR Tickets**: Frictionless reserving, simulated mobile payment, and cryptographically signed QR tickets for beach check-in.
+- **Instant Booking & QR Tickets**: Frictionless reserving, one shared checkout, and cryptographically signed QR tickets for beach check-in.
 - **Field Desk Validation**: Digital ticket scanner for beach attendants and administrators.
 - **Cohesive Tourism Ecosystem**: Architectural blueprints for Hotels, Beach Dining, Transport (Tomtom/Jeep), and Water Sports.
 
@@ -82,7 +84,7 @@
      - 🔴 **Booked / Occupied**: Double-booking prevented via database row locks and slot constraints.
      - ⚪ **Past / Inactive**: Out-of-window slots.
    - **Flexible Duration**: 1 to 4 hour booking blocks with instant minor-unit price computation (e.g. `BDT 50.00 / hr`).
-   - **Simulated Checkout**: Choice of demo mobile wallets (bKash, Nagad) or cards. Instant transaction confirmation without real money processing.
+   - **Checkout**: Payment through the payment-provider port (sandbox adapter today), with instant confirmation and a receipt on the ticket.
    - **Double-Booking Protection**: PostgreSQL transactional isolation prevents race conditions and overlapping slot holds.
 
 4. **Digital QR Tickets & My Bookings**:
@@ -94,11 +96,11 @@
    - Attendant check-in console at `/admin/bookings` with camera-based QR scanner or manual reference lookup.
    - Real-time check-in status transitions (`CONFIRMED` $\rightarrow$ `CHECKED_IN`).
    - Beach point configuration and status dashboard at `/admin/points`.
-   - Seamless Persona Switcher in the top navigation to instantly toggle between Tourist and Admin roles.
+   - Account switcher in the top navigation to move between the seeded visitor and staff accounts (local and presentation use only).
 
-6. **Food & Beach Dining (`/food`)** — demo, all money simulated:
+6. **Food & Beach Dining (`/food`)**:
    - Venue discovery with filters (venue type, beach point, "reserve a table", "delivers to your sunbed") and venue pages with menus at `/food/[code]`.
-   - Hourly table reservations (1–3 hours, up to 7 days ahead) with a demo deposit, race-safe table-hour locking, a QR ticket and cancellation until 60 minutes before the start.
+   - Hourly table reservations (1–3 hours, up to 7 days ahead) with an optional deposit, race-safe table-hour locking, a QR ticket and cancellation until 60 minutes before the start.
    - Food delivery to a sunbed the tourist has currently booked at the same beach point, with server-side pricing, order tracking (`Placed → Preparing → Ready → Delivered`) and cancellation while still placed.
    - Reservations and food orders appear on `/bookings`.
    - Operations desk at `/admin/dining`: overview, venue and menu editing, reservation check-in and a kitchen queue.
@@ -107,10 +109,11 @@
 
 ### Future Modules (In Development)
 
-The navigation menu provides full architectural templates and specifications for future modules:
-- 🏨 **Hotels & Coastal Resorts (`/hotels`)**: Government-benchmarked room tariffs, direct hotel contact directory, verified amenities, and anti-gouging provenance.
-- 🛺 **Rides & Beach Transport (`/rides`)**: Fixed-fare electric Tomtoms, open-top 4WD Chander Gari Marine Drive safari jeeps, and driver ID verification.
-- 🏄 **Water Sports & Sea Adventures (`/activities`)**: Licensed Jet ski wave running, coastal parasailing flights, and surfing academy reservations with tide alert safety integration.
+These services are not released. In the target design they sit behind feature flags and stay out of navigation until they are complete:
+- 🛺 **Rides & Beach Transport (`/rides`)**: Fixed-fare electric Tomtoms and open-top 4WD Chander Gari Marine Drive jeeps.
+- 🏄 **Water Sports & Sea Adventures (`/activities`)**: Jet ski, parasailing and surfing sessions.
+
+Hotel stays (`/hotels`) are implemented: hotel list, hotel pages and room booking through the same order and ticket flow.
 
 ---
 
@@ -202,7 +205,7 @@ pnpm db:up
 > `pnpm db:up` publishes the container on that port. Do not stop or change your native PostgreSQL.
 
 Other database commands: `pnpm db:down` stops the container (data is kept in a Docker volume),
-`pnpm db:setup` starts it, applies migrations and seeds demo data in one go.
+`pnpm db:setup` starts it, applies migrations and seeds the starter data in one go.
 
 > **After every `git pull`:** run `pnpm install` and `pnpm db:migrate`. New migrations and
 > dependencies are the usual reason a fresh pull does not start. Also compare your `.env` with
@@ -210,13 +213,13 @@ Other database commands: `pnpm db:down` stops the container (data is kept in a D
 
 ### 4. Run Migrations & Seed Data
 
-Deploy the Prisma migrations and seed the 6 beach points, sunbeds, and initial demo bookings:
+Deploy the Prisma migrations and seed the 6 beach points, sunbeds, and initial bookings:
 
 ```bash
 # Apply schema migrations
 pnpm db:migrate
 
-# Seed beach points, sunbeds, tariffs, and demo orders
+# Seed beach points, sunbeds, tariffs, and starter orders
 pnpm db:seed
 ```
 
@@ -250,7 +253,7 @@ Once started, the following services are available:
 | **Desk Check-in Console** | [http://localhost:3000/admin/bookings](http://localhost:3000/admin/bookings) | Ticket scanner and attendant check-in portal |
 | **Beach Points Admin** | [http://localhost:3000/admin/points](http://localhost:3000/admin/points) | Beach point status and sunbed maintenance controls |
 | **Dining** | [http://localhost:3000/food](http://localhost:3000/food) | Venues and menus, table reservations, food delivery to your sunbed |
-| **Dining Operations** | [http://localhost:3000/admin/dining](http://localhost:3000/admin/dining) | Overview, venue/menu editing, reservation desk, kitchen queue (admin persona) |
+| **Dining Operations** | [http://localhost:3000/admin/dining](http://localhost:3000/admin/dining) | Overview, venue/menu editing, reservation desk, kitchen queue (staff account) |
 | **Future Modules** | [http://localhost:3000/rides](http://localhost:3000/rides) | Rides (`/rides`), Sports (`/activities`) |
 | **REST API Base** | [http://localhost:3001/api/v1](http://localhost:3001/api/v1) | Backend REST API endpoints |
 | **Swagger / OpenAPI** | [http://localhost:3001/api/docs](http://localhost:3001/api/docs) | Interactive API documentation and test harness |
@@ -258,13 +261,13 @@ Once started, the following services are available:
 
 ---
 
-## Demo Personas
+## Seeded Accounts
 
-The system includes pre-seeded demo personas accessible via the persona dropdown in the top header:
+Seeded accounts for local development and presentations, available from the account switcher in the top header while `DEMO_AUTH_ENABLED=true`. They are synthetic and are disabled in production:
 
 1. **Rahim Ahmed (`TOURIST`)**:
    - Regular domestic tourist visiting Cox's Bazar.
-   - Used to make demo reservations, test slot selections, and view personal QR tickets in `/bookings`.
+   - Used to make reservations, try slot selections, and view personal QR tickets in `/bookings`.
 2. **Fatima Begum (`TOURIST`)**:
    - Secondary tourist profile for testing concurrency, multi-user bookings, and distinct ticket archives.
 3. **Admin User (`ADMIN`)**:
@@ -292,7 +295,7 @@ Run these from the repository root:
 | `pnpm db:setup` | `db:up` + migrations + seed in one command |
 | `pnpm db:generate` | Generates the Prisma Client |
 | `pnpm db:migrate` | Runs database migrations |
-| `pnpm db:seed` | Populates database with beach points, sunbeds, and demo orders |
+| `pnpm db:seed` | Populates database with beach points, sunbeds, and starter orders |
 | `pnpm db:reset` | Resets the database and reapplies seeds from scratch |
 
 ---
@@ -314,10 +317,10 @@ pnpm typecheck
 
 Current test suite coverage includes:
 - **`OrdersService`**: Inventory validation, slot booking, double-booking prevention, cancellation rules, check-in validation.
-- **`OrdersController` & `AdminOrdersController`**: Tourist and admin HTTP boundaries, persona authentication, DTO validation.
+- **`OrdersController` & `AdminOrdersController`**: Tourist and admin HTTP boundaries, seeded-account authentication, DTO validation.
 - **`CatalogueService` & `CatalogueController`**: Beach point geodata, availability queries, sunbed state serialization.
-- **`IdentityController`**: Demo persona switching and session persistence.
-- **`Guards & Filters`**: Role-based access control, demo auth headers, global exception normalization.
+- **`IdentityController`**: Seeded-account switching and session persistence.
+- **`Guards & Filters`**: Role-based access control, seeded-account auth headers, global exception normalization.
 
 ---
 
@@ -326,13 +329,12 @@ Current test suite coverage includes:
 The API is fully documented with OpenAPI/Swagger at [http://localhost:3001/api/docs](http://localhost:3001/api/docs). Key endpoints:
 
 ### Public Catalogue & Availability
-- `GET /api/v1/catalogue/points` — List all 6 verified shoreline beach points with coordinates and capacity.
-- `GET /api/v1/catalogue/points/:code` — Get details and sunbeds for a specific beach point.
-- `GET /api/v1/catalogue/availability?beachPointCode=KOL&date=2026-11-10` — Hourly slot matrix and live status for all sunbeds at a point.
+- `GET /api/v1/beach-points?date=2026-11-10` — List the 6 beach points with coordinates, price and free-bed counts.
+- `GET /api/v1/beach-points/:code?date=2026-11-10` — One beach point with its hourly slots and the status of every sunbed.
 
 ### Orders & Sunbed Booking
-- `POST /api/v1/orders` — Create a new sunbed booking (requires `sunbedId`, `date`, `startHour`, `durationHours`, `paymentMethod`).
-- `GET /api/v1/orders/me` — List upcoming and past bookings for the current tourist persona.
+- `POST /api/v1/orders` — Create a sunbed booking (`items[]` with `sunbedId`, `startsAt`, `hours`).
+- `GET /api/v1/orders/me` — List upcoming and past bookings for the current visitor account.
 - `GET /api/v1/orders/:orderRef` — Retrieve details, status, and QR ticket for a booking.
 - `POST /api/v1/orders/:orderRef/cancel` — Cancel an upcoming reservation and release the inventory slot.
 
@@ -340,18 +342,18 @@ The API is fully documented with OpenAPI/Swagger at [http://localhost:3001/api/d
 - `GET /api/v1/admin/orders` — Filter all bookings by date, beach point, status, or search query.
 - `POST /api/v1/admin/orders/:orderRef/check-in` — Manual attendant check-in for an arriving tourist.
 - `POST /api/v1/admin/tickets/validate` — Validate a scanned QR ticket code and verify cryptographic signature.
-- `GET /api/v1/admin/overview` — Operational summary metrics (total bookings, active check-ins, simulated revenue).
+- `GET /api/v1/admin/overview` — Operational summary metrics (total bookings, active check-ins, revenue).
 
 ### Dining
 - `GET /api/v1/dining/venues` and `GET /api/v1/dining/venues/:code` — Venue directory and venue menu.
 - `GET /api/v1/dining/venues/:code/availability?date=` — Hourly table availability for a Dhaka date.
-- `POST /api/v1/dining/reservations`, `GET /api/v1/dining/reservations/me`, `POST /api/v1/dining/reservations/:ref/cancel` — Table reservations (demo deposit).
-- `GET /api/v1/dining/delivery/beds`, `POST /api/v1/dining/food-orders`, `GET /api/v1/dining/food-orders/me`, `POST /api/v1/dining/food-orders/:ref/cancel` — Food delivery to a booked sunbed (demo charge).
+- `POST /api/v1/dining/reservations`, `GET /api/v1/dining/reservations/me`, `POST /api/v1/dining/reservations/:ref/cancel` — Table reservations (optional deposit).
+- `GET /api/v1/dining/delivery/beds`, `POST /api/v1/dining/food-orders`, `GET /api/v1/dining/food-orders/me`, `POST /api/v1/dining/food-orders/:ref/cancel` — Food delivery to a booked sunbed.
 - `/api/v1/admin/dining/*` — Overview, venue/menu edits, reservation check-in/cancel and kitchen status changes. Full list in [docs/api.md](docs/api.md).
 
 ### Identity & Health
-- `GET /api/v1/identity/personas` — List available demo user profiles.
-- `POST /api/v1/identity/switch` — Switch active persona cookie.
+- `GET /api/v1/session` — The current account.
+- `GET /api/v1/demo/users` — List the seeded accounts (only while `DEMO_AUTH_ENABLED=true`). The web app selects one with a cookie and sends it as the `x-demo-user-id` header.
 - `GET /api/v1/health/live` & `GET /api/v1/health/ready` — Application and database liveness probes.
 
 ---
@@ -363,7 +365,9 @@ As codified in [AGENTS.md](AGENTS.md):
 - **Timezone Invariance**: All database timestamps and API dates are stored strictly in UTC and presented in Bangladesh Standard Time (`Asia/Dhaka`, UTC+6).
 - **Concurrency & Double-Booking Protection**: All inventory slot reservations execute inside serializable or locked PostgreSQL transactions. Overlapping booking slots for the same bed are rejected with HTTP `409 Conflict`.
 - **Audit Logging**: Privilege transitions (e.g. check-ins, cancellations) write immutable append-only audit log entries.
-- **Privacy & Security**: Demo personas use synthetic fixtures. No real credit card credentials, payment tokens, or personally identifiable information (PII) are stored or logged.
+- **Privacy & Security**: Seeded accounts use synthetic fixtures. No card credentials, wallet PINs, payment tokens, or personally identifiable information (PII) are stored or logged, and checkout never asks for them while the sandbox payment adapter is active.
+- **Publishable Interface**: No user-facing surface uses test or presentation wording, and none implies government endorsement. The rules and the replacement copy are in [docs/design.md](docs/design.md) section 12.
+- **One Design for Web and Android**: Role-named design tokens, Material window size classes, and shared route and component names so the Kotlin/Compose app matches the website.
 
 ---
 
@@ -409,15 +413,16 @@ Detailed architectural and requirements documentation is maintained under the `d
 - [Technology Stack Decision (ADR-001)](docs/ADR-001-stack.md)
 - [Data Model & Database Schema](docs/data-model.md)
 - [REST API Specification](docs/api.md)
-- [UI/UX Design System](docs/design.md)
+- [Design Specification: website and Android](docs/design.md) — visual language, tokens, responsive layout, navigation, flows, page specs, copy rules
 - [Security & Authorization Policy](docs/security.md)
 - [Domain Workflows & Lifecycle States](docs/workflows.md)
 - [Testing Strategy & Quality Gates](docs/testing.md)
 - [Operations & Deployment Guide](docs/operations.md)
 - [Delivery Roadmap & Milestones](docs/delivery-plan.md)
+- [Implementation Plan: redesign work packages](docs/implementation-plan.md) — ordered work packages with files, tests, decisions and progress
 
 ---
 
 ## License
 
-This demonstrator repository is created as a technology proposal. All rights reserved.
+All rights reserved.

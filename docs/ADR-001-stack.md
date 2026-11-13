@@ -7,8 +7,9 @@
 ## Context
 
 The team has 2–4 developers and under 3 months. The product has relational governance, inventory,
-booking, audit and finance data. The database provider called “dbx” is not identified. The prototype
-is web first; Android may follow.
+booking, audit and finance data. The database provider called “dbx” is not identified. The product
+is web first; an Android app (Kotlin, Jetpack Compose) follows and shares the REST contract and the
+design specification in [design.md](design.md).
 
 ## Decision
 

@@ -4,9 +4,12 @@
 
 ## 1. Context and system boundary
 
-Browser clients use Next.js, which calls a separate REST API. The API owns domain rules,
-authorization and transitions. PostgreSQL is the source of truth. There is no browser-to-database
-path. No external payment, government, messaging or map dependency is required for MVP.
+Browser clients use Next.js, which calls a separate REST API. The planned Android app (Kotlin,
+Jetpack Compose) calls the same REST API directly. The API owns domain rules, authorization and
+transitions. PostgreSQL is the source of truth. There is no client-to-database path. No external
+payment gateway, government or messaging dependency is required: payments go through a
+payment-provider port whose only adapter today is the in-process sandbox adapter
+([workflows.md](workflows.md) section 2).
 
 ## 2. Technology decisions
 
@@ -31,17 +34,26 @@ See [ADR-001-stack.md](ADR-001-stack.md).
 
 ## 3. Container/component view
 
-- **Web app:** public discovery, visitor account, provider portal and admin portal.
+- **Web app:** public discovery, visitor account, provider portal and operations pages, built to
+  [design.md](design.md).
+- **Android app (planned):** the same visitor product in Kotlin and Jetpack Compose. It shares
+  design tokens, route names, component names and the OpenAPI contract with the web app; it shares
+  no runtime code.
+- **Design tokens:** defined in the web theme today; a shared `packages/design-tokens` source that
+  generates the CSS theme and the Compose theme is planned.
 - **API app:** REST controllers, guards, application services, domain modules and persistence
   adapters.
 - **Database:** relational records, workflow history, inventory, audit and finance ledger.
-- **Optional later:** licensed map tiles, email/SMS, real payment integration only after separate
-  authorization and design.
+- **Payment provider port:** one interface for charge and refund inside the API. The sandbox
+  adapter implements it now; a licensed gateway adapter replaces it later without changing
+  bookings, the clients or the ledger.
+- **Optional later:** licensed map tiles, email/SMS, a live payment gateway adapter only after
+  separate authorization and design.
 
 ## 4. Module decomposition
 
-Identity; providers; catalogue; moderation; tariffs; inventory; bookings; procurement; contracts;
-finance; reporting; audit; shared/common. Each module owns its invariants and data access.
+Identity; providers; catalogue; moderation; tariffs; inventory; bookings; dining; payments;
+procurement; contracts; finance; reporting; audit; shared/common. Each module owns its invariants and data access.
 Cross-module calls use explicit application-service interfaces; avoid circular dependencies.
 
 Do not introduce microservices, an event broker or Kubernetes in MVP.

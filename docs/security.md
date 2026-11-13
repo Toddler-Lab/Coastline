@@ -1,12 +1,19 @@
 # Security, Privacy and Access Control
 
-**Status:** prototype baseline; production legal/privacy review required
+**Status:** baseline; legal/privacy review required before public launch
 
 ## 1. Threat boundaries
 
 Protect accounts, provider-scoped data, booking inventory, bid/evaluation records, audit history and
-finance demonstrations from unauthorized access or tampering. Assume browser input is hostile. The
-demo must not collect real payment credentials or imply public authority.
+finance records from unauthorized access or tampering. Assume browser and mobile-client input is
+hostile. The platform must not collect payment credentials or imply public authority.
+
+**Payment credentials.** While the sandbox payment adapter is the active provider, no page, form or
+endpoint may render, accept, store or log card numbers, expiry dates, CVVs, wallet PINs or one-time
+codes. Checkout sends a method name only. Credential entry arrives only with a licensed gateway's
+hosted page and its own security review. This rule exists because the interface no longer marks
+payments as test payments: a visitor must never be invited to type real credentials into a flow
+that does not need them.
 
 ## 2. Authentication
 
@@ -16,8 +23,14 @@ CSRF token. Rotate sessions at login and privilege change; revoke on logout; enf
 expiry. Add double-submit CSRF protection. No auth tokens in localStorage.
 
 Throttle login with an in-memory limiter for the single-instance MVP; replace with a shared store
-before horizontal scaling. Demo password reset is non-delivering and labelled. Seed accounts must
-fail closed in production.
+before horizontal scaling. Password reset has no delivery channel yet and is not offered in the
+interface until one exists. Seeded accounts and the header-based account switch
+(`DEMO_AUTH_ENABLED`) must fail closed in production; where enabled, the interface presents them as
+an ordinary "Switch account" list.
+
+The Android app cannot rely on browser cookies and CSRF tokens. Its session mechanism (for example
+short-lived access tokens with rotating refresh tokens held in the Android Keystore) is an open
+decision and needs its own review before the app ships.
 
 ## 3. Roles and authorization
 
@@ -31,7 +44,7 @@ approved tariffs.
 
 ## 4. Data minimization
 
-Synthetic demo identities only. Collect minimal account/contact data. No identity documents, payment
+Seeded accounts are synthetic. Collect minimal account/contact data. No identity documents, payment
 credentials, precise visitor movement history or child data in MVP. Do not persist browser
 geolocation. No sensitive values in logs, analytics or seed fixtures.
 
@@ -55,7 +68,9 @@ Ledger/audit correction is by compensating/reversal record.
 
 ## 7. Privacy and release gate
 
-Before real public use, define lawful basis, jurisdiction, retention, access/deletion requests,
-breach handling and vendor processing. Do not claim regulatory compliance without assessment.
-Government involvement, authority, tariffs and data sharing require explicit agreements and
-qualified review.
+Before public launch, define lawful basis, jurisdiction, retention, access/deletion requests,
+breach handling and vendor processing, and publish the terms and privacy pages linked from the
+footer. Do not claim regulatory compliance without assessment. Government involvement, authority,
+tariffs and data sharing require explicit agreements and qualified review; until then the
+interface makes no such claim and carries the independence statement in the footer and on
+`/about`.
