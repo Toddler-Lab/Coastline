@@ -1,6 +1,7 @@
+import { ConfigService } from '@nestjs/config';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import '../../catalogue/testing/test-bootstrap';
 import {
   MAX_FOOD_ITEM_QUANTITY,
@@ -328,6 +329,58 @@ describeDb('sunbed food delivery', () => {
         });
         const res = await place(TEST_USERS.tourist).expect(422);
         expect(res.body.error.message).toMatch(/closed/i);
+      });
+
+      describe('DINING_IGNORE_TIME_RULES testing aid', () => {
+        const relaxTimeRules = () => {
+          const config = app.get(ConfigService);
+          const original = config.get.bind(config);
+          vi.spyOn(config, 'get').mockImplementation(((key: string, ...rest: unknown[]) =>
+            key === 'DINING_IGNORE_TIME_RULES'
+              ? true
+              : (original as (k: string, ...r: unknown[]) => unknown)(key, ...rest)) as never);
+        };
+
+        it('lists past and future beds and orders outside the booked window and kitchen hours', async () => {
+          relaxTimeRules();
+          const past = await createSunbedBooking(prisma, {
+            touristId: TEST_USERS.tourist,
+            sunbedId: TEST_BEDS.kol002,
+            fromHour: -3,
+            toHour: 0,
+          });
+          await prisma.diningVenue.update({
+            where: { id: FOOD_IDS.kolVenue },
+            data: closedHoursNow(),
+          });
+
+          const beds = (
+            await http()
+              .get(`${API}/dining/delivery/beds`)
+              .set(auth(TEST_USERS.tourist))
+              .expect(200)
+          ).body.data as DeliverableBedDto[];
+          expect(beds.map((b) => b.orderItemId)).toContain(past.orderItemId);
+
+          const order = await placeOk({ orderItemId: past.orderItemId });
+          expect(order.delivery.sunbedCode).toBe('KOL-002');
+        });
+
+        it('still rejects cancelled beds, other beach points and other tourists', async () => {
+          relaxTimeRules();
+          const cancelled = await createSunbedBooking(prisma, {
+            touristId: TEST_USERS.tourist,
+            sunbedId: TEST_BEDS.kol002,
+            orderStatus: 'CANCELLED',
+            itemStatus: 'CANCELLED',
+          });
+          await place(TEST_USERS.tourist, { orderItemId: cancelled.orderItemId }).expect(422);
+          await place(TEST_USERS.tourist, {
+            venueId: FOOD_IDS.sugVenue,
+            lines: [{ menuItemId: FOOD_IDS.sugPrawn, quantity: 1 }],
+          }).expect(422);
+          await place(TEST_USERS.otherTourist).expect(404);
+        });
       });
 
       it('404 for an inactive venue', async () => {

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
 import type {
   AdminFoodOrderDto,
@@ -64,7 +65,17 @@ export class FoodOrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly config: ConfigService,
   ) {}
+
+  /**
+   * Testing aid (`DINING_IGNORE_TIME_RULES=true`): ignore the sunbed booked
+   * window and the kitchen opening hours. Off by default; refused in production.
+   */
+  private get ignoreTimeRules(): boolean {
+    const value = this.config.get<boolean | string>('DINING_IGNORE_TIME_RULES');
+    return value === true || String(value).trim().toLowerCase() === 'true';
+  }
 
   /* Tourist ---------------------------------------------------------------- */
 
@@ -74,8 +85,7 @@ export class FoodOrdersService {
       where: {
         order: { touristId: actor.id, status: 'CONFIRMED' },
         status: { in: [...DELIVERABLE_ITEM_STATUSES] },
-        startAt: { lte: now },
-        endAt: { gt: now },
+        ...(this.ignoreTimeRules ? {} : { startAt: { lte: now }, endAt: { gt: now } }),
       },
       orderBy: [{ startAt: 'asc' }, { sunbedCode: 'asc' }],
     });
@@ -111,7 +121,7 @@ export class FoodOrdersService {
       ) {
         throw unprocessable(`Sunbed booking for ${bed.sunbedCode} is cancelled.`);
       }
-      if (now < bed.startAt || now >= bed.endAt) {
+      if (!this.ignoreTimeRules && (now < bed.startAt || now >= bed.endAt)) {
         throw unprocessable(
           `Food can only be delivered to ${bed.sunbedCode} during its booked hours.`,
         );
@@ -132,7 +142,7 @@ export class FoodOrdersService {
           `${venue.name} only delivers to sunbeds at ${venue.beachPoint?.name ?? 'its own beach'}; ${bed.sunbedCode} is at ${bed.beachPointName}.`,
         );
       }
-      if (!isVenueOpen(venue, now)) {
+      if (!this.ignoreTimeRules && !isVenueOpen(venue, now)) {
         throw unprocessable(
           `${venue.name} is closed now. Kitchen hours are ${venue.openHour}:00–${venue.closeHour}:00 (Asia/Dhaka).`,
         );

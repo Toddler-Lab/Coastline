@@ -70,6 +70,15 @@ class EnvironmentVariables {
   @IsBoolean()
   DEMO_AUTH_ENABLED?: boolean;
 
+  /**
+   * Testing aid: skips the sunbed booked-hours and kitchen-hours checks when
+   * ordering food to a sunbed. Refused in production.
+   */
+  @IsOptional()
+  @Transform(({ value }) => parseBoolean(value))
+  @IsBoolean()
+  DINING_IGNORE_TIME_RULES?: boolean;
+
   @IsOptional()
   @IsString()
   TICKET_SECRET?: string;
@@ -97,6 +106,13 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
   const demoEnabled = validated.DEMO_AUTH_ENABLED ?? true;
   if (demoEnabled && (validated.NODE_ENV === 'production' || validated.APP_ENV === 'production')) {
     throw new Error('DEMO_AUTH_ENABLED must not be enabled in production');
+  }
+
+  if (
+    validated.DINING_IGNORE_TIME_RULES &&
+    (validated.NODE_ENV === 'production' || validated.APP_ENV === 'production')
+  ) {
+    throw new Error('DINING_IGNORE_TIME_RULES must not be enabled in production');
   }
 
   return { ...config, ...validated, DEMO_AUTH_ENABLED: demoEnabled };
