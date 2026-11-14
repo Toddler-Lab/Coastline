@@ -13,6 +13,7 @@ import { CurrentActor } from '../../common/auth/current-actor.decorator';
 import { CancelOrderDto } from './dto/cancel-order.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrdersService } from './orders.service';
+import { Idempotent } from '../../common/idempotency/idempotent.decorator';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -20,6 +21,7 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
+  @Idempotent()
   async create(
     @CurrentActor() actor: Actor,
     @Body() dto: CreateOrderDto,

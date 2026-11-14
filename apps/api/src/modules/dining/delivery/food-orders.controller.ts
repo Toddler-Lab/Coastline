@@ -6,6 +6,7 @@ import { CurrentActor } from '../../../common/auth/current-actor.decorator';
 import { CancelFoodOrderDto } from './dto/cancel-food-order.dto';
 import { CreateFoodOrderDto } from './dto/create-food-order.dto';
 import { FoodOrdersService } from './food-orders.service';
+import { Idempotent } from '../../../common/idempotency/idempotent.decorator';
 
 /** Tourist side of sunbed food delivery. Role checks live in the service. */
 @ApiTags('dining-delivery')
@@ -19,6 +20,7 @@ export class FoodOrdersController {
   }
 
   @Post('food-orders')
+  @Idempotent()
   async create(
     @CurrentActor() actor: Actor,
     @Body() dto: CreateFoodOrderDto,

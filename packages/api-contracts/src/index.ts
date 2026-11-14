@@ -159,6 +159,16 @@ export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 /** Message of the `PAYMENT_FAILED` (HTTP 422) error. */
 export const PAYMENT_FAILED_MESSAGE = 'Payment was not completed. You have not been charged.';
 
+/**
+ * Optional request header on `POST /orders`, `POST /hotels/bookings`,
+ * `POST /dining/reservations` and `POST /dining/food-orders`:
+ * 8-128 characters of `[A-Za-z0-9_-]`, unique per attempt.
+ */
+export const IDEMPOTENCY_KEY_HEADER = 'Idempotency-Key';
+export const IDEMPOTENCY_KEY_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
+/** Response header set to `true` when a stored response is replayed. */
+export const IDEMPOTENT_REPLAYED_HEADER = 'Idempotent-Replayed';
+
 export interface PaymentDto {
   id: string;
   type: 'CHARGE' | 'REFUND';

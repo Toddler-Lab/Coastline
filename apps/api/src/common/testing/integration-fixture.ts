@@ -56,7 +56,8 @@ export async function resetDatabase(prisma: PrismaService): Promise<void> {
       "table_slots", "table_reservations", "dining_tables", "menu_items",
       "menu_categories", "dining_venues", "booking_slots", "hotel_room_nights",
       "order_items", "hotel_bookings", "hotel_rooms", "room_types", "hotels",
-      "orders", "sunbeds", "beach_points", "users" RESTART IDENTITY CASCADE`,
+      "orders", "sunbeds", "beach_points", "users", "idempotency_keys"
+      RESTART IDENTITY CASCADE`,
   );
 }
 

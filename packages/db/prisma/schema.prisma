@@ -273,6 +273,25 @@ model AuditEvent {
   @@map("audit_events")
 }
 
+// One row per (scope, key) from an `Idempotency-Key` header. The unique index is
+// the claim: a concurrent duplicate cannot insert a second row. A row with a
+// null response status is still in progress.
+model IdempotencyKey {
+  id             String    @id @default(uuid()) @db.Uuid
+  scope          String
+  key            String
+  actorUserId    String?   @map("actor_user_id") @db.Uuid
+  requestHash    String    @map("request_hash")
+  responseStatus Int?      @map("response_status")
+  responseBody   Json?     @map("response_body") @db.JsonB
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt      DateTime  @map("expires_at") @db.Timestamptz(6)
+
+  @@unique([scope, key])
+  @@index([expiresAt])
+  @@map("idempotency_keys")
+}
+
 model Hotel {
   id               String          @id @default(uuid()) @db.Uuid
   slug             String          @unique

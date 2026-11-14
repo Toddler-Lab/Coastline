@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { validateEnvironment } from './config/env.validation';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { AuthModule } from './common/auth/auth.module';
+import { IdempotencyModule } from './common/idempotency/idempotency.module';
 import { DemoAuthGuard } from './common/auth/demo-auth.guard';
 import { RolesGuard } from './common/auth/roles.guard';
 import { AuditModule } from './modules/audit/audit.module';
@@ -24,6 +25,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
     }),
     PrismaModule,
     AuthModule,
+    IdempotencyModule,
     AuditModule,
     HealthModule,
     IdentityModule,

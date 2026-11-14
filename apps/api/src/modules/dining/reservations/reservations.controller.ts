@@ -11,6 +11,7 @@ import { CurrentActor } from '../../../common/auth/current-actor.decorator';
 import { CancelReservationDto } from './dto/cancel-reservation.dto';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { ReservationsService } from './reservations.service';
+import { Idempotent } from '../../../common/idempotency/idempotent.decorator';
 
 @ApiTags('dining-reservations')
 @Controller('dining')
@@ -27,6 +28,7 @@ export class ReservationsController {
   }
 
   @Post('reservations')
+  @Idempotent()
   async create(
     @CurrentActor() actor: Actor,
     @Body() dto: CreateReservationDto,

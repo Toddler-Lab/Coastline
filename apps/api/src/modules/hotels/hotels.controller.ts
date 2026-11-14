@@ -19,6 +19,7 @@ import { CurrentActor } from '../../common/auth/current-actor.decorator';
 import { CreateHotelOrderDto } from './dto/create-hotel-order.dto';
 import { HotelQueryDto } from './dto/hotel-query.dto';
 import { HotelsService } from './hotels.service';
+import { Idempotent } from '../../common/idempotency/idempotent.decorator';
 
 @ApiTags('hotels')
 @Controller('hotels')
@@ -44,6 +45,7 @@ export class HotelsController {
   }
 
   @Post('bookings')
+  @Idempotent()
   async createBooking(
     @CurrentActor() actor: Actor,
     @Body() dto: CreateHotelOrderDto,
