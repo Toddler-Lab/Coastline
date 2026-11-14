@@ -6,6 +6,7 @@ import type {
   AdminOverviewDto,
   BeachPointSummary,
   OrderDto,
+  SunbedConflictDetails,
 } from '@coastline/api-contracts';
 import { MAX_ADVANCE_DAYS, MAX_BEDS_PER_ORDER } from '@coastline/api-contracts';
 import { Prisma } from '@coastline/db';
@@ -36,6 +37,32 @@ import {
   type OrderWithRelations,
 } from './orders.serializer';
 import { TicketService } from './ticket.service';
+
+const HOURS_TAKEN_MESSAGE = 'Those hours were just booked by another visitor.';
+
+/**
+ * 409 details naming every bed that lost one or more requested hours, in the
+ * order first seen, with the taken hours per bed (`conflicts`, kept for
+ * existing clients).
+ */
+function takenSlotDetails(
+  slots: Array<{ sunbedId: string; slotStart: Date; sunbed: { code: string } }>,
+): SunbedConflictDetails {
+  const byBed = new Map<string, { code: string; slotStarts: string[] }>();
+  for (const slot of slots) {
+    const entry = byBed.get(slot.sunbedId) ?? { code: slot.sunbed.code, slotStarts: [] };
+    entry.slotStarts.push(slot.slotStart.toISOString());
+    byBed.set(slot.sunbedId, entry);
+  }
+  return {
+    sunbedIds: [...byBed.keys()],
+    sunbedCodes: [...byBed.values()].map((bed) => bed.code),
+    conflicts: [...byBed.values()].map((bed) => ({
+      sunbedCode: bed.code,
+      slotStarts: bed.slotStarts.sort(),
+    })),
+  };
+}
 
 function generateRef(dateKey: string): string {
   const cleanDate = dateKey.replace(/-/g, '');
@@ -116,9 +143,19 @@ export class OrdersService {
     const startHourDhaka = dhakaHour(startDate);
     const endHourDhaka = startHourDhaka + hours;
 
+    const outOfService = sunbeds.filter((bed) => bed.status !== 'AVAILABLE');
     for (const bed of sunbeds) {
       if (bed.status !== 'AVAILABLE') {
-        throw conflict(`Sunbed ${bed.code} is currently out of service.`);
+        const details: SunbedConflictDetails = {
+          sunbedIds: outOfService.map((b) => b.id),
+          sunbedCodes: outOfService.map((b) => b.code),
+        };
+        throw conflict(
+          outOfService.length === 1
+            ? `Sunbed ${bed.code} is currently out of service.`
+            : `Sunbeds ${details.sunbedCodes.join(', ')} are currently out of service.`,
+          details,
+        );
       }
       if (startHourDhaka < bed.beachPoint.openHour || endHourDhaka > bed.beachPoint.closeHour) {
         throw unprocessable(
@@ -154,21 +191,7 @@ export class OrdersService {
         });
 
         if (activeConflicts.length > 0) {
-          const grouped: Record<string, string[]> = {};
-          for (const c of activeConflicts) {
-            const code = c.sunbed.code;
-            if (!grouped[code]) {
-              grouped[code] = [];
-            }
-            grouped[code].push(c.slotStart.toISOString());
-          }
-          const conflictDetails = Object.entries(grouped).map(([sunbedCode, slotStarts]) => ({
-            sunbedCode,
-            slotStarts,
-          }));
-          throw conflict('Those hours were just booked by another visitor.', {
-            conflicts: conflictDetails,
-          });
+          throw conflict(HOURS_TAKEN_MESSAGE, takenSlotDetails(activeConflicts));
         }
 
         const totalMinor = dto.items.reduce((sum, item) => {
@@ -258,7 +281,24 @@ export class OrdersService {
       return serializeOrder(createdOrder, this.ticketService);
     } catch (err: unknown) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        throw conflict('Those hours were just booked by another visitor.');
+        // Lost the race on the partial unique index: the winner has committed,
+        // so its active slots name the beds this request lost.
+        const taken = await this.prisma.bookingSlot.findMany({
+          where: {
+            isActive: true,
+            OR: requestedSlots.map((s) => ({ sunbedId: s.sunbedId, slotStart: s.slotStart })),
+          },
+          include: { sunbed: true },
+        });
+        const details: SunbedConflictDetails =
+          taken.length > 0
+            ? takenSlotDetails(taken)
+            : {
+                // Not attributable to a bed: report every requested bed as lost.
+                sunbedIds: sunbeds.map((bed) => bed.id),
+                sunbedCodes: sunbeds.map((bed) => bed.code),
+              };
+        throw conflict(HOURS_TAKEN_MESSAGE, details);
       }
       throw err;
     }

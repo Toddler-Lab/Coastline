@@ -131,6 +131,46 @@ describeDb(
     );
 
     it(
+      'carries the hero photo fields on summaries and details, null when unset',
+      async () => {
+        const image = {
+          imageUrl: 'https://images.example.org/kolatoli.jpg',
+          imageAlt: 'Wide sand beach at low tide with sunbeds in a row',
+          imageCredit: 'Photo: A. Photographer, CC BY 4.0',
+        };
+        await prisma.beachPoint.update({ where: { id: TEST_POINTS.kolatoli }, data: image });
+
+        const list = (await request(app.getHttpServer()).get(`${API}/beach-points`).expect(200))
+          .body.data as BeachPointSummary[];
+        expect(list.find((p) => p.code === 'KOL')).toMatchObject(image);
+        expect(list.find((p) => p.code === 'SUG')).toMatchObject({
+          imageUrl: null,
+          imageAlt: null,
+          imageCredit: null,
+        });
+
+        const detail = (
+          await request(app.getHttpServer()).get(`${API}/beach-points/KOL`).expect(200)
+        ).body.data as BeachPointDetail;
+        expect(detail).toMatchObject(image);
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'refuses a non-https photo URL in the database',
+      async () => {
+        await expect(
+          prisma.beachPoint.update({
+            where: { id: TEST_POINTS.kolatoli },
+            data: { imageUrl: 'http://images.example.org/kolatoli.jpg' },
+          }),
+        ).rejects.toThrow(/beach_points_image_url_https_check/);
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
       'returns a point detail with full hourly grid and bed availability',
       async () => {
         const tomorrow = dayKey(1);

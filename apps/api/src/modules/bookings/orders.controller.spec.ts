@@ -2,7 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import '../catalogue/testing/test-bootstrap';
-import type { AdminOrderDto, OrderDto } from '@coastline/api-contracts';
+import type { AdminOrderDto, OrderDto, SunbedConflictDetails } from '@coastline/api-contracts';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import {
   TEST_BEDS,
@@ -108,6 +108,94 @@ describeDb('orders API', () => {
       expect(conflictRes.body.error.code).toBe('CONFLICT');
       expect(conflictRes.body.error.details.conflicts).toHaveLength(1);
       expect(conflictRes.body.error.details.conflicts[0].sunbedCode).toBe('KOL-001');
+      expect(conflictRes.body.error.details).toMatchObject({
+        sunbedIds: [TEST_BEDS.kol001],
+        sunbedCodes: ['KOL-001'],
+      });
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
+    'names only the lost beds when part of a selection is already booked',
+    async () => {
+      const startsAt = dhakaHourToUtc(dayKey(1), 10).toISOString();
+      await request(app.getHttpServer())
+        .post(`${API}/orders`)
+        .set(auth(TEST_USERS.otherTourist))
+        .send({ items: [{ sunbedId: TEST_BEDS.kol002, startsAt: dhakaHourToUtc(dayKey(1), 11).toISOString(), hours: 1 }] })
+        .expect(201);
+
+      const res = await request(app.getHttpServer())
+        .post(`${API}/orders`)
+        .set(auth(TEST_USERS.tourist))
+        .send({
+          items: [
+            { sunbedId: TEST_BEDS.kol001, startsAt, hours: 2 },
+            { sunbedId: TEST_BEDS.kol002, startsAt, hours: 2 },
+            { sunbedId: TEST_BEDS.kol003, startsAt, hours: 2 },
+          ],
+        })
+        .expect(409);
+
+      const details = res.body.error.details as SunbedConflictDetails;
+      expect(details.sunbedIds).toEqual([TEST_BEDS.kol002]);
+      expect(details.sunbedCodes).toEqual(['KOL-002']);
+      expect(details.conflicts).toEqual([
+        { sunbedCode: 'KOL-002', slotStarts: [dhakaHourToUtc(dayKey(1), 11).toISOString()] },
+      ]);
+      expect(await prisma.order.count({ where: { touristId: TEST_USERS.tourist } })).toBe(0);
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
+    'names the out-of-service bed in the 409',
+    async () => {
+      const startsAt = dhakaHourToUtc(dayKey(1), 10).toISOString();
+      const res = await request(app.getHttpServer())
+        .post(`${API}/orders`)
+        .set(auth(TEST_USERS.tourist))
+        .send({
+          items: [
+            { sunbedId: TEST_BEDS.kol001, startsAt, hours: 1 },
+            { sunbedId: TEST_BEDS.kol004, startsAt, hours: 1 },
+          ],
+        })
+        .expect(409);
+      expect(res.body.error.details).toEqual({
+        sunbedIds: [TEST_BEDS.kol004],
+        sunbedCodes: ['KOL-004'],
+      });
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
+    'a lost race names the lost bed: one winner, every loser gets the bed in details',
+    async () => {
+      const startsAt = dhakaHourToUtc(dayKey(2), 10).toISOString();
+      const attempt = (user: string) =>
+        request(app.getHttpServer())
+          .post(`${API}/orders`)
+          .set(auth(user))
+          .send({ items: [{ sunbedId: TEST_BEDS.sug001, startsAt, hours: 2 }] });
+
+      const results = await Promise.all(
+        Array.from({ length: 6 }, (_, i) =>
+          attempt(i % 2 === 0 ? TEST_USERS.tourist : TEST_USERS.otherTourist),
+        ),
+      );
+      expect(results.filter((r) => r.status === 201)).toHaveLength(1);
+      const losers = results.filter((r) => r.status === 409);
+      expect(losers).toHaveLength(5);
+      for (const loser of losers) {
+        expect(loser.body.error.details).toMatchObject({
+          sunbedIds: [TEST_BEDS.sug001],
+          sunbedCodes: ['SUG-001'],
+        });
+      }
+      expect(await prisma.bookingSlot.count({ where: { sunbedId: TEST_BEDS.sug001 } })).toBe(2);
     },
     TEST_TIMEOUT,
   );

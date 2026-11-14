@@ -135,6 +135,9 @@ function toSummary(
     freeBeds,
     totalBeds,
     referenceSlotLabel: reference.label,
+    imageUrl: point.imageUrl,
+    imageAlt: point.imageAlt,
+    imageCredit: point.imageCredit,
   };
 }
 

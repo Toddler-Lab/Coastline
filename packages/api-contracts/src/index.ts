@@ -88,6 +88,12 @@ export interface BeachPointSummary {
   totalBeds: number;
   /** Label of the slot the free count refers to, e.g. "10:00". */
   referenceSlotLabel: string;
+  /** Hero photo, an https URL; null until a verified, licensed photo is set. */
+  imageUrl: string | null;
+  /** Alt text describing the photo; null when there is no photo. */
+  imageAlt: string | null;
+  /** Attribution the photo's licence requires; null when none is required. */
+  imageCredit: string | null;
 }
 
 export interface SlotDto {
@@ -231,6 +237,18 @@ export interface CreateOrderRequest {
   items: CreateOrderItemRequest[];
   /** Checkout method. `'MOCK'` or absent is the legacy form (stored as null). */
   paymentMethod?: PaymentMethodInput;
+}
+
+/**
+ * `details` of the 409 returned by `POST /orders` when a chosen bed is taken
+ * (lost race, already booked, or out of service). Names every lost bed so the
+ * client can keep the rest of the selection.
+ */
+export interface SunbedConflictDetails {
+  sunbedIds: string[];
+  sunbedCodes: string[];
+  /** Per-bed taken hours, when the conflict is about booked hours. */
+  conflicts?: Array<{ sunbedCode: string; slotStarts: string[] }>;
 }
 
 export interface CancelOrderRequest {

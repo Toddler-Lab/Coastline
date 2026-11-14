@@ -7,6 +7,7 @@
  */
 import process from 'node:process';
 import { PrismaClient, type PaymentMethod } from '../src/index';
+import { beachPointImageFor } from './beach-point-images';
 import { HOTELS } from './hotels-seed';
 import { seedDining } from './seed-dining';
 
@@ -235,6 +236,8 @@ async function main(): Promise<void> {
 
   const pointIds = new Map<string, string>();
   for (const point of POINTS) {
+    // Photos come from beach-point-images.ts (null until verified, licensed photos are set).
+    const image = beachPointImageFor(point.code);
     const record = await prisma.beachPoint.upsert({
       where: { code: point.code },
       update: {
@@ -247,6 +250,7 @@ async function main(): Promise<void> {
         defaultHourlyPriceMinor: point.priceMinor,
         sortOrder: point.sortOrder,
         isActive: true,
+        ...image,
       },
       create: {
         code: point.code,
@@ -258,6 +262,7 @@ async function main(): Promise<void> {
         closeHour: point.closeHour,
         defaultHourlyPriceMinor: point.priceMinor,
         sortOrder: point.sortOrder,
+        ...image,
       },
     });
     pointIds.set(point.code, record.id);

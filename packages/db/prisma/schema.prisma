@@ -130,6 +130,10 @@ model BeachPoint {
   currency                String   @default("BDT") @db.Char(3)
   sortOrder               Int      @default(0) @map("sort_order")
   isActive                Boolean  @default(true) @map("is_active")
+  // Hero photo (https URL), its alt text and the attribution its licence requires.
+  imageUrl                String?  @map("image_url")
+  imageAlt                String?  @map("image_alt")
+  imageCredit             String?  @map("image_credit")
   createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt               DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
