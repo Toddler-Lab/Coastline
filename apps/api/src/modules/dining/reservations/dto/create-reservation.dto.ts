@@ -1,5 +1,9 @@
 import { IsIn, IsInt, IsISO8601, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
-import type { CreateReservationRequest } from '@coastline/api-contracts';
+import {
+  PAYMENT_METHOD_INPUT_MESSAGE,
+  PAYMENT_METHOD_INPUTS,
+} from '../../../payments/payment-method-input';
+import type { CreateReservationRequest, PaymentMethodInput } from '@coastline/api-contracts';
 
 /**
  * Shape-only validation (400). Business ranges — hours, party size against the
@@ -23,7 +27,9 @@ export class CreateReservationDto implements CreateReservationRequest {
   @MaxLength(500)
   note?: string;
 
+  /** Checkout method (BKASH, NAGAD, CARD). Never a credential. */
+  // legacy: remove in WP-23 — 'MOCK' and an absent method are accepted and stored as null.
   @IsOptional()
-  @IsIn(['MOCK'])
-  paymentMethod?: 'MOCK';
+  @IsIn(PAYMENT_METHOD_INPUTS, { message: PAYMENT_METHOD_INPUT_MESSAGE })
+  paymentMethod?: PaymentMethodInput;
 }

@@ -5,6 +5,8 @@ import { TicketService } from './ticket.service';
 import type { PrismaService } from '../../common/prisma/prisma.service';
 import type { AuditService } from '../audit/audit.service';
 import type { CatalogueService } from '../catalogue/catalogue.service';
+import { PaymentsService } from '../payments/payments.service';
+import { SandboxPaymentProvider } from '../payments/sandbox-payment.provider';
 import { addHours, dhakaDateKey, dhakaHourToUtc } from '../../common/time/dhaka';
 
 describe('OrdersService (unit)', () => {
@@ -47,8 +49,9 @@ describe('OrdersService (unit)', () => {
         updateMany: vi.fn(),
       },
       payment: {
-        create: vi.fn(),
+        create: vi.fn(async ({ data }) => ({ id: 'pay-1', createdAt: new Date(), ...data })),
         findMany: vi.fn(),
+        findFirst: vi.fn(),
       },
     };
 
@@ -61,7 +64,13 @@ describe('OrdersService (unit)', () => {
     };
 
     ticketService = new TicketService();
-    service = new OrdersService(prisma as unknown as PrismaService, audit as unknown as AuditService, ticketService, catalogue as unknown as CatalogueService);
+    service = new OrdersService(
+      prisma as unknown as PrismaService,
+      audit as unknown as AuditService,
+      ticketService,
+      catalogue as unknown as CatalogueService,
+      new PaymentsService(new SandboxPaymentProvider()),
+    );
   });
 
   describe('TicketService', () => {
@@ -150,19 +159,6 @@ describe('OrdersService (unit)', () => {
             checkedInAt: null,
           },
         ],
-        payments: [
-          {
-            id: 'pay-1',
-            orderId: 'order-1',
-            type: 'CHARGE',
-            provider: 'MOCK',
-            status: 'SUCCEEDED',
-            amountMinor: 20000,
-            currency: 'BDT',
-            externalRef: 'MOCK-BK-20261111-A1B2',
-            createdAt: new Date(),
-          },
-        ],
         tourist: {
           id: touristActor.id,
           name: touristActor.name,
@@ -174,12 +170,25 @@ describe('OrdersService (unit)', () => {
 
       const result = await service.createOrder(touristActor, {
         items: [{ sunbedId: 'bed-1', startsAt, hours: 2 }],
+        paymentMethod: 'NAGAD',
       });
 
       expect(result.status).toBe('CONFIRMED');
       expect(result.totalMinor).toBe(20000);
       expect(result.ticket).not.toBeNull();
       expect(audit.record).toHaveBeenCalled();
+      // The charge goes through the payment port, inside the same transaction.
+      expect(prisma.payment.create).toHaveBeenCalledTimes(1);
+      expect(result.payments).toEqual([
+        expect.objectContaining({
+          type: 'CHARGE',
+          provider: 'SANDBOX',
+          method: 'NAGAD',
+          status: 'SUCCEEDED',
+          amountMinor: 20000,
+          externalRef: expect.stringMatching(/^SBX-BK-\d{8}-[0-9A-F]{4}$/),
+        }),
+      ]);
     });
   });
 

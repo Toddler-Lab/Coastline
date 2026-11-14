@@ -15,6 +15,7 @@ import { AuditActions } from '../audit/audit.actions';
 import { AuditService } from '../audit/audit.service';
 import { serializeOrder } from '../bookings/orders.serializer';
 import { TicketService } from '../bookings/ticket.service';
+import { PaymentsService, resolvePaymentMethod } from '../payments/payments.service';
 import type { CreateHotelOrderDto } from './dto/create-hotel-order.dto';
 import type { HotelQueryDto } from './dto/hotel-query.dto';
 
@@ -49,6 +50,7 @@ export class HotelsService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly ticketService: TicketService,
+    private readonly payments: PaymentsService,
   ) {}
 
   async listHotels(query: HotelQueryDto): Promise<HotelSummaryDto[]> {
@@ -307,6 +309,7 @@ export class HotelsService {
     }
 
     const totalMinor = roomType.basePriceMinor * stayNights.length;
+    const paymentMethod = resolvePaymentMethod(dto.paymentMethod);
 
     // Concurrent guests can win the room we picked. The partial unique index on
     // active room-nights decides the race; on a loss, try the next free room.
@@ -350,23 +353,22 @@ export class HotelsService {
                   },
                 },
               },
-              payments: {
-                create: {
-                  type: 'CHARGE',
-                  provider: 'MOCK',
-                  status: 'SUCCEEDED',
-                  amountMinor: totalMinor,
-                  currency: 'BDT',
-                  externalRef: `MOCK-${publicRef}`,
-                },
-              },
             },
             include: {
               items: true,
               hotelBookings: true,
-              payments: true,
               tourist: true,
             },
+          });
+
+          // After the room nights are inserted, so a lost race never reaches the
+          // provider. A declined charge throws PAYMENT_FAILED and rolls this back.
+          const charge = await this.payments.charge(tx, {
+            target: { orderId: order.id },
+            amountMinor: totalMinor,
+            currency: 'BDT',
+            method: paymentMethod,
+            reference: publicRef,
           });
 
           await this.audit.record(
@@ -390,7 +392,7 @@ export class HotelsService {
             tx,
           );
 
-          return order;
+          return { ...order, payments: [charge] };
         });
 
         return serializeOrder(createdOrder, this.ticketService);

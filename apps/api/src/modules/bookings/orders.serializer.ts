@@ -87,11 +87,13 @@ export function serializeItem(
   };
 }
 
+/** Explicit field list: a payment never exposes anything beyond these fields. */
 export function serializePayment(payment: PrismaPayment): PaymentDto {
   return {
     id: payment.id,
     type: payment.type,
     provider: payment.provider,
+    method: payment.method,
     status: payment.status,
     amountMinor: payment.amountMinor,
     currency: payment.currency.trim(),

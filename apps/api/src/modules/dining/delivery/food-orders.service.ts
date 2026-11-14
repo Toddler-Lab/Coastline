@@ -20,6 +20,7 @@ import { PrismaService } from '../../../common/prisma/prisma.service';
 import { dhakaDateKey, dhakaHour, dhakaHourToUtc, isDateKey } from '../../../common/time/dhaka';
 import { AuditActions } from '../../audit/audit.actions';
 import { AuditService } from '../../audit/audit.service';
+import { PaymentsService, resolvePaymentMethod } from '../../payments/payments.service';
 import type { AdminFoodOrderQueryDto } from './dto/admin-food-order-query.dto';
 import type { CancelFoodOrderDto } from './dto/cancel-food-order.dto';
 import type { CreateFoodOrderDto, CreateFoodOrderLineDto } from './dto/create-food-order.dto';
@@ -66,6 +67,7 @@ export class FoodOrdersService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly config: ConfigService,
+    private readonly payments: PaymentsService,
   ) {}
 
   /**
@@ -207,19 +209,19 @@ export class FoodOrdersService {
           note,
           placedAt: now,
           items: { create: lines },
-          payments: {
-            create: {
-              type: 'CHARGE',
-              provider: 'MOCK',
-              status: 'SUCCEEDED',
-              amountMinor: totalMinor,
-              currency,
-              externalRef: `MOCK-${publicRef}`,
-            },
-          },
         },
         include: FOOD_ORDER_INCLUDE,
       });
+
+      // A declined charge throws PAYMENT_FAILED and rolls the order back.
+      const charge = await this.payments.charge(tx, {
+        target: { foodOrderId: order.id },
+        amountMinor: totalMinor,
+        currency,
+        method: resolvePaymentMethod(dto.paymentMethod),
+        reference: publicRef,
+      });
+      order.payments.push(charge);
 
       await this.audit.record(
         {
@@ -354,7 +356,7 @@ export class FoodOrdersService {
   /**
    * Moves an order one step. The update is conditional on the status the
    * caller validated, so two racing moves cannot both succeed: the loser
-   * matches zero rows and gets a 409. Cancelling records a mock refund by
+   * matches zero rows and gets a 409. Cancelling records a refund by
    * reversal; the original charge row is never touched.
    */
   private async applyTransition(
@@ -402,17 +404,12 @@ export class FoodOrdersService {
     }
 
     if (target === 'CANCELLED') {
-      await tx.payment.create({
-        data: {
-          foodOrderId: order.id,
-          type: 'REFUND',
-          provider: 'MOCK',
-          status: 'SUCCEEDED',
-          amountMinor: order.totalMinor,
-          currency: order.currency.trim(),
-          // Unique ref: a second refund for the same order cannot be written.
-          externalRef: `MOCK-REFUND-${order.publicRef}`,
-        },
+      await this.payments.refund(tx, {
+        target: { foodOrderId: order.id },
+        amountMinor: order.totalMinor,
+        currency: order.currency.trim(),
+        // Unique ref: a second refund for the same order cannot be written.
+        reference: order.publicRef,
       });
     }
 

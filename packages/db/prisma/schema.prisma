@@ -61,6 +61,14 @@ enum PaymentType {
 
 enum PaymentStatus {
   SUCCEEDED
+  FAILED
+}
+
+/// Method the visitor chose at checkout. Never a credential.
+enum PaymentMethod {
+  BKASH
+  NAGAD
+  CARD
 }
 
 enum DiningVenueKind {
@@ -228,7 +236,10 @@ model Payment {
   reservationId String?       @map("reservation_id") @db.Uuid
   foodOrderId   String?       @map("food_order_id") @db.Uuid
   type        PaymentType
-  provider    String        @default("MOCK")
+  // Chosen by the server (PAYMENT_PROVIDER), never by the client.
+  provider    String        @default("SANDBOX")
+  // Null for records created before methods existed or without a method.
+  method      PaymentMethod?
   status      PaymentStatus @default(SUCCEEDED)
   amountMinor Int           @map("amount_minor")
   currency    String        @default("BDT") @db.Char(3)

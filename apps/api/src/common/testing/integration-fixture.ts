@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { AppModule } from '../../app.module';
 import { configureApplication } from '../../app.setup';
+import { PAYMENT_PROVIDER, type PaymentProvider } from '../../modules/payments/payment-provider';
 import { PrismaService } from '../prisma/prisma.service';
 
 export const TEST_USERS = {
@@ -32,8 +33,17 @@ export function auth(userId: string): Record<string, string> {
   return { 'x-demo-user-id': userId };
 }
 
-export async function createTestApp(): Promise<INestApplication> {
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+export interface TestAppOptions {
+  /** Replaces the configured adapter, e.g. with a declining test double. */
+  paymentProvider?: PaymentProvider;
+}
+
+export async function createTestApp(options: TestAppOptions = {}): Promise<INestApplication> {
+  const builder = Test.createTestingModule({ imports: [AppModule] });
+  if (options.paymentProvider) {
+    builder.overrideProvider(PAYMENT_PROVIDER).useValue(options.paymentProvider);
+  }
+  const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication({ logger: false });
   configureApplication(app);
   await app.init();

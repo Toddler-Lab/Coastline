@@ -24,6 +24,7 @@ import {
 import { AuditActions } from '../audit/audit.actions';
 import { AuditService } from '../audit/audit.service';
 import { CatalogueService } from '../catalogue/catalogue.service';
+import { PaymentsService, resolvePaymentMethod } from '../payments/payments.service';
 import type { AdminOrderQueryDto } from './dto/admin-order-query.dto';
 import type { CancelOrderDto } from './dto/cancel-order.dto';
 import type { CheckInDto } from './dto/check-in.dto';
@@ -49,6 +50,7 @@ export class OrdersService {
     private readonly audit: AuditService,
     private readonly ticketService: TicketService,
     private readonly catalogue: CatalogueService,
+    private readonly payments: PaymentsService,
   ) {}
 
   async createOrder(
@@ -215,22 +217,21 @@ export class OrdersService {
                 };
               }),
             },
-            payments: {
-              create: {
-                type: 'CHARGE',
-                provider: 'MOCK',
-                status: 'SUCCEEDED',
-                amountMinor: totalMinor,
-                currency: 'BDT',
-                externalRef: `MOCK-${publicRef}`,
-              },
-            },
           },
           include: {
             items: true,
-            payments: true,
             tourist: true,
           },
+        });
+
+        // After the slots are inserted, so a lost race never reaches the provider.
+        // A declined charge throws PAYMENT_FAILED and rolls all of this back.
+        const charge = await this.payments.charge(tx, {
+          target: { orderId: order.id },
+          amountMinor: totalMinor,
+          currency: 'BDT',
+          method: resolvePaymentMethod(dto.paymentMethod),
+          reference: publicRef,
         });
 
         await this.audit.record(
@@ -251,7 +252,7 @@ export class OrdersService {
           tx,
         );
 
-        return order;
+        return { ...order, payments: [charge] };
       });
 
       return serializeOrder(createdOrder, this.ticketService);
@@ -360,16 +361,11 @@ export class OrdersService {
         data: { isActive: false },
       });
 
-      await tx.payment.create({
-        data: {
-          orderId: order.id,
-          type: 'REFUND',
-          provider: 'MOCK',
-          status: 'SUCCEEDED',
-          amountMinor: order.totalMinor,
-          currency: order.currency,
-          externalRef: `MOCK-REFUND-${order.publicRef}-${Date.now()}`,
-        },
+      await this.payments.refund(tx, {
+        target: { orderId: order.id },
+        amountMinor: order.totalMinor,
+        currency: order.currency.trim(),
+        reference: `${order.publicRef}-${Date.now()}`,
       });
 
       const res = await tx.order.update({

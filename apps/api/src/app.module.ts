@@ -13,6 +13,7 @@ import { CatalogueModule } from './modules/catalogue/catalogue.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
 import { HotelsModule } from './modules/hotels/hotels.module';
 import { DiningModule } from './modules/dining/dining.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { DiningModule } from './modules/dining/dining.module';
     HealthModule,
     IdentityModule,
     CatalogueModule,
+    PaymentsModule,
     BookingsModule,
     HotelsModule,
     DiningModule,

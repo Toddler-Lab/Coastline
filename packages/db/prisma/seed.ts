@@ -6,7 +6,7 @@
  * are cleared on every seed run.
  */
 import process from 'node:process';
-import { PrismaClient } from '../src/index';
+import { PrismaClient, type PaymentMethod } from '../src/index';
 import { HOTELS } from './hotels-seed';
 import { seedDining } from './seed-dining';
 
@@ -150,11 +150,14 @@ interface SeedOrder {
   lines: Array<{ code: string; hour: number; hours: number }>;
   paidHoursAgo?: number;
   cancelled?: boolean;
+  /** Checkout method recorded on the charge (and its refund). */
+  method: PaymentMethod;
 }
 
 const ORDERS: SeedOrder[] = [
   {
     ref: 'SEED-001',
+    method: 'BKASH',
     touristId: USERS[1].id,
     dayOffset: 0,
     lines: [
@@ -164,12 +167,14 @@ const ORDERS: SeedOrder[] = [
   },
   {
     ref: 'SEED-002',
+    method: 'NAGAD',
     touristId: USERS[2].id,
     dayOffset: 0,
     lines: [{ code: 'KOL-003', hour: 11, hours: 2 }],
   },
   {
     ref: 'SEED-003',
+    method: 'CARD',
     touristId: USERS[1].id,
     dayOffset: 0,
     lines: [
@@ -179,18 +184,21 @@ const ORDERS: SeedOrder[] = [
   },
   {
     ref: 'SEED-004',
+    method: 'BKASH',
     touristId: USERS[3].id,
     dayOffset: 0,
     lines: [{ code: 'SUG-001', hour: 10, hours: 2 }],
   },
   {
     ref: 'SEED-005',
+    method: 'BKASH',
     touristId: USERS[2].id,
     dayOffset: 1,
     lines: [{ code: 'KOL-001', hour: 10, hours: 3 }],
   },
   {
     ref: 'SEED-006',
+    method: 'NAGAD',
     touristId: USERS[1].id,
     dayOffset: 1,
     lines: [
@@ -201,12 +209,14 @@ const ORDERS: SeedOrder[] = [
   },
   {
     ref: 'SEED-007',
+    method: 'CARD',
     touristId: USERS[3].id,
     dayOffset: 2,
     lines: [{ code: 'HIM-001', hour: 11, hours: 4 }],
   },
   {
     ref: 'SEED-008',
+    method: 'BKASH',
     touristId: USERS[1].id,
     dayOffset: 0,
     lines: [{ code: 'KOL-008', hour: 16, hours: 1 }],
@@ -415,12 +425,14 @@ async function main(): Promise<void> {
         totalMinor,
         placedAt: new Date(Date.now() - 10 * 60 * 60 * 1000),
         cancelledAt: order.cancelled ? new Date(Date.now() - 60 * 60 * 1000) : null,
-        cancelReason: order.cancelled ? 'Demo cancellation' : null,
+        cancelReason: order.cancelled ? 'Cancelled by visitor' : null,
         payments: {
           create: {
             type: 'CHARGE',
+            provider: 'SANDBOX',
+            method: order.method,
             amountMinor: totalMinor,
-            externalRef: `MOCK-${order.ref}`,
+            externalRef: `SBX-${order.ref}`,
           },
         },
         items: {
@@ -461,8 +473,10 @@ async function main(): Promise<void> {
         data: {
           orderId: created.id,
           type: 'REFUND',
+          provider: 'SANDBOX',
+          method: order.method,
           amountMinor: totalMinor,
-          externalRef: `MOCK-REFUND-${order.ref}`,
+          externalRef: `SBX-REFUND-${order.ref}`,
         },
       });
     }
@@ -498,8 +512,10 @@ async function main(): Promise<void> {
         payments: {
           create: {
             type: 'CHARGE',
+            provider: 'SANDBOX',
+            method: 'CARD',
             amountMinor: totalMinor,
-            externalRef: 'MOCK-HOTEL-001',
+            externalRef: 'SBX-HOTEL-001',
           },
         },
         hotelBookings: {

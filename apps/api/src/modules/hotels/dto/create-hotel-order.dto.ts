@@ -1,7 +1,12 @@
-import { IsInt, IsOptional, IsString, IsUUID, Matches, Max, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, IsUUID, Matches, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
+import type { CreateHotelOrderRequest, PaymentMethodInput } from '@coastline/api-contracts';
+import {
+  PAYMENT_METHOD_INPUT_MESSAGE,
+  PAYMENT_METHOD_INPUTS,
+} from '../../payments/payment-method-input';
 
-export class CreateHotelOrderDto {
+export class CreateHotelOrderDto implements CreateHotelOrderRequest {
   @IsUUID()
   hotelId!: string;
 
@@ -34,4 +39,10 @@ export class CreateHotelOrderDto {
   @IsOptional()
   @IsString()
   touristPhone?: string;
+
+  /** Checkout method (BKASH, NAGAD, CARD). Never a credential. */
+  // legacy: remove in WP-23 — 'MOCK' and an absent method are accepted and stored as null.
+  @IsOptional()
+  @IsIn(PAYMENT_METHOD_INPUTS, { message: PAYMENT_METHOD_INPUT_MESSAGE })
+  paymentMethod?: PaymentMethodInput;
 }

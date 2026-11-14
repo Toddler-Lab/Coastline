@@ -1,5 +1,5 @@
 /**
- * Shared transport types for the Coastline beach demonstrator API.
+ * Shared transport types for the Coastline API.
  *
  * Dependency-free so the NestJS API and the Next.js client can both import it.
  * Validation DTOs live in the API; only stable values live here.
@@ -36,6 +36,8 @@ export const ErrorCode = {
   NOT_FOUND: 'NOT_FOUND',
   CONFLICT: 'CONFLICT',
   UNPROCESSABLE_ENTITY: 'UNPROCESSABLE_ENTITY',
+  /** HTTP 422: the payment provider declined or failed the charge; nothing was booked. */
+  PAYMENT_FAILED: 'PAYMENT_FAILED',
   INTERNAL_ERROR: 'INTERNAL_ERROR',
 } as const;
 
@@ -131,11 +133,40 @@ export interface OrderItemDto {
   checkedInAt: string | null;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Payments                                                                   */
+/* -------------------------------------------------------------------------- */
+
+/** Methods checkout may offer. `GET /payments/methods` returns them with labels. */
+export const PAYMENT_METHODS = ['BKASH', 'NAGAD', 'CARD'] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+/**
+ * Value accepted on create requests. `'MOCK'` and an absent method are the
+ * legacy forms (stored with `method: null`); they are removed in WP-23.
+ */
+export type PaymentMethodInput = PaymentMethod | 'MOCK';
+
+/** One entry of `GET /payments/methods`. A method name only; never a credential. */
+export interface PaymentMethodDto {
+  code: PaymentMethod;
+  label: string;
+}
+
+export const PAYMENT_STATUSES = ['SUCCEEDED', 'FAILED'] as const;
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+
+/** Message of the `PAYMENT_FAILED` (HTTP 422) error. */
+export const PAYMENT_FAILED_MESSAGE = 'Payment was not completed. You have not been charged.';
+
 export interface PaymentDto {
   id: string;
   type: 'CHARGE' | 'REFUND';
+  /** Server-chosen adapter, e.g. `SANDBOX`. A data field, never a label. */
   provider: string;
-  status: 'SUCCEEDED';
+  /** Checkout method; null for records without one. */
+  method: PaymentMethod | null;
+  status: PaymentStatus;
   amountMinor: number;
   currency: string;
   externalRef: string | null;
@@ -188,8 +219,8 @@ export interface CreateOrderItemRequest {
 
 export interface CreateOrderRequest {
   items: CreateOrderItemRequest[];
-  /** Only the mock provider exists; the server ignores any other value. */
-  paymentMethod?: 'MOCK';
+  /** Checkout method. `'MOCK'` or absent is the legacy form (stored as null). */
+  paymentMethod?: PaymentMethodInput;
 }
 
 export interface CancelOrderRequest {
@@ -368,11 +399,13 @@ export interface CreateHotelBookingItem {
   guestsCount?: number;
 }
 
-export interface CreateHotelOrderRequest {
-  booking: CreateHotelBookingItem;
+/** Body of `POST /hotels/bookings`. The booking fields are sent flat, not nested. */
+export interface CreateHotelOrderRequest extends CreateHotelBookingItem {
   touristName?: string;
   touristEmail?: string;
   touristPhone?: string;
+  /** Checkout method. `'MOCK'` or absent is the legacy form (stored as null). */
+  paymentMethod?: PaymentMethodInput;
 }
 
 export interface HotelAvailabilityQuery {
@@ -426,7 +459,7 @@ export const MAX_FOOD_ORDER_LINES = 12;
 export const MAX_FOOD_ITEM_QUANTITY = 10;
 
 export interface DiningPaymentRefs {
-  /** Mock payments only; present when a deposit or charge was taken. */
+  /** Charges and refunds; present when a deposit or charge was taken. */
   payments: PaymentDto[];
 }
 
@@ -520,8 +553,11 @@ export interface CreateReservationRequest {
   hours: number;
   partySize: number;
   note?: string;
-  /** Only the mock provider exists; ignored when the deposit is zero. */
-  paymentMethod?: 'MOCK';
+  /**
+   * Checkout method for the deposit; ignored when the deposit is zero.
+   * `'MOCK'` or absent is the legacy form (stored as null).
+   */
+  paymentMethod?: PaymentMethodInput;
 }
 
 export interface CancelReservationRequest {
@@ -593,7 +629,8 @@ export interface CreateFoodOrderRequest {
   venueId: string;
   lines: CreateFoodOrderLine[];
   note?: string;
-  paymentMethod?: 'MOCK';
+  /** Checkout method. `'MOCK'` or absent is the legacy form (stored as null). */
+  paymentMethod?: PaymentMethodInput;
 }
 
 export interface CancelFoodOrderRequest {

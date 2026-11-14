@@ -29,6 +29,7 @@ import {
 import { AuditActions } from '../../audit/audit.actions';
 import { AuditService } from '../../audit/audit.service';
 import { TicketService } from '../../bookings/ticket.service';
+import { PaymentsService, resolvePaymentMethod } from '../../payments/payments.service';
 import type { AdminReservationQueryDto } from './dto/admin-reservation-query.dto';
 import type { CancelReservationDto } from './dto/cancel-reservation.dto';
 import type { CreateReservationDto } from './dto/create-reservation.dto';
@@ -73,6 +74,7 @@ export class ReservationsService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly tickets: TicketService,
+    private readonly payments: PaymentsService,
   ) {}
 
   /* Availability ------------------------------------------------------------ */
@@ -256,23 +258,22 @@ export class ReservationsService {
             slots: {
               create: slotStarts.map((slotStart) => ({ tableId: table.id, slotStart })),
             },
-            ...(depositMinor > 0
-              ? {
-                  payments: {
-                    create: {
-                      type: 'CHARGE',
-                      provider: 'MOCK',
-                      status: 'SUCCEEDED',
-                      amountMinor: depositMinor,
-                      currency,
-                      externalRef: `MOCK-${publicRef}`,
-                    },
-                  },
-                }
-              : {}),
           },
           include: RESERVATION_INCLUDE,
         });
+
+        // After the table-hours are inserted, so a lost race never reaches the
+        // provider. A declined deposit throws PAYMENT_FAILED and rolls this back.
+        if (depositMinor > 0) {
+          const charge = await this.payments.charge(tx, {
+            target: { reservationId: reservation.id },
+            amountMinor: depositMinor,
+            currency,
+            method: resolvePaymentMethod(dto.paymentMethod),
+            reference: publicRef,
+          });
+          reservation.payments.push(charge);
+        }
 
         await this.audit.record(
           {
@@ -462,7 +463,7 @@ export class ReservationsService {
   }
 
   /**
-   * Cancels, releases the table-hours and refunds the net mock deposit by
+   * Cancels, releases the table-hours and refunds the net deposit by
    * reversal, all in one transaction. The status guard makes a concurrent
    * second cancel or check-in lose with 409 instead of double-refunding.
    */
@@ -496,16 +497,13 @@ export class ReservationsService {
         0,
       );
       if (netPaid > 0) {
-        await tx.payment.create({
-          data: {
-            reservationId,
-            type: 'REFUND',
-            provider: 'MOCK',
-            status: 'SUCCEEDED',
-            amountMinor: netPaid,
-            currency: reservation.currency.trim(),
-            externalRef: `MOCK-REFUND-${reservation.publicRef}`,
-          },
+        // Reference is the public ref alone: the unique external reference
+        // makes a second refund for the same reservation impossible.
+        await this.payments.refund(tx, {
+          target: { reservationId },
+          amountMinor: netPaid,
+          currency: reservation.currency.trim(),
+          reference: reservation.publicRef,
         });
       }
 

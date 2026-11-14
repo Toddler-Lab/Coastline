@@ -9,7 +9,15 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import type { CreateFoodOrderLine, CreateFoodOrderRequest } from '@coastline/api-contracts';
+import {
+  PAYMENT_METHOD_INPUT_MESSAGE,
+  PAYMENT_METHOD_INPUTS,
+} from '../../../payments/payment-method-input';
+import type {
+  CreateFoodOrderLine,
+  CreateFoodOrderRequest,
+  PaymentMethodInput,
+} from '@coastline/api-contracts';
 
 export const FOOD_ORDER_NOTE_MAX = 300;
 
@@ -44,7 +52,9 @@ export class CreateFoodOrderDto implements CreateFoodOrderRequest {
   @MaxLength(FOOD_ORDER_NOTE_MAX)
   note?: string;
 
+  /** Checkout method (BKASH, NAGAD, CARD). Never a credential. */
+  // legacy: remove in WP-23 — 'MOCK' and an absent method are accepted and stored as null.
   @IsOptional()
-  @IsIn(['MOCK'])
-  paymentMethod?: 'MOCK';
+  @IsIn(PAYMENT_METHOD_INPUTS, { message: PAYMENT_METHOD_INPUT_MESSAGE })
+  paymentMethod?: PaymentMethodInput;
 }

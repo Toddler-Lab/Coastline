@@ -12,6 +12,7 @@ import {
   MinLength,
   validateSync,
 } from 'class-validator';
+import { PAYMENT_PROVIDER_NAMES } from '../modules/payments/payment-provider';
 
 /** Strict boolean parsing: the string "false" must never become true. */
 function parseBoolean(value: unknown): unknown {
@@ -36,7 +37,7 @@ class EnvironmentVariables {
   NODE_ENV?: string;
 
   @IsOptional()
-  @IsIn(['local', 'demo', 'staging', 'production'])
+  @IsIn(['local', 'staging', 'production'])
   APP_ENV?: string;
 
   @IsOptional()
@@ -79,6 +80,21 @@ class EnvironmentVariables {
   @IsBoolean()
   DINING_IGNORE_TIME_RULES?: boolean;
 
+  /** Payment adapter. Only `sandbox` exists; any other value fails start-up. */
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @IsIn([...PAYMENT_PROVIDER_NAMES])
+  PAYMENT_PROVIDER?: string;
+
+  /**
+   * Deliberate opt-in to run the sandbox adapter in production. Without it,
+   * production start-up with PAYMENT_PROVIDER=sandbox fails.
+   */
+  @IsOptional()
+  @Transform(({ value }) => parseBoolean(value))
+  @IsBoolean()
+  ALLOW_SANDBOX_PAYMENTS?: boolean;
+
   @IsOptional()
   @IsString()
   TICKET_SECRET?: string;
@@ -103,17 +119,29 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
     throw new Error(`Invalid environment configuration: ${properties}`);
   }
 
+  const isProduction = validated.NODE_ENV === 'production' || validated.APP_ENV === 'production';
+
   const demoEnabled = validated.DEMO_AUTH_ENABLED ?? true;
-  if (demoEnabled && (validated.NODE_ENV === 'production' || validated.APP_ENV === 'production')) {
+  if (demoEnabled && isProduction) {
     throw new Error('DEMO_AUTH_ENABLED must not be enabled in production');
   }
 
-  if (
-    validated.DINING_IGNORE_TIME_RULES &&
-    (validated.NODE_ENV === 'production' || validated.APP_ENV === 'production')
-  ) {
+  if (validated.DINING_IGNORE_TIME_RULES && isProduction) {
     throw new Error('DINING_IGNORE_TIME_RULES must not be enabled in production');
   }
 
-  return { ...config, ...validated, DEMO_AUTH_ENABLED: demoEnabled };
+  const paymentProvider = validated.PAYMENT_PROVIDER ?? 'sandbox';
+  if (paymentProvider === 'sandbox' && isProduction && validated.ALLOW_SANDBOX_PAYMENTS !== true) {
+    throw new Error(
+      'PAYMENT_PROVIDER=sandbox confirms bookings without collecting money; set ALLOW_SANDBOX_PAYMENTS=true to allow it in production',
+    );
+  }
+
+  return {
+    ...config,
+    ...validated,
+    DEMO_AUTH_ENABLED: demoEnabled,
+    PAYMENT_PROVIDER: paymentProvider,
+    ALLOW_SANDBOX_PAYMENTS: validated.ALLOW_SANDBOX_PAYMENTS ?? false,
+  };
 }

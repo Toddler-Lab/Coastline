@@ -8,7 +8,7 @@ import {
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { ErrorCode } from '@coastline/api-contracts';
+import { ErrorCode, PAYMENT_FAILED_MESSAGE } from '@coastline/api-contracts';
 
 /** Throw helpers that keep the global response shape consistent. */
 export function unauthenticated(message = 'Sign in to continue.'): HttpException {
@@ -36,6 +36,11 @@ export function unprocessable(message: string, details?: unknown): HttpException
     message,
     details,
   });
+}
+
+/** HTTP 422 `PAYMENT_FAILED`: the provider declined; the caller's transaction rolls back. */
+export function paymentFailed(message: string = PAYMENT_FAILED_MESSAGE): HttpException {
+  return new UnprocessableEntityException({ code: ErrorCode.PAYMENT_FAILED, message });
 }
 
 export function conflict(message: string, details?: unknown): HttpException {

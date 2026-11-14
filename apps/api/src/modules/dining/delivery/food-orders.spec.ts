@@ -170,10 +170,11 @@ describeDb('sunbed food delivery', () => {
       expect(order.payments).toHaveLength(1);
       expect(order.payments[0]).toMatchObject({
         type: 'CHARGE',
-        provider: 'MOCK',
+        provider: 'SANDBOX',
+        method: null,
         status: 'SUCCEEDED',
         amountMinor: expected,
-        externalRef: `MOCK-${order.publicRef}`,
+        externalRef: `SBX-${order.publicRef}`,
       });
 
       const audit = await auditFor(order.id);

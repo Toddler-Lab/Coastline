@@ -178,9 +178,10 @@ describeDb('dining table reservations', () => {
       expect(r.payments).toHaveLength(1);
       expect(r.payments[0]).toMatchObject({
         type: 'CHARGE',
-        provider: 'MOCK',
+        provider: 'SANDBOX',
+        method: null,
         amountMinor: MAIN_DEPOSIT_MINOR,
-        externalRef: `MOCK-${r.publicRef}`,
+        externalRef: `SBX-${r.publicRef}`,
       });
       expect(r.ticket?.code).toBe(r.publicRef);
       expect(r.ticket?.payload).toMatch(new RegExp(`^COASTLINE:${r.publicRef}:[0-9A-F]{16}$`));
@@ -220,7 +221,7 @@ describeDb('dining table reservations', () => {
       await reserve(TEST_USERS.tourist, { tableId: 'not-a-uuid' }).expect(400);
       await reserve(TEST_USERS.tourist, { startsAt: 'later' }).expect(400);
       await reserve(TEST_USERS.tourist, { hours: 1.5 }).expect(400);
-      await reserve(TEST_USERS.tourist, { paymentMethod: 'CARD' }).expect(400);
+      await reserve(TEST_USERS.tourist, { paymentMethod: 'PAYPAL' }).expect(400);
     });
 
     it.each([
