@@ -445,7 +445,7 @@ export class FoodOrdersService {
   private assertTourist(actor: Actor): void {
     if (actor.role !== 'TOURIST') {
       throw forbidden(
-        'Food delivery belongs to tourist personas. Switch persona to a tourist in the header.',
+        'Food delivery is for visitor accounts. Switch to a visitor account to order.',
       );
     }
   }

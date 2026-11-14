@@ -2,7 +2,7 @@
   "name": "coastline",
   "version": "0.1.0",
   "private": true,
-  "description": "Coastline - Cox's Bazar beach services and discovery demonstrator",
+  "description": "Coastline - Cox's Bazar beach services and discovery",
   "license": "UNLICENSED",
   "packageManager": "pnpm@10.13.1",
   "engines": {

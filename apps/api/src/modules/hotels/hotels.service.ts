@@ -246,7 +246,7 @@ export class HotelsService {
   ): Promise<OrderDto> {
     if (actor.role !== 'TOURIST') {
       throw forbidden(
-        'Admins cannot place tourist bookings. Switch persona to a tourist in the header.',
+        'Admins cannot place tourist bookings. Switch to a visitor account to book.',
       );
     }
 

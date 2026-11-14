@@ -29,10 +29,8 @@ export interface RefundInput {
 export const REFUND_FAILED_MESSAGE =
   'The refund could not be completed. Your booking has not been cancelled.';
 
-/**
- * Maps the request value to the stored method.
- * legacy: remove in WP-23 — `'MOCK'` and an absent method are stored as null.
- */
+/** Maps the request value to the stored method. */
+// legacy: remove in WP-23 — 'MOCK' and an absent method are stored as null.
 export function resolvePaymentMethod(input: PaymentMethodInput | undefined): PaymentMethod | null {
   if (input === undefined || input === 'MOCK') {
     return null;

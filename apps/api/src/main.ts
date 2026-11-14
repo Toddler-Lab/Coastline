@@ -43,10 +43,8 @@ async function bootstrap(): Promise<void> {
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Coastline API')
     .setDescription(
-      [
-        'Sunbed catalogue, hourly availability, mock-paid bookings and QR tickets.',
-        'Demo data only. Payments are simulated and no money is collected.',
-      ].join('\n\n'),
+      'Beach points and sunbed availability, sunbed and hotel bookings, dining reservations ' +
+        'and food orders, payments and QR tickets.',
     )
     .setVersion('0.1.0')
     .build();

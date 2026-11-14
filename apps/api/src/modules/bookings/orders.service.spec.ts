@@ -95,7 +95,7 @@ describe('OrdersService (unit)', () => {
         service.createOrder(adminActor, {
           items: [{ sunbedId: 'bed-1', startsAt: '2026-11-11T10:00:00.000Z', hours: 1 }],
         }),
-      ).rejects.toThrow(/Admins cannot place tourist bookings/);
+      ).rejects.toThrow(/^Admins cannot place tourist bookings. Switch to a visitor account to book.$/);
     });
 
     it('rejects booking if more than 6 beds are requested', async () => {

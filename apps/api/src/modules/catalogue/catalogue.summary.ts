@@ -43,7 +43,7 @@ export function addDays(dateKey: string, days: number): string {
 /**
  * Normalizes and validates the `date` query parameter.
  *
- * Absent or blank means today in Asia/Dhaka. The public demo only exposes the
+ * Absent or blank means today in Asia/Dhaka. The public catalogue only exposes the
  * next {@link MAX_ADVANCE_DAYS} days, so anything else is a 400.
  */
 export function resolveDhakaDay(value: string | undefined, now: Date = new Date()): DhakaDay {

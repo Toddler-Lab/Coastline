@@ -52,7 +52,7 @@ const VENUES: VenueSeed[] = [
     kind: 'SEAFOOD_KITCHEN',
     description:
       'Open kitchen grilling the day’s catch a short walk from the Sugandha sunbed line.',
-    address: 'Sugandha Point road, Cox’s Bazar (demo)',
+    address: 'Sugandha Point road, Cox’s Bazar',
     contactPhone: '+880 1700 000001',
     cuisineTags: ['Seafood', 'Grill'],
     beachPointCode: 'SUG',
@@ -135,7 +135,7 @@ const VENUES: VenueSeed[] = [
     nameBn: 'লাবণী বাঙালি টেবিল',
     kind: 'RESTAURANT',
     description: 'Home-style Bengali lunch and dinner minutes from the Laboni viewpoint.',
-    address: 'Laboni Beach road, Cox’s Bazar (demo)',
+    address: 'Laboni Beach road, Cox’s Bazar',
     contactPhone: '+880 1700 000002',
     cuisineTags: ['Bengali', 'Family'],
     beachPointCode: 'LAB',
@@ -171,7 +171,7 @@ const VENUES: VenueSeed[] = [
     kind: 'RESTAURANT',
     description:
       'Town restaurant known for dried-fish dishes and coastal curries. Reservations only.',
-    address: 'Marine Drive, Cox’s Bazar (demo)',
+    address: 'Marine Drive, Cox’s Bazar',
     contactPhone: '+880 1700 000003',
     cuisineTags: ['Shutki', 'Coastal'],
     openHour: 12,

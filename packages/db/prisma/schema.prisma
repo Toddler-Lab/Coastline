@@ -1,4 +1,5 @@
-// Coastline — beach demonstrator catalogue, hourly slots, orders and mock payments.
+// Coastline — beach services catalogue, hourly slots, orders and payments recorded
+// through the payment-provider port.
 //
 // Conventions:
 // - UUID primary keys; timestamptz columns stored in UTC.

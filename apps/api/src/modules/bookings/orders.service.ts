@@ -86,7 +86,7 @@ export class OrdersService {
     requestId?: string,
   ): Promise<OrderDto> {
     if (actor.role !== 'TOURIST') {
-      throw forbidden('Admins cannot place tourist bookings. Switch persona to a tourist in the header.');
+      throw forbidden('Admins cannot place tourist bookings. Switch to a visitor account to book.');
     }
 
     if (!dto.items || dto.items.length === 0) {

@@ -159,7 +159,7 @@ export class ReservationsService {
   ): Promise<ReservationDto> {
     if (actor.role !== 'TOURIST') {
       throw forbidden(
-        'Admins cannot reserve tables for themselves. Switch persona to a tourist in the header.',
+        'Admins cannot reserve tables for themselves. Switch to a visitor account to reserve.',
       );
     }
 

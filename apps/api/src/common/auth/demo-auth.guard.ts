@@ -37,7 +37,7 @@ export class DemoAuthGuard implements CanActivate {
       if (anonymous) {
         return true;
       }
-      throw unauthenticated('Demo authentication is disabled.');
+      throw unauthenticated('Sign in to continue.');
     }
 
     const userId = request.header('x-demo-user-id');
@@ -45,11 +45,11 @@ export class DemoAuthGuard implements CanActivate {
       if (anonymous) {
         return true;
       }
-      throw unauthenticated('Choose a demo user to continue.');
+      throw unauthenticated('Sign in to continue.');
     }
 
     if (!UUID_PATTERN.test(userId)) {
-      throw unauthenticated('Unknown demo user.');
+      throw unauthenticated('Sign in to continue.');
     }
 
     const user = await this.prisma.user.findUnique({
@@ -58,7 +58,7 @@ export class DemoAuthGuard implements CanActivate {
     });
 
     if (!user || !user.isActive) {
-      throw unauthenticated('Unknown demo user.');
+      throw unauthenticated('Sign in to continue.');
     }
 
     const actor: Actor = {
