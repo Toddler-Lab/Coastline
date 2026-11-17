@@ -9,10 +9,10 @@ import { formatIsoDate, toDhaka } from '@/lib/format';
 
 export { MAX_FOOD_ITEM_QUANTITY, MAX_FOOD_ORDER_LINES };
 
-type Tone = 'neutral' | 'sea' | 'sand' | 'success' | 'warn' | 'danger';
+type Tone = import('@/lib/tone').Tone;
 
 export function foodOrderHref(publicRef: string): string {
-  return `/food/orders/${encodeURIComponent(publicRef)}`;
+  return `/trips/${encodeURIComponent(publicRef)}`;
 }
 
 /** Statuses after which the order can no longer change. */
@@ -23,11 +23,11 @@ export function isTerminalFoodStatus(status: FoodOrderStatus): boolean {
 export function foodStatusPresentation(status: FoodOrderStatus): { label: string; tone: Tone } {
   switch (status) {
     case 'PLACED':
-      return { label: 'Placed', tone: 'sea' };
+      return { label: 'Placed', tone: 'info' };
     case 'PREPARING':
       return { label: 'Preparing', tone: 'warn' };
     case 'READY':
-      return { label: 'Ready · on its way', tone: 'sand' };
+      return { label: 'Ready · on its way', tone: 'warn' };
     case 'DELIVERED':
       return { label: 'Delivered', tone: 'success' };
     default:

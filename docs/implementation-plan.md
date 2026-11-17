@@ -269,6 +269,18 @@ After Phase B, the API work of one phase can run in parallel with the UI work of
 
 ## 6. Progress
 
+**UI pass (2026-11-17).** The whole web app was rebuilt on the v2 design against the existing API,
+with no API, contract or schema change. What it covers and what each WP still owes:
+
+| Area | Delivered in the UI pass | Still open |
+|---|---|---|
+| WP-02 tokens | Role tokens light/dark, destination accents, Inter + Hind Siliguri, theme cookie (no flash) | Old token names were removed, not mapped |
+| WP-03 components | `components/ui` and `components/patterns`; sheets use the native modal `<dialog>` instead of Radix | `/dev/components` gallery; keyboard/focus tests (no web test runner yet, WP-01) |
+| WP-04 shells | Visitor top/bottom bar, Help button and sheet, provider/desk/admin shells, workspace switcher | Roles `PROVIDER`/`DESK`, scopes and guards; staff workspaces open to `ADMIN` only |
+| WP-08/09 places | Explore, destination, spot hub, service lists, listing detail, search, redirects | Places come from `lib/places.ts` (Cox's Bazar descriptor + beach points as spots) until WP-05/06; no facility data, no list/map toggle |
+| WP-11/12/13 booking | Shared checkout with sandbox gateway screen, stay/table/food flows, restacked sunbed picker, Trips and ticket | Booking is created on Approve (no pending draft or payment port, WP-10); no offline ticket cache |
+| WP-17/18/23 portals | Provider Today, bookings, kitchen, listing/menu editor; desk scan and arrivals; admin overview, destinations (read-only), bookings | Every "Soon" item in the sidebars |
+
 | WP | Title | Done |
 |---|---|---|
 | 01 | Quality harness | ☐ |

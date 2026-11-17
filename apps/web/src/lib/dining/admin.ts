@@ -11,7 +11,7 @@ import { hourLabel } from '@/lib/format';
 
 /** Dining operations desk helpers (stream D). */
 
-export type Tone = 'neutral' | 'sea' | 'sand' | 'success' | 'warn' | 'danger';
+export type Tone = import('@/lib/tone').Tone;
 
 export const OPEN_FOOD_ORDER_STATUSES = [
   'PLACED',
@@ -53,7 +53,7 @@ export const FOOD_ORDER_ADVANCE_LABELS: Partial<Record<FoodOrderStatus, string>>
 export function reservationStatusTone(status: ReservationStatus): Tone {
   switch (status) {
     case 'CONFIRMED':
-      return 'sand';
+      return 'warn';
     case 'CHECKED_IN':
       return 'success';
     case 'CANCELLED':
@@ -68,9 +68,9 @@ export function foodOrderStatusTone(status: FoodOrderStatus): Tone {
     case 'PLACED':
       return 'warn';
     case 'PREPARING':
-      return 'sand';
+      return 'warn';
     case 'READY':
-      return 'sea';
+      return 'info';
     case 'DELIVERED':
       return 'success';
     case 'CANCELLED':

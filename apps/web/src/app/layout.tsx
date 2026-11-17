@@ -1,71 +1,67 @@
 import type { Metadata, Viewport } from 'next';
-import { Bricolage_Grotesque, IBM_Plex_Mono, Manrope } from 'next/font/google';
+import { cookies } from 'next/headers';
+import { Hind_Siliguri, Inter } from 'next/font/google';
 import './globals.css';
-import { DemoBanner } from '@/components/brand/demo-banner';
+import { SessionProvider } from '@/components/patterns/session';
 import { ToastProvider } from '@/components/ui/toast';
-import { SiteHeader } from '@/components/site/site-header';
 import { getDemoUsers, getViewer } from '@/lib/session';
+import { THEME_COOKIE, parseTheme } from '@/lib/theme';
 
-const display = Bricolage_Grotesque({
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-bricolage',
-  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-inter',
   display: 'swap',
 });
 
-const body = Manrope({
-  subsets: ['latin'],
-  variable: '--font-manrope',
+const hind = Hind_Siliguri({
+  subsets: ['bengali', 'latin'],
   weight: ['400', '500', '600', '700'],
-  display: 'swap',
-});
-
-const mono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  variable: '--font-plex-mono',
-  weight: ['400', '500', '600'],
+  variable: '--font-hind',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "Coastline — Cox's Bazar sunbed map",
+    default: 'Coastline · Book stays, food and sunbeds in Bangladesh',
     template: '%s · Coastline',
   },
   description:
-    "Find a free sunbed on Cox's Bazar beach, book it by the hour, and show the QR ticket at the bed. Demo: payments are simulated.",
+    'Pick a destination and a spot, then find and book what is there: stays, food, sunbeds and more, with help on the spot.',
   applicationName: 'Coastline',
-  keywords: ["Cox's Bazar", 'sunbed', 'beach', 'booking', 'Kolatoli', 'Laboni'],
 };
 
 export const viewport: Viewport = {
-  themeColor: '#041014',
-  colorScheme: 'dark',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f7f8f8' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f1415' },
+  ],
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [viewer, users] = await Promise.all([getViewer(), getDemoUsers()]);
+  const store = await cookies();
+  const theme = parseTheme(store.get(THEME_COOKIE)?.value);
+  const [viewer, accounts] = await Promise.all([getViewer(), getDemoUsers()]);
 
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
-      <head>
-        <link rel="preconnect" href="https://server.arcgisonline.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://server.arcgisonline.com" />
-      </head>
-      <body className="min-h-dvh bg-abyss text-foam antialiased">
+    <html
+      lang="en"
+      data-theme={theme === 'system' ? undefined : theme}
+      className={`${inter.variable} ${hind.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="min-h-dvh">
         <a
           href="#main"
-          className="fixed left-4 top-4 z-[200] -translate-y-24 rounded-full bg-sea px-4 py-2 text-[12px] font-semibold text-abyss transition-transform focus:translate-y-0"
+          className="fixed left-4 top-4 z-[400] -translate-y-24 rounded-md bg-primary px-4 py-3 text-label text-on-primary focus:translate-y-0"
         >
           Skip to content
         </a>
-        <ToastProvider>
-          <DemoBanner />
-          <SiteHeader user={viewer.user} users={users} currentId={viewer.userId} />
-          <div id="main" className="pb-16 md:pb-0">
-            {children}
-          </div>
-        </ToastProvider>
+        <SessionProvider value={{ user: viewer.user, userId: viewer.userId, accounts }}>
+          <ToastProvider>{children}</ToastProvider>
+        </SessionProvider>
       </body>
     </html>
   );

@@ -215,14 +215,14 @@ export function orderPointNames(order: Pick<OrderDto, 'items'>): string[] {
   return [...new Set(order.items.map((item) => item.beachPointName))];
 }
 
-export type PhaseTone = 'neutral' | 'sea' | 'sand' | 'success' | 'warn' | 'danger';
+export type PhaseTone = import('./tone').Tone;
 
 export function phasePresentation(phase: OrderPhase): { label: string; tone: PhaseTone } {
   switch (phase) {
     case 'ACTIVE':
       return { label: 'In progress', tone: 'success' };
     case 'UPCOMING':
-      return { label: 'Upcoming', tone: 'sea' };
+      return { label: 'Upcoming', tone: 'info' };
     case 'CANCELLED':
       return { label: 'Cancelled', tone: 'danger' };
     default:
@@ -240,12 +240,12 @@ export function itemStatusPresentation(status: OrderDto['items'][number]['status
     case 'CANCELLED':
       return { label: 'Cancelled', tone: 'danger' };
     default:
-      return { label: 'Reserved', tone: 'sea' };
+      return { label: 'Reserved', tone: 'info' };
   }
 }
 
 export function paymentTypeLabel(type: OrderDto['payments'][number]['type']): string {
-  return type === 'REFUND' ? 'Refund (simulated)' : 'Charge (simulated)';
+  return type === 'REFUND' ? 'Refund' : 'Payment';
 }
 
 /**

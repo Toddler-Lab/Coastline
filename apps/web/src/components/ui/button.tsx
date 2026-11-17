@@ -1,68 +1,99 @@
-import type { ButtonHTMLAttributes } from 'react';
+import { forwardRef } from 'react';
+import { LoaderCircle } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'sand';
-type Size = 'sm' | 'md' | 'lg' | 'icon';
+export type ButtonVariant = 'primary' | 'secondary' | 'text' | 'danger' | 'ghost';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
-const VARIANTS: Record<Variant, string> = {
-  primary:
-    'bg-sea text-abyss hover:bg-sea-deep disabled:bg-sea/40 disabled:text-abyss/60 font-semibold',
-  secondary: 'bg-raised/60 text-foam border border-line-strong hover:border-sea/60 hover:bg-raised',
-  ghost: 'bg-transparent text-mist hover:bg-raised/60 hover:text-foam',
-  danger: 'bg-danger/15 text-danger border border-danger/35 hover:bg-danger/25',
-  sand: 'bg-sand text-abyss hover:bg-sand/85 font-semibold',
+const BASE =
+  'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-label transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50';
+
+const VARIANTS: Record<ButtonVariant, string> = {
+  primary: 'bg-primary text-on-primary hover:brightness-110 active:brightness-95',
+  secondary: 'border border-line bg-surface text-fg hover:bg-surface-alt',
+  text: 'text-primary hover:bg-primary-soft',
+  ghost: 'text-fg hover:bg-surface-alt',
+  danger: 'bg-danger text-surface hover:brightness-110',
 };
 
-const SIZES: Record<Size, string> = {
-  sm: 'h-9 px-3 text-[12px] gap-1.5',
-  md: 'h-11 px-4 text-[13px] gap-2',
-  lg: 'h-12 px-5 text-[14px] gap-2',
-  icon: 'h-11 w-11 justify-center',
+/* Every size keeps a 44 px touch target; `sm` is for dense staff tables. */
+const SIZES: Record<ButtonSize, string> = {
+  sm: 'h-9 min-w-9 px-3 text-[14px]',
+  md: 'h-11 min-w-11 px-4',
+  lg: 'h-12 min-w-12 px-6 text-[16px]',
 };
 
 export function buttonClass(
-  variant: Variant = 'primary',
-  size: Size = 'md',
-  extra?: string,
+  variant: ButtonVariant = 'primary',
+  size: ButtonSize = 'md',
+  className?: string,
 ): string {
-  return cn(
-    'inline-flex select-none items-center justify-center rounded-full transition-colors duration-150 disabled:opacity-60',
-    VARIANTS[variant],
-    SIZES[size],
-    extra,
-  );
+  return cn(BASE, VARIANTS[variant], SIZES[size], className);
 }
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  size?: Size;
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   loading?: boolean;
+  block?: boolean;
 }
 
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  loading = false,
-  disabled,
-  className,
-  children,
-  ...props
-}: ButtonProps) {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    variant = 'primary',
+    size = 'md',
+    loading = false,
+    block,
+    className,
+    children,
+    disabled,
+    type,
+    ...rest
+  },
+  ref,
+) {
   return (
     <button
-      type={props.type ?? 'button'}
-      className={buttonClass(variant, size, className)}
+      ref={ref}
+      type={type ?? 'button'}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      {...props}
+      className={buttonClass(variant, size, cn(block && 'w-full', className))}
+      {...rest}
     >
-      {loading ? (
-        <span
-          aria-hidden
-          className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"
-        />
-      ) : null}
+      {loading ? <LoaderCircle aria-hidden className="size-5 animate-spin" /> : null}
       {children}
     </button>
   );
+});
+
+export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  label: string;
+  variant?: 'ghost' | 'secondary' | 'primary';
 }
+
+/** Square 44 px button with a required accessible label. */
+export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
+  { label, variant = 'ghost', className, children, type, ...rest },
+  ref,
+) {
+  return (
+    <button
+      ref={ref}
+      type={type ?? 'button'}
+      aria-label={label}
+      title={label}
+      className={cn(
+        'inline-flex size-11 flex-none items-center justify-center rounded-full transition-colors disabled:opacity-50',
+        variant === 'ghost' && 'text-fg hover:bg-surface-alt',
+        variant === 'secondary' &&
+          'border border-line bg-surface text-fg shadow-soft hover:bg-surface-alt',
+        variant === 'primary' && 'bg-primary text-on-primary hover:brightness-110',
+        className,
+      )}
+      {...rest}
+    >
+      {children}
+    </button>
+  );
+});

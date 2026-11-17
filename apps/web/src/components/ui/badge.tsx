@@ -1,44 +1,72 @@
-import type { HTMLAttributes } from 'react';
+import {
+  CircleAlert,
+  CircleCheck,
+  CircleDot,
+  CircleX,
+  Clock,
+  Info,
+  type LucideIcon,
+} from 'lucide-react';
 import { cn } from '@/lib/cn';
-
-type Tone = 'neutral' | 'sea' | 'sand' | 'success' | 'warn' | 'danger';
+import type { Tone } from '@/lib/tone';
 
 const TONES: Record<Tone, string> = {
-  neutral: 'border-line text-mist bg-raised/40',
-  sea: 'border-sea/35 text-sea bg-sea/10',
-  sand: 'border-sand/40 text-sand bg-sand/10',
-  success: 'border-success/35 text-success bg-success/10',
-  warn: 'border-warn/40 text-warn bg-warn/10',
-  danger: 'border-danger/40 text-danger bg-danger/10',
+  neutral: 'bg-surface-alt text-muted',
+  primary: 'bg-primary-soft text-primary',
+  info: 'bg-info/12 text-info',
+  success: 'bg-success/12 text-success',
+  warn: 'bg-warn/14 text-warn',
+  danger: 'bg-danger/12 text-danger',
 };
 
 export function Badge({
   tone = 'neutral',
   className,
-  ...props
-}: HTMLAttributes<HTMLSpanElement> & { tone?: Tone }) {
+  children,
+}: {
+  tone?: Tone;
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.12em]',
+        'inline-flex h-6 items-center gap-1 whitespace-nowrap rounded-full px-2.5 text-caption',
         TONES[tone],
         className,
       )}
-      {...props}
-    />
+    >
+      {children}
+    </span>
   );
 }
 
-export function StatusDot({ tone = 'neutral' }: { tone?: Tone }) {
-  const color =
-    tone === 'success'
-      ? 'bg-success'
-      : tone === 'danger'
-        ? 'bg-danger'
-        : tone === 'warn'
-          ? 'bg-warn'
-          : tone === 'sea'
-            ? 'bg-sea'
-            : 'bg-mist';
-  return <span aria-hidden className={cn('h-1.5 w-1.5 rounded-full', color)} />;
+const STATUS_ICONS: Record<Tone, LucideIcon> = {
+  neutral: CircleDot,
+  primary: CircleDot,
+  info: Clock,
+  success: CircleCheck,
+  warn: CircleAlert,
+  danger: CircleX,
+};
+
+/** Status never relies on colour alone: every status has a label and an icon. */
+export function StatusBadge({
+  tone,
+  label,
+  icon,
+  className,
+}: {
+  tone: Tone;
+  label: string;
+  icon?: LucideIcon;
+  className?: string;
+}) {
+  const Icon = icon ?? STATUS_ICONS[tone] ?? Info;
+  return (
+    <Badge tone={tone} className={className}>
+      <Icon aria-hidden className="size-3.5" />
+      {label}
+    </Badge>
+  );
 }

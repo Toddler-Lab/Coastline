@@ -266,13 +266,17 @@ Once started, the following services are available:
 
 | Service | URL | Description |
 |---|---|---|
-| **Web Application** | [http://localhost:3000](http://localhost:3000) | Interactive beach map, sunbed reservation, and bookings |
-| **My Bookings** | [http://localhost:3000/bookings](http://localhost:3000/bookings) | User QR tickets, active stays, and cancellation drawer |
-| **Desk Check-in Console** | [http://localhost:3000/admin/bookings](http://localhost:3000/admin/bookings) | Ticket scanner and attendant check-in portal |
-| **Beach Points Admin** | [http://localhost:3000/admin/points](http://localhost:3000/admin/points) | Beach point status and sunbed maintenance controls |
-| **Dining** | [http://localhost:3000/food](http://localhost:3000/food) | Venues and menus, table reservations, food delivery to your sunbed |
-| **Dining Operations** | [http://localhost:3000/admin/dining](http://localhost:3000/admin/dining) | Overview, venue/menu editing, reservation desk, kitchen queue (admin persona) |
-| **Future Modules** | [http://localhost:3000/rides](http://localhost:3000/rides) | Rides (`/rides`), Sports (`/activities`) |
+| **Explore** | [http://localhost:3000](http://localhost:3000) | Search, destination, service tiles, spots, stays and food |
+| **Destination and spots** | [/d/coxs-bazar](http://localhost:3000/d/coxs-bazar) | Destination hub; spot hubs at `/d/coxs-bazar/s/<spot>` |
+| **Sunbed picker** | [/sunbeds/kol](http://localhost:3000/sunbeds/kol) | Beach chips, time controls, map, accessible bed list |
+| **Listing and booking** | `/l/<listing>`, `/l/<listing>/book` | Stays, tables and food to your sunbed, then `/checkout/<draft>` |
+| **Trips** | [/trips](http://localhost:3000/trips) | Every booking with its QR ticket, receipt and cancellation |
+| **Provider portal** | [/provider](http://localhost:3000/provider) | Today, table bookings, kitchen, listing and menu editor (operator account for now) |
+| **Desk** | [/desk](http://localhost:3000/desk) | Scan or type a reference, check in; arrivals by day |
+| **Admin console** | [/admin](http://localhost:3000/admin) | Overview, destinations and spots, all bookings |
+
+Old routes (`/hotels`, `/food`, `/bookings`, `/admin/dining`, `/admin/points`, ...) redirect permanently to
+their v2 equivalents.
 | **REST API Base** | [http://localhost:3001/api/v1](http://localhost:3001/api/v1) | Backend REST API endpoints |
 | **Swagger / OpenAPI** | [http://localhost:3001/api/docs](http://localhost:3001/api/docs) | Interactive API documentation and test harness |
 | **API Health Checks** | [http://localhost:3001/api/v1/health/live](http://localhost:3001/api/v1/health/live) | Kubernetes/Docker liveness & readiness probes |

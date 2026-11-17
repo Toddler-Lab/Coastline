@@ -1,16 +1,25 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { buttonClass } from '@/components/ui/button';
+import { ErrorState } from '@/components/ui/states';
 
-export default function GlobalError({ reset }: { error: Error; reset: () => void }) {
+export default function GlobalError({
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   return (
-    <main className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-start justify-center gap-4 px-6">
-      <p className="label">Something broke</p>
-      <h1 className="text-3xl">The beach map lost its bearings.</h1>
-      <p className="max-w-prose text-[13.5px] leading-relaxed text-mist">
-        This is usually a stopped API or a lost database connection. Start the API, then try again.
-      </p>
-      <Button onClick={reset}>Try again</Button>
+    <main id="main" className="page max-w-xl py-16">
+      <ErrorState
+        title="This page did not load"
+        message="Something went wrong on our side. Anything you already paid for is safe in Trips."
+        onRetry={reset}
+      />
+      <Link href="/trips" className={buttonClass('text', 'md', 'mt-4')}>
+        Open Trips
+      </Link>
     </main>
   );
 }

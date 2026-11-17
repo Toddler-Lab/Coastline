@@ -6,15 +6,13 @@ import dynamic from 'next/dynamic';
 const CoastMap = dynamic(() => import('./coast-map'), {
   ssr: false,
   loading: () => (
-    <div className="grid h-full w-full place-items-center bg-deep">
+    <div className="grid h-full w-full place-items-center bg-surface-alt">
       <div className="flex flex-col items-center gap-3">
         <span
           aria-hidden
-          className="h-7 w-7 animate-spin rounded-full border-2 border-sea border-t-transparent"
+          className="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent"
         />
-        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-mist">
-          Loading satellite view
-        </p>
+        <p className="text-body-sm text-muted">Loading satellite view</p>
       </div>
     </div>
   ),

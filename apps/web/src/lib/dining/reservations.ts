@@ -6,11 +6,11 @@ import type {
 import { MAX_RESERVATION_HOURS } from '@coastline/api-contracts';
 import { formatIsoDate, formatIsoTime } from '@/lib/format';
 
-export type ReservationTone = 'neutral' | 'sea' | 'sand' | 'success' | 'warn' | 'danger';
+export type ReservationTone = import('@/lib/tone').Tone;
 
 /** Path of the tourist-facing reservation detail page. */
 export function reservationHref(publicRef: string): string {
-  return `/food/reservations/${encodeURIComponent(publicRef)}`;
+  return `/trips/${encodeURIComponent(publicRef)}`;
 }
 
 export function reservationStatusPresentation(status: ReservationStatus): {
@@ -23,7 +23,7 @@ export function reservationStatusPresentation(status: ReservationStatus): {
     case 'CANCELLED':
       return { label: 'Cancelled', tone: 'danger' };
     default:
-      return { label: 'Confirmed', tone: 'sea' };
+      return { label: 'Confirmed', tone: 'info' };
   }
 }
 

@@ -1,125 +1,195 @@
 @import 'tailwindcss';
 @import 'maplibre-gl/dist/maplibre-gl.css';
 
-@theme {
-  --color-abyss: #041014;
-  --color-deep: #071a1f;
-  --color-surface: #0b2429;
-  --color-raised: #103038;
-  --color-foam: #e9f6f1;
-  --color-mist: #a7beb8;
-  --color-sea: #6fe7d2;
-  --color-sea-deep: #36b7a4;
-  --color-sand: #e7d4ae;
-  --color-coral: #ff6f4e;
-  --color-success: #8de3a5;
-  --color-warn: #f2c66d;
-  --color-danger: #ff8b7a;
-  --color-line: rgba(198, 230, 222, 0.14);
-  --color-line-strong: rgba(198, 230, 222, 0.28);
-
-  --font-display: var(--font-bricolage), 'Bricolage Grotesque', sans-serif;
-  --font-sans: var(--font-manrope), 'Manrope', system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), 'IBM Plex Mono', monospace;
-
-  --radius-panel: 18px;
-  --radius-card: 14px;
-}
+/*
+ * Coastline v2 design tokens (docs/design.md section 3).
+ * Components use these role tokens only, never raw colour values.
+ * Light is the default; dark applies by system preference unless the visitor
+ * picked a theme, which the server writes to <html data-theme>.
+ */
 
 :root {
+  color-scheme: light;
+  --bg: #f7f8f8;
+  --surface: #ffffff;
+  --surface-alt: #eef2f2;
+  --fg: #121a1c;
+  --muted: #56656a;
+  --line: #dde3e4;
+  --primary: #0e6e6a;
+  --on-primary: #ffffff;
+  --primary-soft: #ddf2ef;
+  --success: #1e7b3a;
+  --warn: #9a5b00;
+  --danger: #b3261e;
+  --info: #1f5fa8;
+  --scrim: rgb(0 0 0 / 0.45);
+  --shadow: 0 6px 24px rgb(18 26 28 / 0.1);
+
+  --accent-sea: #0b7a8f;
+  --accent-forest: #2f7d32;
+  --accent-lake: #2457a6;
+  --accent-hill: #8a5a1f;
+  --accent-heritage: #8e3b46;
+  --accent-neutral: #4f5b62;
+  --accent: var(--accent-neutral);
+
+  --topbar-h: 64px;
+  --bottombar-h: 64px;
+}
+
+:root[data-theme='dark'] {
   color-scheme: dark;
-  --header-height: 64px;
-  --banner-height: 30px;
+  --bg: #0f1415;
+  --surface: #171d1e;
+  --surface-alt: #1f2728;
+  --fg: #e8eeee;
+  --muted: #9aabae;
+  --line: #2c3638;
+  --primary: #5fd0c6;
+  --on-primary: #00302d;
+  --primary-soft: #123b39;
+  --success: #7bd88f;
+  --warn: #f2c46d;
+  --danger: #ff8a80;
+  --info: #8db8f2;
+  --scrim: rgb(0 0 0 / 0.6);
+  --shadow: 0 6px 24px rgb(0 0 0 / 0.45);
+
+  --accent-sea: #6fd3e6;
+  --accent-forest: #8fd694;
+  --accent-lake: #93b7f0;
+  --accent-hill: #e3b474;
+  --accent-heritage: #eba2ab;
+  --accent-neutral: #b2bec4;
 }
 
-* {
-  border-color: var(--color-line);
-  scrollbar-width: thin;
-  scrollbar-color: rgba(111, 231, 210, 0.28) transparent;
-}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #0f1415;
+    --surface: #171d1e;
+    --surface-alt: #1f2728;
+    --fg: #e8eeee;
+    --muted: #9aabae;
+    --line: #2c3638;
+    --primary: #5fd0c6;
+    --on-primary: #00302d;
+    --primary-soft: #123b39;
+    --success: #7bd88f;
+    --warn: #f2c46d;
+    --danger: #ff8a80;
+    --info: #8db8f2;
+    --scrim: rgb(0 0 0 / 0.6);
+    --shadow: 0 6px 24px rgb(0 0 0 / 0.45);
 
-/* Custom sleek dark scrollbar across browsers */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(111, 231, 210, 0.22);
-  border-radius: 999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(111, 231, 210, 0.45);
-}
-
-::-webkit-scrollbar-button {
-  display: none;
-  width: 0;
-  height: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: calc(var(--header-height) + var(--banner-height) + 16px);
-}
-
-body {
-  background: var(--color-abyss);
-  color: var(--color-foam);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  overflow-x: hidden;
-}
-
-::selection {
-  background: var(--color-sea);
-  color: var(--color-abyss);
-}
-
-:focus-visible {
-  outline: 2px solid var(--color-sea);
-  outline-offset: 3px;
-}
-
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
-
-button {
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-button:disabled {
-  cursor: not-allowed;
-}
-
-@layer base {
-  h1,
-  h2,
-  h3,
-  h4 {
-    font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: 1.02;
-    text-wrap: balance;
-  }
-
-  p {
-    text-wrap: pretty;
+    --accent-sea: #6fd3e6;
+    --accent-forest: #8fd694;
+    --accent-lake: #93b7f0;
+    --accent-hill: #e3b474;
+    --accent-heritage: #eba2ab;
+    --accent-neutral: #b2bec4;
   }
 }
 
-@utility text-balance {
-  text-wrap: balance;
+/* Destination accent, set by the operator per destination. */
+[data-accent='SEA'] {
+  --accent: var(--accent-sea);
+}
+[data-accent='FOREST'] {
+  --accent: var(--accent-forest);
+}
+[data-accent='LAKE'] {
+  --accent: var(--accent-lake);
+}
+[data-accent='HILL'] {
+  --accent: var(--accent-hill);
+}
+[data-accent='HERITAGE'] {
+  --accent: var(--accent-heritage);
+}
+[data-accent='NEUTRAL'] {
+  --accent: var(--accent-neutral);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-scrim: var(--scrim);
+
+  --font-sans: var(--font-inter), var(--font-hind), system-ui, sans-serif;
+  --font-bangla: var(--font-hind), var(--font-inter), system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, Consolas, monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --shadow-soft: var(--shadow);
+}
+
+/* Compact < 600, medium 600-1023, expanded >= 1024 (design.md 4). */
+@theme {
+  --breakpoint-md: 37.5rem;
+  --breakpoint-lg: 64rem;
+}
+
+/* Type scale (design.md 3.3). */
+@utility text-display {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  @media (width >= 1024px) {
+    font-size: 40px;
+    line-height: 48px;
+  }
+}
+@utility text-title-lg {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+@utility text-title {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+}
+@utility text-title-sm {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+}
+@utility text-body {
+  font-size: 16px;
+  line-height: 24px;
+}
+@utility text-body-sm {
+  font-size: 14px;
+  line-height: 20px;
+}
+@utility text-label {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+@utility text-caption {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
 }
 
 @utility scrollbar-none {
@@ -129,296 +199,140 @@ button:disabled {
   }
 }
 
-@utility hairline {
-  border: 1px solid var(--color-line);
-}
-
-@utility panel {
-  background: linear-gradient(
-    155deg,
-    rgba(16, 48, 56, 0.72) 0%,
-    rgba(7, 26, 31, 0.9) 58%,
-    rgba(4, 16, 20, 0.96) 100%
-  );
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-panel);
-  backdrop-filter: blur(18px);
-}
-
-@utility label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  line-height: 1.2;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-mist);
-}
-
-@utility grid-paper {
-  background-image:
-    linear-gradient(to right, rgba(198, 230, 222, 0.055) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(198, 230, 222, 0.055) 1px, transparent 1px);
-  background-size: 56px 56px;
-}
-
-/* Corner survey ticks: quiet cartographic signature. */
-@utility corner-ticks {
-  position: relative;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    width: 9px;
-    height: 9px;
-    pointer-events: none;
-    opacity: 0.6;
+/* Page side margins 16 / 24 / 32 and the 1200 content width (design.md 3.4). */
+@utility page {
+  width: 100%;
+  max-width: 1264px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  @media (width >= 600px) {
+    padding-inline: 24px;
   }
-
-  &::before {
-    top: 9px;
-    left: 9px;
-    border-top: 1px solid var(--color-sea);
-    border-left: 1px solid var(--color-sea);
-  }
-
-  &::after {
-    right: 9px;
-    bottom: 9px;
-    border-right: 1px solid var(--color-sea);
-    border-bottom: 1px solid var(--color-sea);
+  @media (width >= 1024px) {
+    padding-inline: 32px;
   }
 }
 
-/* Map ---------------------------------------------------------------- */
-
-.maplibregl-map {
-  font-family: var(--font-sans);
+/* Horizontal rows that bleed to the screen edge on phones. */
+@utility bleed-row {
+  margin-inline: -16px;
+  padding-inline: 16px;
+  scroll-padding-inline: 16px;
+  @media (width >= 600px) {
+    margin-inline: -24px;
+    padding-inline: 24px;
+    scroll-padding-inline: 24px;
+  }
 }
 
-.maplibregl-ctrl-attrib {
-  background: rgba(4, 16, 20, 0.78) !important;
-  color: rgba(233, 246, 241, 0.55) !important;
-  font-family: var(--font-mono) !important;
-  font-size: 9px !important;
-  padding: 2px 6px !important;
-  border-radius: 6px !important;
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--topbar-h) + 64px);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 24px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  :lang(bn) {
+    font-family: var(--font-bangla);
+    line-height: 1.65;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--primary-soft);
+    color: var(--fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button {
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  dialog {
+    color: var(--fg);
+  }
+
+  dialog::backdrop {
+    background: var(--scrim);
+  }
 }
 
-.maplibregl-ctrl-attrib a {
-  color: rgba(233, 246, 241, 0.72) !important;
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
-.maplibregl-ctrl-attrib-button {
-  display: none !important;
-}
-
-.maplibregl-ctrl-group {
-  background: rgba(7, 26, 31, 0.88) !important;
-  border: 1px solid var(--color-line) !important;
-  backdrop-filter: blur(12px);
-  border-radius: 10px !important;
-  overflow: hidden;
-}
-
-.maplibregl-ctrl-group button + button {
-  border-top: 1px solid var(--color-line) !important;
-}
-
-.maplibregl-ctrl-group button span {
-  filter: invert(1) opacity(0.72);
-}
-
-.maplibregl-canvas:focus-visible {
-  outline: 2px solid var(--color-sea);
-  outline-offset: -2px;
-}
-
-/* A beach point: numbered survey pin with an always-visible name card. */
-.point-marker {
-  /* MapLibre positions markers absolutely; a relative marker would enter the
-     canvas flow and push later pins down the page. */
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  border: 0;
-  background: transparent;
+/* Sheets: bottom sheet on compact screens, centred dialog from 1024. */
+.sheet {
+  margin: auto auto 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: calc(100dvh - 48px);
+  border-radius: 20px 20px 0 0;
   padding: 0;
-  color: var(--color-foam);
-  cursor: pointer;
+  border: 0;
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
-
-.point-marker__pin {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-abyss);
-  background: var(--color-sea);
-  border: 2px solid rgba(4, 16, 20, 0.9);
-  box-shadow:
-    0 0 0 1px rgba(111, 231, 210, 0.55),
-    0 10px 26px rgba(0, 0, 0, 0.55);
-  transition:
-    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
-    background 180ms ease;
+.sheet[open] {
+  animation: sheet-up 220ms ease-out;
 }
-
-.point-marker__card {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  white-space: nowrap;
-  background: rgba(4, 16, 20, 0.86);
-  border: 1px solid var(--color-line-strong);
-  border-radius: 6px;
-  padding: 3px 7px;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-}
-
-.point-marker__free {
-  color: var(--color-success);
-}
-
-/* At the coast-wide zoom the three Cox's Bazar town pins are spread apart and
-   their cards would collide; the numbered pins and the rail carry the names. */
-.map-wide .point-marker--cluster .point-marker__card {
-  display: none;
-}
-
-.map-wide .point-marker--cluster:hover .point-marker__card,
-.map-wide .point-marker--cluster:focus-visible .point-marker__card {
-  display: flex;
-}
-
-.point-marker:hover .point-marker__pin,
-.point-marker:focus-visible .point-marker__pin {
-  transform: scale(1.1);
-}
-
-.point-marker[aria-pressed='true'] .point-marker__pin {
-  background: var(--color-sand);
-  box-shadow:
-    0 0 0 1px rgba(231, 212, 174, 0.7),
-    0 10px 30px rgba(0, 0, 0, 0.55);
-}
-
-.point-marker[aria-pressed='true'] .point-marker__card {
-  border-color: rgba(231, 212, 174, 0.55);
-}
-
-/* A sunbed: compact coded pill. Colour encodes state, icon-free. */
-.bed-marker {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 48px;
-  height: 22px;
-  padding: 0 4px;
-  border-radius: 999px;
-  border: 1.5px solid rgba(4, 16, 20, 0.85);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  color: var(--color-abyss);
-  background: var(--color-success);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
-  transition:
-    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 160ms ease;
-  cursor: pointer;
-}
-
-.bed-marker--booked {
-  color: rgba(233, 246, 241, 0.92);
-  background: #7c2d22;
-}
-
-.bed-marker--mine {
-  color: var(--color-abyss);
-  background: var(--color-warn);
-}
-
-.bed-marker--selected {
-  color: var(--color-abyss);
-  background: var(--color-sea);
-  box-shadow:
-    0 0 0 3px rgba(4, 16, 20, 0.9),
-    0 0 0 5px rgba(111, 231, 210, 0.85),
-    0 8px 22px rgba(0, 0, 0, 0.5);
-  transform: scale(1.08);
-}
-
-.bed-marker--off {
-  color: rgba(233, 246, 241, 0.55);
-  background: rgba(58, 76, 74, 0.92);
-  border-style: dashed;
-}
-
-.bed-marker:hover:not(:disabled),
-.bed-marker:focus-visible:not(:disabled) {
-  transform: scale(1.1);
-}
-
-.bed-marker:disabled {
-  cursor: not-allowed;
-  opacity: 0.9;
-}
-
-/* Legend chips */
-.state-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 999px;
-  display: inline-block;
-  flex: none;
-}
-
-.state-dot--free {
-  background: var(--color-success);
-}
-.state-dot--booked {
-  background: #a8453a;
-}
-.state-dot--mine {
-  background: var(--color-warn);
-}
-.state-dot--selected {
-  background: var(--color-sea);
-}
-.state-dot--off {
-  background: #5a6d69;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -500px 0;
+@media (width >= 1024px) {
+  .sheet {
+    margin: auto;
+    max-width: 560px;
+    border-radius: 20px;
   }
-  100% {
-    background-position: 500px 0;
+  .sheet[open] {
+    animation: fade-in 180ms ease-out;
   }
 }
 
 @keyframes sheet-up {
   from {
-    opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(24px);
+    opacity: 0.4;
   }
   to {
-    opacity: 1;
     transform: translateY(0);
+    opacity: 1;
   }
 }
 
@@ -431,23 +345,20 @@ button:disabled {
   }
 }
 
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(198, 230, 222, 0.05) 0%,
-    rgba(198, 230, 222, 0.11) 45%,
-    rgba(198, 230, 222, 0.05) 100%
-  );
-  background-size: 1000px 100%;
-  animation: shimmer 1.8s linear infinite;
-}
-
-.animate-sheet-up {
-  animation: sheet-up 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
 .animate-fade-in {
-  animation: fade-in 240ms ease-out both;
+  animation: fade-in 200ms ease-out;
+}
+
+.skeleton {
+  background: var(--surface-alt);
+  border-radius: 8px;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.55;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -456,7 +367,118 @@ button:disabled {
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------- Map ---- */
+
+.maplibregl-map {
+  font-family: var(--font-sans);
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 11px;
+}
+
+.maplibregl-ctrl-group {
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.maplibregl-ctrl-group button {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.point-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.point-marker__pin {
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--fg);
+  border: 2px solid var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+
+.point-marker__card {
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--fg);
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+}
+
+.point-marker[aria-pressed='true'] .point-marker__pin,
+.point-marker:hover .point-marker__pin {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.bed-marker {
+  min-width: 44px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border: 2px solid var(--success);
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+}
+
+.bed-marker--selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+
+.bed-marker--mine {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  border-style: dashed;
+}
+
+.bed-marker--booked {
+  background: var(--surface-alt);
+  border-color: var(--danger);
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.bed-marker--off {
+  background: var(--surface-alt);
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.bed-marker:disabled {
+  cursor: not-allowed;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
   }
 }

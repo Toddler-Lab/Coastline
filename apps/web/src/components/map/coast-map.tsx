@@ -111,6 +111,7 @@ export default function CoastMap({
   pointHandler.current = onSelectPoint;
   bedHandler.current = onToggleBed;
   const readyHandler = useRef(onReady);
+  const initialPoints = useRef(points);
   readyHandler.current = onReady;
 
   useEffect(() => {
@@ -120,17 +121,28 @@ export default function CoastMap({
 
     setWorkerUrl('/maplibre-gl-worker.mjs');
 
+    // The camera follows the destination's own points instead of fixed bounds,
+    // so any destination an operator adds frames correctly.
+    const initial = initialPoints.current;
+    const lons = initial.map((point) => point.longitude);
+    const lats = initial.map((point) => point.latitude);
+    const margin = 0.35;
+    const hasPoints = initial.length > 0;
     const map = new MapLibreMap({
       container: containerRef.current,
       style: SATELLITE_STYLE,
-      center: [92.02, 21.33],
-      zoom: 9.4,
-      minZoom: 8.0,
+      center: hasPoints
+        ? [(Math.min(...lons) + Math.max(...lons)) / 2, (Math.min(...lats) + Math.max(...lats)) / 2]
+        : [90.4, 23.7],
+      zoom: hasPoints ? 9.4 : 6,
+      minZoom: 6,
       maxZoom: 18.5,
-      maxBounds: [
-        [91.8, 20.65],
-        [92.45, 21.75],
-      ],
+      maxBounds: hasPoints
+        ? [
+            [Math.min(...lons) - margin, Math.min(...lats) - margin],
+            [Math.max(...lons) + margin, Math.max(...lats) + margin],
+          ]
+        : undefined,
       dragRotate: false,
       pitchWithRotate: false,
       touchPitch: false,
@@ -189,13 +201,8 @@ export default function CoastMap({
 
     const bounds = new LngLatBounds();
     points.forEach((point) => bounds.extend([point.longitude, point.latitude]));
-    // On desktop the left rail and booking panel cover the map edges. Keep the
-    // pins in the open strip between them so no marker lands under a panel.
-    const wide = window.innerWidth >= 1024;
     map.fitBounds(bounds, {
-      padding: wide
-        ? { top: 90, right: 440, bottom: 110, left: 344 }
-        : { top: 70, right: 54, bottom: 96, left: 54 },
+      padding: { top: 60, right: 60, bottom: 60, left: 60 },
       maxZoom: 12,
       duration: 0,
     });
@@ -312,22 +319,20 @@ export default function CoastMap({
   }, [selectedPointCode, points, ready]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-deep">
+    <div className="relative h-full w-full overflow-hidden bg-surface-alt">
       <div
         ref={containerRef}
         className="h-full w-full"
-        aria-label="Satellite map of Cox's Bazar beach points"
+        aria-label="Satellite map of the beach and its sunbeds"
       />
       {!ready ? (
-        <div className="absolute inset-0 z-10 grid place-items-center bg-deep">
+        <div className="absolute inset-0 z-10 grid place-items-center bg-surface-alt">
           <div className="flex flex-col items-center gap-3">
             <span
               aria-hidden
-              className="h-7 w-7 animate-spin rounded-full border-2 border-sea border-t-transparent"
+              className="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent"
             />
-            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-mist">
-              Loading satellite view
-            </p>
+            <p className="text-body-sm text-muted">Loading satellite view</p>
           </div>
         </div>
       ) : null}
