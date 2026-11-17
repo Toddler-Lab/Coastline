@@ -35,7 +35,10 @@ function storeDouble() {
 }
 
 async function run(store: ReturnType<typeof storeDouble>, handler: CallHandler): Promise<unknown> {
-  const interceptor = new IdempotencyInterceptor(store as unknown as IdempotencyService);
+  const interceptor = new IdempotencyInterceptor(
+    store as unknown as IdempotencyService,
+    new Reflector(),
+  );
   return lastValueFrom(await interceptor.intercept(contextFor({ a: 1 }), handler));
 }
 
@@ -56,10 +59,7 @@ describe('IdempotencyInterceptor (unit)', () => {
     const store = storeDouble();
     const error = new ConflictException({ code: 'CONFLICT', message: 'Taken' });
     await expect(run(store, { handle: () => throwError(() => error) })).rejects.toBe(error);
-    expect(store.complete).toHaveBeenCalledWith('row-1', 409, {
-      code: 'CONFLICT',
-      message: 'Taken',
-    });
+    expect(store.complete).toHaveBeenCalledWith('row-1', 409, { code: 'CONFLICT', message: 'Taken' });
     expect(store.release).not.toHaveBeenCalled();
   });
 
