@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Headers,
-  Param,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type {
   AdminOrderDto,
@@ -17,6 +9,7 @@ import type {
 import type { Actor } from '../../common/auth/actor';
 import { Roles } from '../../common/auth/auth.decorators';
 import { CurrentActor } from '../../common/auth/current-actor.decorator';
+import { notFound } from '../../common/errors/api-errors';
 import { CatalogueService } from '../catalogue/catalogue.service';
 import { AdminOrderQueryDto } from './dto/admin-order-query.dto';
 import { CancelOrderDto } from './dto/cancel-order.dto';
@@ -58,13 +51,13 @@ export class AdminOrdersController {
     @Headers('x-request-id') requestId?: string,
   ): Promise<{ data: AdminOrderDto }> {
     const updated = await this.ordersService.cancelOrder(actor, ref, dto, requestId);
-    // Cast to AdminOrderDto (order has actor tourist info)
-    return {
-      data: {
-        ...updated,
-        tourist: { id: actor.id, name: actor.name, email: actor.email },
-      },
-    };
+    // Re-read through the admin view so `tourist` is the guest, not the admin who cancelled.
+    const list = await this.ordersService.findAdminOrders({ ref: updated.publicRef });
+    const order = list.orders.find((item) => item.publicRef === updated.publicRef);
+    if (!order) {
+      throw notFound(`Booking ${updated.publicRef} was not found.`);
+    }
+    return { data: order };
   }
 
   @Post('orders/:ref/check-in')
@@ -84,4 +77,3 @@ export class AdminOrdersController {
     return { data: result };
   }
 }
-

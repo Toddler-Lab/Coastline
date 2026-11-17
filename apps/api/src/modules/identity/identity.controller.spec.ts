@@ -49,6 +49,8 @@ describeDb(
           name: 'Test Tourist',
           email: 'tourist@test.example',
           role: 'TOURIST',
+          providers: [],
+          deskDestinations: [],
         });
 
         const admin = await request(app.getHttpServer())

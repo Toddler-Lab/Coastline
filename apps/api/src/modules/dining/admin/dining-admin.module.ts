@@ -8,5 +8,6 @@ import { DiningAdminService } from './dining-admin.service';
   imports: [AuditModule],
   controllers: [DiningAdminController],
   providers: [DiningAdminService],
+  exports: [DiningAdminService],
 })
 export class DiningAdminModule {}

@@ -35,10 +35,7 @@ function storeDouble() {
 }
 
 async function run(store: ReturnType<typeof storeDouble>, handler: CallHandler): Promise<unknown> {
-  const interceptor = new IdempotencyInterceptor(
-    store as unknown as IdempotencyService,
-    new Reflector(),
-  );
+  const interceptor = new IdempotencyInterceptor(store as unknown as IdempotencyService);
   return lastValueFrom(await interceptor.intercept(contextFor({ a: 1 }), handler));
 }
 

@@ -353,6 +353,18 @@ export class ReservationsService {
 
   /* Admin ------------------------------------------------------------------- */
 
+  /** One reservation by reference, for staff lookups (scope is checked by the caller). */
+  async adminGet(publicRef: string): Promise<AdminReservationDto> {
+    const row = await this.prisma.tableReservation.findFirst({
+      where: { publicRef: { equals: publicRef.trim(), mode: 'insensitive' } },
+      include: RESERVATION_INCLUDE,
+    });
+    if (!row) {
+      throw notFound(`Reservation ${publicRef} was not found.`);
+    }
+    return serializeAdminReservation(row, this.tickets, new Date());
+  }
+
   async adminList(query: AdminReservationQueryDto): Promise<AdminReservationDto[]> {
     const where: Prisma.TableReservationWhereInput = {};
     if (query.date) {

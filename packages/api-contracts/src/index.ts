@@ -987,3 +987,17 @@ export interface CheckoutQuoteDto {
   totalMinor: number;
   currency: string;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Desk (WP-23, first part)                                                   */
+/* -------------------------------------------------------------------------- */
+
+/** `POST /desk/lookup`: a scanned ticket payload or a typed reference. */
+export interface DeskLookupRequest {
+  query: string;
+}
+
+/** A booking found at the desk: sunbeds and rooms, or a table reservation. */
+export type DeskLookupDto =
+  | { kind: 'order'; order: AdminOrderDto }
+  | { kind: 'reservation'; reservation: AdminReservationDto };

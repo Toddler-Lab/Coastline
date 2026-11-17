@@ -37,10 +37,11 @@ const REPLAYABLE_ERROR_STATUSES = new Set([400, 404, 409, 422]);
  */
 @Injectable()
 export class IdempotencyInterceptor implements NestInterceptor {
-  constructor(
-    private readonly store: IdempotencyService,
-    @Inject(Reflector) private readonly reflector: Reflector,
-  ) {}
+  // Reflector only reads decorator metadata and holds no state, so the interceptor
+  // owns one instead of depending on module order for its injection.
+  private readonly reflector = new Reflector();
+
+  constructor(@Inject(IdempotencyService) private readonly store: IdempotencyService) {}
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
     const http = context.switchToHttp();

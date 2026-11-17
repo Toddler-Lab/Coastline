@@ -7,6 +7,7 @@ import { AllowAnonymous } from '../../common/auth/auth.decorators';
 import { CurrentActor } from '../../common/auth/current-actor.decorator';
 import type { Actor } from '../../common/auth/actor';
 import { notFound } from '../../common/errors/api-errors';
+import { WorkspaceScopeService } from '../workspaces/workspace-scope.service';
 
 @ApiTags('identity')
 @Controller()
@@ -14,16 +15,25 @@ export class IdentityController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    private readonly scope: WorkspaceScopeService,
   ) {}
 
   @Get('session')
-  session(@CurrentActor() actor: Actor): ApiEnvelope<SessionUser> {
+  async session(@CurrentActor() actor: Actor): Promise<ApiEnvelope<SessionUser>> {
+    // Workspace scope is reported so the web app can show the right workspaces;
+    // every endpoint still checks scope on its own.
+    const [providers, deskDestinations] = await Promise.all([
+      actor.role === 'PROVIDER' ? this.scope.memberships(actor.id) : Promise.resolve([]),
+      actor.role === 'DESK' ? this.scope.deskDestinationSlugs(actor.id) : Promise.resolve([]),
+    ]);
     return {
       data: {
         id: actor.id,
         name: actor.name,
         email: actor.email,
         role: actor.role,
+        providers,
+        deskDestinations,
       },
     };
   }

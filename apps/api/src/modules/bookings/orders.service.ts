@@ -460,14 +460,20 @@ export class OrdersService {
       where.items = { some: { beachPointCode: query.pointCode.toUpperCase() } };
     }
     if (query.date) {
+      // A day holds the sunbed hours that start on it and the hotel stays that check in on it.
       const dayStart = dhakaHourToUtc(query.date, 0);
       const dayEnd = dhakaHourToUtc(query.date, 24);
-      where.items = {
-        some: {
-          ...(where.items && 'some' in where.items ? where.items.some : {}),
-          startAt: { gte: dayStart, lt: dayEnd },
+      const sunbedsOnDay: Prisma.OrderWhereInput = {
+        items: {
+          some: {
+            ...(query.pointCode ? { beachPointCode: query.pointCode.toUpperCase() } : {}),
+            startAt: { gte: dayStart, lt: dayEnd },
+          },
         },
       };
+      const staysOnDay: Prisma.OrderWhereInput = { hotelBookings: { some: { checkInDate: query.date } } };
+      delete where.items;
+      where.OR = query.pointCode ? [sunbedsOnDay] : [sunbedsOnDay, staysOnDay];
     }
 
     const orders = await this.prisma.order.findMany({

@@ -64,7 +64,11 @@ export class DiningAdminService {
     private readonly audit: AuditService,
   ) {}
 
-  async getOverview(dateKey: string = dhakaDateKey()): Promise<DiningAdminOverviewDto> {
+  /** `venueIds` limits the figures to those venues (provider scope); omit for all. */
+  async getOverview(
+    dateKey: string = dhakaDateKey(),
+    venueIds?: string[],
+  ): Promise<DiningAdminOverviewDto> {
     if (!isDateKey(dateKey)) {
       throw unprocessable('date is not a real calendar date.', {
         issues: [{ field: 'date', message: 'date is not a real calendar date.' }],
@@ -72,17 +76,26 @@ export class DiningAdminService {
     }
     const dayStart = dhakaHourToUtc(dateKey, 0);
     const dayEnd = dhakaHourToUtc(dateKey, 24);
+    const inScope = venueIds ? { venueId: { in: venueIds } } : {};
 
     const [venueCount, reservationsToday, openFoodOrders, revenue] = await Promise.all([
-      this.prisma.diningVenue.count({ where: { isActive: true } }),
+      this.prisma.diningVenue.count({
+        where: { isActive: true, ...(venueIds ? { id: { in: venueIds } } : {}) },
+      }),
       this.prisma.tableReservation.count({
-        where: { status: { not: 'CANCELLED' }, startAt: { gte: dayStart, lt: dayEnd } },
+        where: { ...inScope, status: { not: 'CANCELLED' }, startAt: { gte: dayStart, lt: dayEnd } },
       }),
       // Live kitchen queue, independent of the selected date.
-      this.prisma.foodOrder.count({ where: { status: { in: [...OPEN_FOOD_ORDER_STATUSES] } } }),
+      this.prisma.foodOrder.count({
+        where: { ...inScope, status: { in: [...OPEN_FOOD_ORDER_STATUSES] } },
+      }),
       this.prisma.foodOrder.aggregate({
         _sum: { totalMinor: true },
-        where: { status: { not: 'CANCELLED' }, placedAt: { gte: dayStart, lt: dayEnd } },
+        where: {
+          ...inScope,
+          status: { not: 'CANCELLED' },
+          placedAt: { gte: dayStart, lt: dayEnd },
+        },
       }),
     ]);
 
@@ -96,8 +109,9 @@ export class DiningAdminService {
     };
   }
 
-  async listVenues(): Promise<DiningAdminVenueDto[]> {
+  async listVenues(venueIds?: string[]): Promise<DiningAdminVenueDto[]> {
     const venues = await this.prisma.diningVenue.findMany({
+      where: venueIds ? { id: { in: venueIds } } : undefined,
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       include: ADMIN_VENUE_INCLUDE,
     });
