@@ -1,7 +1,7 @@
-# Smart Cox’s Bazar (Coastline)
+# Coastline
 
-> **Proposal-Stage Demonstrator · Bay of Bengal Coastal Services Platform**  
-> *Smart digital discovery, shoreline sunbed reservation, and regulatory governance demonstrator for the Cox’s Bazar 120 km coastal corridor.*
+> **Tourism service platform for Bangladesh**  
+> *Pick a destination and a spot, then find and book everything there: stays, food, sunbeds, rides, boats, tours, entry tickets and photographers, with help on the spot.*
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16.4-black.svg)](https://nextjs.org/)
@@ -14,8 +14,15 @@
 ---
 
 > [!IMPORTANT]
-> **Proposal Demo — Simulated Operations Only**  
-> This platform is a technology proposal and demonstrator. Tariffs, booking orders, mock payment gateways, merchant revenue, desk check-ins, and administrative approvals are simulated. No real money is collected or owed, and no official government endorsement, legally binding procurement, or regulatory authority is implied.
+> **Redesign in progress (branch `redesign/v2`).** Coastline is being rebuilt from a Cox's Bazar
+> beach product into a multi-destination service platform. The target is described in
+> [docs/design.md](docs/design.md) and built in the order of
+> [docs/implementation-plan.md](docs/implementation-plan.md). Sections marked *current build*
+> describe what runs today.
+>
+> **Payments and affiliation.** Payments use a sandbox gateway: every payment, commission and
+> payout is recorded, and no money moves. Coastline is an independent platform; nothing implies
+> government endorsement or official tariffs.
 
 ---
 
@@ -23,8 +30,8 @@
 
 - [Overview](#overview)
 - [Key Features](#key-features)
-  - [Live & Fully Operational](#live--fully-operational)
-  - [Future Modules (In Development)](#future-modules-in-development)
+  - [Target (v2)](#target-v2)
+  - [Current build](#current-build)
 - [Technology Stack & Monorepo Architecture](#technology-stack--monorepo-architecture)
 - [Prerequisites](#prerequisites)
 - [Quick Start Guide](#quick-start-guide)
@@ -46,18 +53,38 @@
 
 ## Overview
 
-**Coastline** addresses critical challenges faced by tourists and municipal authorities in Cox's Bazar, Bangladesh—home to the world's longest unbroken natural sandy sea beach:
-- **Price Transparency**: Eliminates arbitrary overcharging with fixed, benchmarked hourly bed rates.
-- **Shoreline Sunbed Management**: Live real-time visibility of sunbed rows across 6 certified beach points.
-- **Instant Booking & QR Tickets**: Frictionless reserving, simulated mobile payment, and cryptographically signed QR tickets for beach check-in.
-- **Field Desk Validation**: Digital ticket scanner for beach attendants and administrators.
-- **Cohesive Tourism Ecosystem**: Architectural blueprints for Hotels, Beach Dining, Transport (Tomtom/Jeep), and Water Sports.
+Coastline brings every service a tourist needs at a destination into one place. The operator adds
+destinations (Cox's Bazar, Sylhet, Rangamati, ...) and their spots (Laboni Beach, Ratargul, Kaptai
+Lake, ...) from the admin console. Service providers run their own business in a provider portal,
+spot staff run a desk, and the platform earns a commission on each booking.
+
+| Workspace | Who | What they do |
+|---|---|---|
+| Visitor | Tourists | Explore destinations and spot hubs, book through one checkout, keep tickets in Trips, message providers, hire photographers, get help |
+| Provider | Hotels, restaurants, sunbed operators, transport, boats, tours, guides, photographers, ticketed sites | Listings, prices, availability, bookings, check-in, bids, earnings |
+| Desk | Spot staff | Ticket scan, lost and found, complaints, alerts |
+| Admin | Platform operator | Destinations and spots, approvals, commission, payments and payouts, audit |
 
 ---
 
 ## Key Features
 
-### Live & Fully Operational
+### Target (v2)
+
+- **Explore and spot hubs:** every spot shows what you can book, what is nearby (ATM, pharmacy,
+  hospital, washroom, prayer room), what to know (rules, safety, best time) and where to get help.
+- **One checkout and one ticket** for stays, food, sunbeds, rides, boats, tours and entry tickets.
+- **Photographers:** book a package (for example 20 photos for Tk 100, or Tk 5 per photo) or post a
+  request and compare sealed bids; pay a deposit, keep the photos you want, pay the balance.
+- **Help:** emergency information, lost and found with verified claims and desk handover, and
+  problem reports.
+- **Inbox, reviews and saved items.**
+- **Business model:** commission per booking, double-entry ledger, provider payouts.
+- **Light and dark themes, Bangla and English, phone-first.** Sign-in is the last phase.
+
+### Current build
+
+What runs on `dev` today, before the redesign:
 
 1. **Interactive 2D Shoreline Map**:
    - Built on [MapLibre GL](https://maplibre.org/) with multi-layer high-resolution satellite imagery and customized nautical bathymetry styling.
@@ -103,14 +130,8 @@
    - Reservations and food orders appear on `/bookings`.
    - Operations desk at `/admin/dining`: overview, venue and menu editing, reservation check-in and a kitchen queue.
 
----
-
-### Future Modules (In Development)
-
-The navigation menu provides full architectural templates and specifications for future modules:
-- 🏨 **Hotels & Coastal Resorts (`/hotels`)**: Government-benchmarked room tariffs, direct hotel contact directory, verified amenities, and anti-gouging provenance.
-- 🛺 **Rides & Beach Transport (`/rides`)**: Fixed-fare electric Tomtoms, open-top 4WD Chander Gari Marine Drive safari jeeps, and driver ID verification.
-- 🏄 **Water Sports & Sea Adventures (`/activities`)**: Licensed Jet ski wave running, coastal parasailing flights, and surfing academy reservations with tide alert safety integration.
+7. **Hotels (`/hotels`)**: hotel list, hotel pages and room booking. Rides (`/rides`) and water
+   sports (`/activities`) are placeholder pages; in v2 they become bookable services.
 
 ---
 
@@ -260,7 +281,9 @@ Once started, the following services are available:
 
 ## Demo Personas
 
-The system includes pre-seeded demo personas accessible via the persona dropdown in the top header:
+Seeded accounts are picked from the switcher in the top header while `DEMO_AUTH_ENABLED=true`
+(local only; real sign-in is the last phase of the redesign, and v2 adds seeded provider and desk
+accounts). Current build:
 
 1. **Rahim Ahmed (`TOURIST`)**:
    - Regular domestic tourist visiting Cox's Bazar.
@@ -402,22 +425,22 @@ As codified in [AGENTS.md](AGENTS.md):
 
 ## Documentation Index
 
-Detailed architectural and requirements documentation is maintained under the `docs/` folder:
-
-- [Product Requirements Document (PRD)](docs/PRD.md)
-- [System Architecture](docs/architecture.md)
-- [Technology Stack Decision (ADR-001)](docs/ADR-001-stack.md)
-- [Data Model & Database Schema](docs/data-model.md)
-- [REST API Specification](docs/api.md)
-- [UI/UX Design System](docs/design.md)
-- [Security & Authorization Policy](docs/security.md)
-- [Domain Workflows & Lifecycle States](docs/workflows.md)
-- [Testing Strategy & Quality Gates](docs/testing.md)
-- [Operations & Deployment Guide](docs/operations.md)
-- [Delivery Roadmap & Milestones](docs/delivery-plan.md)
+| Work area | Read |
+|---|---|
+| Any change | [AGENTS.md](AGENTS.md), then your work package in [docs/implementation-plan.md](docs/implementation-plan.md) |
+| Product scope and services | [docs/PRD.md](docs/PRD.md) |
+| UI, layout, navigation, pages | [docs/design.md](docs/design.md) |
+| Database and migrations | [docs/data-model.md](docs/data-model.md) |
+| Endpoints | [docs/api.md](docs/api.md) |
+| Booking, photographers, payments, lost and found, complaints | [docs/workflows.md](docs/workflows.md) |
+| Roles, scopes, uploads, privacy | [docs/security.md](docs/security.md) |
+| Modules and structure | [docs/architecture.md](docs/architecture.md), [ADR-001](docs/ADR-001-stack.md), [ADR-002](docs/ADR-002-multi-destination-platform.md) |
+| Tests | [docs/testing.md](docs/testing.md) |
+| Configuration and deployment | [docs/operations.md](docs/operations.md) |
+| Milestones | [docs/delivery-plan.md](docs/delivery-plan.md) |
 
 ---
 
 ## License
 
-This demonstrator repository is created as a technology proposal. All rights reserved.
+All rights reserved.

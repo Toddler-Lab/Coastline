@@ -1,61 +1,90 @@
 # Security, Privacy and Access Control
 
-**Status:** prototype baseline; production legal/privacy review required
+**Status:** v2 target. Sign-in is built in the last phase; production use needs a legal and privacy
+review.
 
 ## 1. Threat boundaries
 
-Protect accounts, provider-scoped data, booking inventory, bid/evaluation records, audit history and
-finance demonstrations from unauthorized access or tampering. Assume browser input is hostile. The
-demo must not collect real payment credentials or imply public authority.
+Protect accounts, provider-scoped data, inventory, payments and ledger, bids, lost-and-found private
+details, complaints and audit history. Treat all browser input as hostile. Never collect real
+payment credentials while the sandbox gateway is active. Never imply public authority.
 
-## 2. Authentication
+## 2. Identity before and after sign-in
 
-Email/password hashed with Argon2id. Browser sessions use opaque, database-backed tokens delivered
-in Secure, HttpOnly, SameSite=Lax cookies. Store only a hash of the session token and a hash of the
-CSRF token. Rotate sessions at login and privilege change; revoke on logout; enforce idle and absolute
-expiry. Add double-submit CSRF protection. No auth tokens in localStorage.
+**Until the sign-in phase:** a seeded-account switcher picks one of the synthetic accounts (tourists,
+providers of each type, desk staff, admin). The web app sends it as `x-demo-user-id`. This works
+only when `DEMO_AUTH_ENABLED=true` and `APP_ENV` is `local` or `staging`; the API refuses to start
+with it enabled in production. Every guard and scope check below runs exactly as it will after
+sign-in, so authorization is real from day one.
 
-Throttle login with an in-memory limiter for the single-instance MVP; replace with a shared store
-before horizontal scaling. Demo password reset is non-delivering and labelled. Seed accounts must
-fail closed in production.
+**Sign-in phase:** phone number with a one-time code (email optional). Database-backed opaque
+sessions in Secure, HttpOnly, SameSite=Lax cookies; only token hashes stored; rotation on sign-in
+and role change; idle and absolute expiry; CSRF protection for cookie-authenticated writes; rate
+limits on code requests and verification; codes hashed, single-use, short-lived.
 
-## 3. Roles and authorization
+## 3. Roles and scope
 
-`VISITOR`; `PROVIDER_OWNER/MANAGER/STAFF`; `LISTING_REVIEWER`; `TARIFF_REVIEWER`;
-`PROCUREMENT_OFFICER`; `EVALUATOR`; `FINANCE_ANALYST`; `FINANCE_ADMIN`; `PLATFORM_ADMIN`.
+| Role | Can |
+|---|---|
+| `TOURIST` | Own bookings, requests, messages, reviews, saved items, reports, claims |
+| `PROVIDER` (member `OWNER` or `STAFF`) | Only their provider's listings, bookings, bids, jobs, earnings. `STAFF` cannot change prices, payout details or members |
+| `DESK` | Check-in, lost and found, complaints and alerts in assigned destinations only |
+| `ADMIN` | Everything, with audit; cannot edit ledger or audit rows |
 
-Deny by default. Validate provider membership and ownership on every API call. A provider cannot
-approve its own listing or tariff. Separate procurement author and evaluator duties. Finance analyst
-is read-only; corrections use reversal. Public sees only approved listings and effective internally
-approved tariffs.
+Rules:
 
-## 4. Data minimization
+- Deny by default. Provider scope comes from `provider_members`, desk scope from
+  `desk_assignments`, never from request input.
+- Another user's record returns `404`, not `403`.
+- A provider cannot approve its own listing or revision; only admin approves.
+- Bids are sealed: a provider reads only its own bids; the requesting tourist reads all bids on
+  their request.
+- Lost-and-found private details, private photos and verification answers are visible only to desk
+  staff of that destination and admin. Answers are stored hashed.
+- Tourist contact details are shown to a provider only for that provider's bookings and accepted
+  jobs.
 
-Synthetic demo identities only. Collect minimal account/contact data. No identity documents, payment
-credentials, precise visitor movement history or child data in MVP. Do not persist browser
-geolocation. No sensitive values in logs, analytics or seed fixtures.
+## 4. Uploads
 
-MVP has no file uploads. Listing images are seeded or remote URLs; do not accept arbitrary file
-content. There is no notification feature.
+- Images only: JPEG, PNG, WebP; maximum 8 MB; maximum 12 per listing, 30 per portfolio, 4 per
+  lost-and-found item or complaint.
+- Validate by content, not by extension; re-encode with `sharp`; strip EXIF including location;
+  generate sizes; store under random keys.
+- Private media (`LOST_FOUND` private, `PROVIDER_DOC`, `JOB_PREVIEW` before settlement) is served
+  only through an authorised endpoint; job previews are watermarked.
+- Rate-limit uploads per user.
 
-## 5. Security controls
+## 5. Payments
 
-Schema validation, parameterized DB operations, server-side RBAC, secure headers/CSP, TLS outside
-local, secret manager, CORS allowlist, rate limits, dependency review and redacted structured logs.
-Test IDOR, XSS, CSRF, brute force, mass assignment, session fixation and privilege escalation.
-Production needs backup/restore and an incident process.
+All payments go through the payment-provider port. While `SANDBOX` is the adapter the gateway
+screen never renders or accepts card numbers, CVV, wallet PINs or one-time codes. Totals and
+commission are always computed on the server. Every payment call is idempotent. Enabling a live
+adapter is a separate change with its own security review.
 
-## 6. Auditability
+## 6. Data minimisation
 
-Append-only audit for role/config changes, listing/tariff review, procurement/evaluation, contract
-dues, finance posting/reversal and evaluator conflict declarations. Store actor, action, entity,
-entity ID, time, reason, request ID and safe before/after summary. Exclude passwords, tokens, full
-bid documents and sensitive personal data. Restrict DB update/delete rights where feasible.
-Ledger/audit correction is by compensating/reversal record.
+Synthetic identities only in seeds and tests. Collect name and phone; email optional. No identity
+document numbers are stored for lost-and-found handover; desk staff record only "ID checked" and a
+note. Browser location is used on the device for "near me" and never stored. Logs exclude personal
+data, private details, messages and tokens.
 
-## 7. Privacy and release gate
+## 7. Controls
 
-Before real public use, define lawful basis, jurisdiction, retention, access/deletion requests,
-breach handling and vendor processing. Do not claim regulatory compliance without assessment.
-Government involvement, authority, tariffs and data sharing require explicit agreements and
-qualified review.
+Schema validation on every boundary; parameterised queries; server-side role and scope checks;
+secure headers and CSP; CORS allowlist; rate limits on search, uploads, bids, messages, claims and
+sign-in; message length limits and HTML escaping; structured redacted logs; dependency review.
+Test IDOR across providers, desks and tourists, sealed-bid leakage, claim brute force, upload
+abuse, mass assignment and privilege escalation.
+
+## 8. Audit
+
+Append-only audit for every privileged transition listed in [workflows.md](workflows.md) section 10,
+with actor, action, entity, time, reason, request ID and a safe before and after summary. No
+secrets, tokens, answers or private details in audit payloads.
+
+## 9. Release gate
+
+Before real public use: define lawful basis, retention (messages, lost-and-found, complaints),
+access and deletion requests, breach handling, and vendor processing; complete a security
+assessment; sign provider agreements covering commission and payouts. Do not claim regulatory
+compliance without assessment.

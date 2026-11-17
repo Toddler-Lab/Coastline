@@ -1,89 +1,106 @@
 # System Architecture
 
-**Status:** baseline · **Style:** TypeScript modular monolith
+**Style:** TypeScript modular monolith · **Status:** v2 target
 
-## 1. Context and system boundary
+## 1. Context
 
-Browser clients use Next.js, which calls a separate REST API. The API owns domain rules,
-authorization and transitions. PostgreSQL is the source of truth. There is no browser-to-database
-path. No external payment, government, messaging or map dependency is required for MVP.
+Browsers use the Next.js web app, which calls the NestJS REST API. The API owns business rules,
+authorization and state transitions. PostgreSQL is the source of truth; the browser never reaches
+it. Images go to object storage through the API. External dependencies are behind ports with a
+local adapter so the system runs fully offline in development:
 
-## 2. Technology decisions
+| Port | Adapter today | Later |
+|---|---|---|
+| Payments | `SANDBOX` gateway (approve or decline, no money) | Live gateway after a reviewed decision |
+| File storage | Local disk under `var/uploads` | S3-compatible storage |
+| Notifications | In-app inbox (`notifications` table) | SMS and email |
+| Weather | None (alerts are entered by staff) | A weather data provider |
+| Maps | MapLibre with open tiles | Licensed tiles if needed |
 
-- **Web:** Next.js App Router, React, TypeScript and Tailwind CSS.
-- **API:** Node.js 22 LTS and NestJS using its default Express adapter. One modular API, not
-  services or microservices.
-- **Database:** PostgreSQL 16+ using a standard `DATABASE_URL`; no provider-specific features while
-  “dbx” is unconfirmed.
-- **Data access:** Prisma for schema, migrations and ordinary queries. Use transactions for
-  multi-step writes and reviewed SQL for `SELECT ... FOR UPDATE` inventory locking.
-- **Contracts:** shared types and enums in `packages/api-contracts`; NestJS DTOs with
-  `class-validator`; OpenAPI generated with `@nestjs/swagger`.
-- **Local:** pnpm workspaces and Docker Compose PostgreSQL in `infra/compose.yaml`. Turborepo is not
-  used.
-- **Tests:** Vitest for unit, API and PostgreSQL integration tests; Playwright for core browser
-  journeys.
-- **CI:** format, lint, typecheck, Prisma validation, tests, build and migration validation.
+## 2. Technology
 
-NestJS is selected for modules, guards, validation, dependency injection and API documentation.
-The Express adapter supplies the HTTP layer without requiring a separate application structure.
-See [ADR-001-stack.md](ADR-001-stack.md).
+- **Web:** Next.js App Router, React, TypeScript, Tailwind CSS v4 with role tokens, Radix
+  primitives, MapLibre GL for maps, SWR for client data.
+- **API:** Node.js 22, NestJS on Express, `class-validator` DTOs, `@nestjs/swagger` OpenAPI.
+- **Data:** PostgreSQL 16+, Prisma for schema, migrations and ordinary queries; reviewed SQL for
+  `SELECT ... FOR UPDATE` and ledger checks.
+- **Images:** `sharp` for validation, resizing and stripping metadata.
+- **Jobs:** an in-process scheduler for hold expiry, slot generation, quote and lost-and-found
+  expiry, and match scoring; each job is idempotent and works in small batches.
+- **Monorepo:** pnpm workspaces; Docker Compose PostgreSQL in `infra/compose.yaml`.
+- **Tests:** Vitest (unit, API, PostgreSQL integration) and Playwright (browser journeys).
 
-## 3. Container/component view
+See [ADR-001-stack.md](ADR-001-stack.md) and [ADR-002-multi-destination-platform.md](ADR-002-multi-destination-platform.md).
 
-- **Web app:** public discovery, visitor account, provider portal and admin portal.
-- **API app:** REST controllers, guards, application services, domain modules and persistence
-  adapters.
-- **Database:** relational records, workflow history, inventory, audit and finance ledger.
-- **Optional later:** licensed map tiles, email/SMS, real payment integration only after separate
-  authorization and design.
-
-## 4. Module decomposition
-
-Identity; providers; catalogue; moderation; tariffs; inventory; bookings; procurement; contracts;
-finance; reporting; audit; shared/common. Each module owns its invariants and data access.
-Cross-module calls use explicit application-service interfaces; avoid circular dependencies.
-
-Do not introduce microservices, an event broker or Kubernetes in MVP.
-
-## 5. Repository shape
+## 3. API modules
 
 ```text
-apps/web/src/app/(public|account|provider|admin)
-apps/web/src/components
-apps/web/src/hooks
-apps/web/public
-apps/api/src/common
-apps/api/src/modules/{identity,providers,catalogue,moderation,tariffs,inventory,
-                     bookings,procurement,contracts,finance,reporting,audit}
-packages/api-contracts/src
-packages/db/prisma
-packages/db/src
-packages/tsconfig
-infra/compose.yaml
+apps/api/src/
+  common/            auth guards (roles, provider scope, desk scope), errors, http, prisma,
+                     time, idempotency, audit writer, storage port, payments port
+  modules/
+    places/          destinations, spots, alerts, emergency contacts
+    providers/       applications, members, service types
+    listings/        listings, revisions, media links, search, nearby
+    inventory/       offerings, schedules, slots (generic engine)
+    bookings/        generic bookings + trips aggregation across engines
+    sunbeds/         existing sunbed engine (renamed from bookings + catalogue)
+    hotels/          existing stay engine
+    dining/          existing dining engine
+    quotes/          requests, bids, counters, jobs, previews
+    checkout/        checkout sessions, payments, receipts, sandbox gateway
+    finance/         commission rules, ledger, payouts, reports
+    help/            lost and found, claims, matching, complaints
+    engagement/      conversations, messages, notifications, reviews, saved
+    media/           uploads and serving
+    identity/        users, seeded-account switch (sign-in last)
+    admin/           overview, settings, users, audit search
+    audit/
+  health/
 ```
 
-`apps/api/src/routes` and `apps/api/src/middleware` are not used. NestJS controllers and guards live
-inside domain modules; cross-cutting middleware lives in `common`.
+Each module owns its tables and invariants. Cross-module calls go through exported services, for
+example `checkout` asks each engine to confirm or release a booking through a small
+`BookableEngine` interface (`price`, `confirm`, `release`, `refundable`). Modules never write
+another module's tables directly. No microservices, broker or Kubernetes.
 
-## 6. Key runtime decisions
+The placeholder module folders from the original proposal (`procurement`, `tariffs`, `contracts`,
+`moderation`, `reporting`, `providers`, `inventory`, `finance`) are removed or reused by the
+modules above.
 
-REST `/api/v1`, JSON; UUID internal identifiers plus separate public references; UTC database
-timestamps and Asia/Dhaka presentation; standard `DATABASE_URL`. “dbx” is unconfirmed: no vendor SDK
-or proprietary feature. Use transactions for bookings and ledger posting. Cache only safe public
-catalogue data. Hosting and managed database vendor selection are deferred.
+## 4. Web app structure
 
-The API exposes `/health/live` and `/health/ready` outside the versioned business API. OpenAPI is
-generated from DTOs and must match implemented routes.
+```text
+apps/web/src/
+  app/
+    (visitor)/        Explore, destination, spot, lists, listing, sunbeds, photographers,
+                      requests, checkout, trips, inbox, saved, help, profile
+    provider/         provider workspace
+    desk/             desk workspace
+    admin/            admin console
+  components/
+    ui/               foundations (button, chip, sheet, dialog, tabs, field, ...)
+    patterns/         bars, hero, cards, filter bar, gallery, booking card, ticket, ...
+    features/         per feature: places, listings, sunbeds, stays, dining, quotes,
+                      checkout, trips, inbox, help, provider, desk, admin
+  lib/                api client, session, format, i18n, theme, features flags
+```
 
-## 7. Quality attributes and trade-offs
+Server components fetch public data; client components handle interaction. Each workspace has its
+own layout and navigation. Old routes redirect (see [design.md](design.md) section 6.3).
 
-Prioritize maintainability and transactional correctness over early scale. A small team gets clear
-module ownership without distributed-system overhead. PostgreSQL constraints enforce relational and
-financial integrity. PostGIS is optional to avoid blocking while boundary data and provider are
-unresolved. The API remains authoritative even when web uses server components.
+## 5. Key runtime decisions
 
-## 8. Architecture decision records
+- REST under `/api/v1`; UUIDs internally; separate non-secret public references for anything a
+  person reads aloud (`CXB-SB-4821`).
+- UTC storage, Asia/Dhaka presentation and business rules (opening hours, cut-offs).
+- Transactions for every booking, payment, refund, payout and ledger posting.
+- Public catalogue responses may be cached briefly; anything personal or money-related is not.
+- Health: `/health/live` (process) and `/health/ready` (database and storage).
 
-Record later changes under `ADR-NNN-title.md` with context, decision, alternatives, consequences and
-date. Existing stack rationale is [ADR-001-stack.md](ADR-001-stack.md).
+## 6. Trade-offs
+
+A modular monolith keeps a small team fast while module boundaries keep features separable. A
+generic offering engine avoids writing one engine per new service; the three existing engines stay
+because they are tested and have special rules (bed map, nights, menus). A common `Trips`
+aggregation gives the visitor one timeline without merging the engines' tables.

@@ -1,46 +1,53 @@
 # Operations and Deployment
 
-**Environment status:** local/demo-first; production provider choices open
+**Environment status:** local-first; hosting not chosen
 
 ## 1. Configuration
 
-`NODE_ENV`; `APP_ENV` (`local`/`demo`/`staging`/`production`); `DATABASE_URL` (standard PostgreSQL);
-`DATABASE_SSL`; `WEB_BASE_URL`; `API_BASE_URL`; `CORS_ORIGINS`; `SESSION_SECRET` (random, at least 32
-bytes); `SESSION_IDLE_MINUTES`; `SESSION_ABSOLUTE_HOURS`; `DEMO_MODE`; `LOG_LEVEL`; `PORT`; `TZ=UTC`;
-optional `MAP_PROVIDER`.
+| Variable | Purpose |
+|---|---|
+| `NODE_ENV`, `APP_ENV` (`local`, `staging`, `production`), `PORT`, `TZ=UTC` | Runtime |
+| `DATABASE_URL`, `TEST_DATABASE_URL`, `POSTGRES_PORT` | PostgreSQL |
+| `WEB_ORIGIN`, `API_INTERNAL_URL`, `CORS_ORIGINS` | Web and API wiring |
+| `DEMO_AUTH_ENABLED` | Seeded-account switcher; refused in production |
+| `PAYMENT_PROVIDER` (`SANDBOX`) | Payment adapter; any other value needs a reviewed adapter |
+| `STORAGE_DRIVER` (`local`, `s3`), `STORAGE_LOCAL_DIR`, `STORAGE_BUCKET`, `STORAGE_ENDPOINT`, credentials | Uploads |
+| `TICKET_SIGNING_SECRET` | QR ticket signatures (32+ random bytes) |
+| `DINING_IGNORE_TIME_RULES` | Local testing aid; refused in production |
+| `LOG_LEVEL` | Logging |
 
-Never commit secrets. Startup must reject demo mode or seeded demo credentials in production.
+Business settings (commission, deposit percent, hold minutes, lost-and-found holding days) live in
+the `settings` table and are edited in the admin console. Never commit secrets.
 
 ## 2. Local development
 
-Use Node.js 22 LTS and pnpm workspaces. Start PostgreSQL with Docker Compose from
-`infra/compose.yaml` with `pnpm db:up` (it also creates the test database; set `POSTGRES_PORT` in
-`.env` if 5432 is taken). PostGIS is optional. Run `pnpm db:migrate` after every pull and before
-starting the API.
+```bash
+pnpm install
+pnpm db:setup        # Docker PostgreSQL, migrations, seeds
+pnpm dev             # API on 3001, web on 3000
+```
 
-When the scaffold is added, expose root scripts for install, dev, lint, typecheck, test, test:e2e,
-build, migrate, seed and reset. Use pnpm workspace filters for per-app commands. Turborepo is not
-used. `.env.example` contains placeholders only. Seed/reset must be explicit, repeatable and blocked
-outside local/demo.
+Run `pnpm install` and `pnpm db:migrate` after every pull. Uploads go to `var/uploads` (ignored by
+git). Seeds create Cox's Bazar, Sylhet and Rangamati with spots, providers of every type, and the
+seeded accounts listed in the README.
 
-MVP has no file-upload storage or notification service.
+## 3. Background jobs
 
-## 3. Health and observability
+In-process scheduler: expire booking holds (every minute), generate offering slots (hourly, 30 days
+ahead), close quote requests at `bids_close_at`, auto-settle delivered jobs after 48 hours, expire
+lost-and-found items, score matches for new items. Jobs are idempotent and batch-limited; a second
+API instance must not run them (single scheduler flag) until a shared lock is added.
 
-`/health/live` checks the process; `/health/ready` checks essential dependencies, especially the
-database. Structured logs include request ID and safe domain event fields; redact personal data and
-secrets. Track HTTP errors/latency, booking conflicts, expiry backlog and ledger validation failures
-without sensitive metric labels.
+## 4. Health and observability
 
-## 4. Deployment
+`/health/live` and `/health/ready` (database and storage). Structured logs with request ID; no
+personal data or secrets. Watch HTTP errors and latency, booking conflicts, hold-expiry backlog,
+ledger balance check failures, upload rejections and job failures.
 
-Hosting and managed PostgreSQL provider are not selected; “dbx” remains unconfirmed. Require TLS, a
-secret manager, a least-privilege DB role, a migration job before rollout, backup and tested restore,
-rate limits and a rollback/mitigation plan. Avoid platform-specific database features until the
-provider is chosen and documented.
+## 5. Deployment
 
-## 5. Recovery and release safeguards
-
-Document backup retention and a restoration owner before production. Never run destructive demo
-reset in production. No real payments or government integrations may be enabled by merely setting a
-URL; those require separate product/legal/security approval and implementation design.
+Hosting is not chosen. Requirements: TLS, a secret manager, a least-privilege database role,
+migrations as a release step, object storage with private buckets, backups with a tested restore,
+rate limits, and a rollback or mitigation note for every migration. `DEMO_AUTH_ENABLED` and
+`DINING_IGNORE_TIME_RULES` must be off in production; a live payment adapter needs a separate
+approval.

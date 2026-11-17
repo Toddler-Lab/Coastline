@@ -1,92 +1,152 @@
 # Data Model and Persistence
 
-**Source of truth:** PostgreSQL · **ORM:** Prisma · **Money:** integer minor units + ISO currency
+**Source of truth:** PostgreSQL 16+ · **ORM:** Prisma, reviewed SQL for locks · **Money:** integer
+minor units plus ISO currency · **Time:** `timestamptz` in UTC, presented in Asia/Dhaka
 
-## 1. Core entities
+This document describes the v2 model. Section 1 is what exists on `dev`; sections 2-9 are the
+additions and changes, delivered in the phases of [implementation-plan.md](implementation-plan.md).
 
-- **Identity:** `users`, `roles`, `user_roles`, `sessions`.
-- **Providers:** `providers`, `provider_memberships`.
-- **Catalogue:** `zones`, `service_categories`, `listings`, `listing_versions`, `products`.
-- **Governance:** `tariff_schedules`, `tariff_versions`.
-- **Inventory/bookings:** `inventory_slots`, `bookings`, `booking_items`, `demo_payments`.
-- **Procurement:** `procurement_notices`, `procurement_lots`, `suppliers`, `bids`, `evaluations`,
-  `contracts`, `contract_dues`.
-- **Finance:** `fee_rules`, `journal_entries`, `journal_lines`.
-- **Platform:** `audit_events`, `idempotency_keys`.
+## 1. What exists on `dev`
 
-There are no media, document-upload or notification tables in MVP.
+Four applied migrations (`init`, `hotel_bookings`, `dining_foundation`,
+`hotel_booking_check_in_time`):
 
-**Dining (implemented, migration `20261111100000_dining_foundation`):** `dining_venues` (optional
-beach point, Dhaka opening hours, reservation/delivery toggles, deposit in minor units),
-`menu_categories`, `menu_items` (composite FK keeps an item's category in the same venue),
-`dining_tables`, `table_reservations` (snapshots venue/table names, deposit and currency),
-`table_slots` (one row per reserved table-hour; a partial unique index on active
-`(table_id, slot_start)` prevents double booking), `food_orders` (linked to the sunbed
-`order_items` row it is delivered to; snapshots venue, bed and beach point) and `food_order_items`
-(snapshots item name and unit price). A `payments` row belongs to exactly one of a sunbed order,
-table reservation or food order (`CHECK num_nonnulls(...) = 1`). Known gap: the payment foreign keys
-to reservations and food orders are `ON DELETE CASCADE`; application code never deletes those
-parents, and a follow-up migration should change them to `RESTRICT`.
+- **Identity:** `users` (`TOURIST`, `ADMIN`).
+- **Sunbeds:** `beach_points`, `sunbeds`, `orders`, `order_items`, `booking_slots` (one row per bed
+  and hour; unique active slot prevents double booking).
+- **Hotels:** `hotels` (with a fixed `HotelZone` enum), `room_types`, `hotel_rooms`,
+  `hotel_bookings`, `hotel_room_nights` (one row per room and night).
+- **Dining:** `dining_venues`, `menu_categories`, `menu_items`, `dining_tables`,
+  `table_reservations`, `table_slots`, `food_orders`, `food_order_items`.
+- **Money:** `payments` with `provider = 'MOCK'`, `type` `CHARGE` or `REFUND`, exactly one parent.
+- **Platform:** `audit_events`.
 
-## 2. Relationships
+These engines keep their tables and locking. v2 attaches them to destinations, spots, providers and
+listings rather than replacing them.
 
-A provider has memberships and listings. A listing belongs to a provider, zone and category and has
-versions. A listing has products; a product has a tariff schedule and inventory slots. A booking
-belongs to a visitor and provider and has one item snapshot referencing a product, slot and tariff
-version. A procurement notice has lots; a lot has bids; a bid has evaluations; an award
-recommendation can create a draft contract; a contract has manually entered demo dues. Journal
-entries link to a source type/id and contain journal lines. Audit events link an actor and entity.
+## 2. Places
 
-## 3. Key fields and constraints
+| Table | Key fields | Rules |
+|---|---|---|
+| `destinations` | `slug` unique, `name`, `name_bn`, `tagline`, `description`, `hero_media_id`, `accent` (`SEA`, `FOREST`, `LAKE`, `HILL`, `HERITAGE`, `NEUTRAL`), `latitude`, `longitude`, `map_zoom`, `content` JSONB (about, best time, how to get there), `sort_order`, `is_active` | Never deleted; hidden with `is_active` |
+| `spots` | `destination_id`, `slug` unique per destination, `name`, `name_bn`, `kind` (`BEACH`, `HILL`, `LAKE`, `RIVER`, `WATERFALL`, `FOREST`, `TEA_GARDEN`, `ISLAND`, `HERITAGE`, `PARK`, `MARKET`, `OTHER`), `description`, `hero_media_id`, coordinates, `open_hours` JSONB, `entry_info`, `content` JSONB (rules, safety, tips), `sort_order`, `is_active` | |
+| `emergency_contacts` | `destination_id`, `label`, `label_bn`, `phone`, `kind` (`NATIONAL`, `POLICE`, `FIRE`, `HOSPITAL`, `COAST_GUARD`, `DESK`, `OTHER`), `sort_order` | Public numbers entered by the operator |
+| `spot_alerts` | `destination_id`, `spot_id` nullable, `kind` (`WEATHER`, `SEA`, `CLOSURE`, `EVENT`, `NOTICE`), `severity` (`INFO`, `CAUTION`, `DANGER`), `title`, `body`, `starts_at`, `ends_at`, `created_by` | Shown while now is inside the window |
 
-- All entities use UUID PKs; created/updated times are `timestamptz`.
-- User email is normalized and unique. Public listing, booking and notice refs are unique and
-  non-secret.
-- `sessions` stores `user_id`, a hashed opaque token, hashed CSRF token, created/rotated/revoked
-  times, idle expiry and absolute expiry. Session tokens are never stored in plaintext.
-- `idempotency_keys` has a unique `(scope, key)`, request hash, response status/body and expiry.
-  Booking holds and confirmation require a key.
-- Version numbers are unique per listing/tariff parent. Submitted versions are immutable.
-- `products.booking_mode` is `SLOT_CAPACITY`, `QUANTITY` or `INQUIRY_ONLY`.
-- Inventory slot capacity and available are integers; `CHECK (0 <= available <= capacity)`;
-  unique product + interval.
-- `bookings.state` is `HELD`, `CONFIRMED`, `CANCELLED` or `EXPIRED`. A booking stores currency,
-  `total_minor`, `hold_expires_at`, a cancellation-policy snapshot and the applicable
-  `fee_rule_id`. MVP writes exactly one `booking_item`.
-- `booking_items` snapshot listing/product names, quantity, unit/line amount and tariff version.
-- `tariff_versions` stores amount, currency, `rate_type`, unit, effective window, source/provenance,
-  status, submitter, reviewer and reason. Approved windows must not overlap for the same product and
-  `rate_type`.
-- `fee_rules` are immutable versions with `platform_fee_bps`, `public_share_bps`, effective window
-  and status. `platform_fee_bps + public_share_bps <= 10000`; bookings and contracts snapshot the
-  applicable rule.
-- `journal_lines` have account, debit_minor, credit_minor and currency. Posting rejects any entry
-  that does not balance per currency; a deferred constraint or trigger may be added as defense.
-- `contract_dues` are manually entered demo amounts linked to a contract; they are never calculated
-  by the application.
-- `audit_events` store actor, action, entity, entity_id, time, reason, request_id and safe
-  before/after JSON. Procurement conflict declarations use
-  `action = EVALUATOR_CONFLICT_DECLARED`.
-- Audit and posted journal rows are append-only. Correct with reversal rather than mutation or
-  deletion.
-- Listing versions may store an array of image URLs as text; there is no upload asset table.
+Changes to existing tables:
 
-## 4. Indexing and GIS
+- `beach_points` gains `spot_id` (unique, required) and `listing_id`. A beach point is the sunbed
+  configuration of a beach spot.
+- `hotels` gains `destination_id`, `spot_id` nullable, `listing_id`, `provider_id`; `zone` is
+  replaced by free-text `area`; `nearest_beach_code` and `distance_meters` become nullable.
+- `dining_venues` gains `destination_id`, `spot_id` nullable, `listing_id`, `provider_id`;
+  `vendor_user_id` is superseded by provider membership.
 
-Index foreign keys, queue state + created_at, effective tariff windows, booking lookup refs and
-zone/category search. Use PostGIS geometry/geography and GIST if available; otherwise store validated
-WGS84 lat/lon and use bounding-box search. Record location source, precision and `verified_at`;
-public locations can be generalized.
+Backfill migration: create Cox's Bazar, one `BEACH` spot per beach point, a provider per existing
+hotel and venue (synthetic seed businesses), a listing per hotel, venue and beach point; then set
+the new columns `NOT NULL` and drop `HotelZone`.
 
-## 5. Migration policy
+## 3. Providers and listings
 
-Prisma schema and migrations are checked in under `packages/db/prisma`. Review migrations; never
-alter an applied migration. Shared environments are forward-only with rollback/mitigation notes.
-Seed data is independent and repeatable. Use a SQL transaction and row lock for inventory
-reservation. Never rely only on application-level validation for invariants.
+| Table | Key fields | Rules |
+|---|---|---|
+| `providers` | `public_id`, `name`, `name_bn`, `kind_summary`, `destination_id`, `phone`, `email`, `about`, `logo_media_id`, `status` (`APPLIED`, `CHANGES_REQUESTED`, `APPROVED`, `REJECTED`, `SUSPENDED`), `payout_method_label`, `verified_at`, `commission_override_bps` nullable | Only `APPROVED` providers have public listings |
+| `provider_service_types` | `provider_id`, `listing_type`, `status` | A provider lists only approved types |
+| `provider_members` | `provider_id`, `user_id`, `role` (`OWNER`, `STAFF`) | Unique pair; provider scope comes from here, never from request input |
+| `listings` | `public_id`, `slug`, `provider_id`, `destination_id`, `spot_id` nullable, `type` (see PRD section 4), `booking_mode` (`NIGHTS`, `TIME_SLOT`, `DEPARTURE`, `ENTRY`, `ORDER`, `QUOTE`, `INFO`), `status` (`DRAFT`, `PENDING_REVIEW`, `ACTIVE`, `CHANGES_REQUESTED`, `REJECTED`, `SUSPENDED`, `ARCHIVED`), `title`, `title_bn`, `summary`, `description`, coordinates, `attributes` JSONB (validated by the shared contract for the type), `cancellation_policy` JSONB, `from_price_minor`, `currency`, `rating_avg`, `rating_count`, `published_at` | Public reads return only `ACTIVE` listings of approved providers in active destinations |
+| `listing_media` | `listing_id`, `media_id`, `sort_order`, `alt`, `alt_bn` | |
+| `listing_revisions` | `listing_id`, `payload` JSONB, `status` (`PENDING`, `APPROVED`, `REJECTED`), `submitted_by`, `reviewed_by`, `reason` | Material edits to an active listing wait here; approval applies them |
 
-## 6. Data lifecycle
+Cancellation policy shape: `{ freeUntilHours, lateRefundPercent, noShowRefundPercent }`, snapshotted
+on every booking.
 
-Demo data is synthetic and resettable only in explicitly guarded demo/local environments. Before
-production, define retention, archival, deletion/access workflows and backup policy. Do not put
-secrets, credentials or real payment data in the schema.
+## 4. Generic booking engine
+
+For `TIME_SLOT`, `DEPARTURE`, `ENTRY` and package bookings of new service types. Stays, tables,
+sunbeds and food orders keep their own engines.
+
+| Table | Key fields | Rules |
+|---|---|---|
+| `offerings` | `listing_id`, `name`, `name_bn`, `price_minor`, `currency`, `price_unit` (`PER_BOOKING`, `PER_PERSON`, `PER_SEAT`, `PER_HOUR`, `PER_PHOTO`, `PER_PACKAGE`, `PER_TICKET`), `included_count` nullable, `extra_unit_price_minor` nullable, `duration_minutes` nullable, `capacity`, `min_qty`, `max_qty`, `is_active` | A listing has one or more offerings (ticket types, boat sizes, packages) |
+| `offering_schedules` | `offering_id`, `days_of_week`, `start_times`, `valid_from`, `valid_to` | Generates slots ahead of time |
+| `offering_slots` | `offering_id`, `starts_at`, `ends_at`, `capacity`, `booked`, `is_blocked` | `CHECK (0 <= booked AND booked <= capacity)`, unique `(offering_id, starts_at)`; reserved with `SELECT ... FOR UPDATE` |
+| `bookings` | `public_ref`, `tourist_id`, `listing_id`, `provider_id`, `destination_id`, `spot_id`, `status` (`PENDING_PAYMENT`, `CONFIRMED`, `CHECKED_IN`, `COMPLETED`, `CANCELLED`, `EXPIRED`, `NO_SHOW`), `total_minor`, `deposit_minor`, `balance_minor`, `currency`, `commission_bps`, `cancellation_policy` JSONB, `snapshot` JSONB (names, unit prices), `hold_expires_at`, `source` (`DIRECT`, `QUOTE`) | Every snapshot is immutable |
+| `booking_lines` | `booking_id`, `offering_id`, `slot_id` nullable, `quantity`, `unit_price_minor`, `line_total_minor`, `name_snapshot` | |
+
+A draft holds inventory for 10 minutes (`PENDING_PAYMENT` with `hold_expires_at`); payment
+confirms it; expiry releases inventory exactly once.
+
+## 5. Photographers and quotes
+
+| Table | Key fields | Rules |
+|---|---|---|
+| `quote_requests` | `public_ref`, `tourist_id`, `listing_type` (`PHOTOGRAPHER`, `GUIDE`, `BOAT`, `RIDE`), `destination_id`, `spot_id`, `starts_at`, `ends_at`, `party_size`, `details` JSONB (photo, video, drone, reel; expected count; notes), `budget_minor` nullable, `budget_unit`, `bids_close_at`, `status` (`OPEN`, `CLOSED`, `ACCEPTED`, `CANCELLED`, `EXPIRED`) | Visible only to approved providers of that type in that destination |
+| `bids` | `request_id`, `provider_id`, `listing_id`, `price_unit` (`PER_PHOTO`, `PER_PACKAGE`, `PER_HOUR`), `unit_price_minor`, `included_count`, `extra_unit_price_minor`, `estimated_total_minor`, `delivery_hours`, `message`, `status` (`ACTIVE`, `COUNTERED`, `WITHDRAWN`, `ACCEPTED`, `DECLINED`, `CLOSED`), `revision` | One active bid per provider per request (partial unique index); sealed |
+| `bid_counters` | `bid_id`, `proposed_unit_price_minor`, `proposed_total_minor`, `message`, `status` (`PENDING`, `ACCEPTED`, `DECLINED`) | One counter per bid |
+| `jobs` | `booking_id` unique, `request_id` nullable, `provider_id`, `price_unit`, `unit_price_minor`, `included_count`, `extra_unit_price_minor`, `delivered_count`, `selected_count`, `final_total_minor`, `delivery_link`, `status` (`SCHEDULED`, `IN_PROGRESS`, `DELIVERED`, `SETTLED`, `DISPUTED`, `CANCELLED`) | Accepted bid or direct package booking becomes a job linked to a booking |
+| `job_previews` | `job_id`, `media_id`, `selected` | Watermarked previews for per-photo selection |
+
+## 6. Payments, commission, ledger, payouts
+
+| Table | Key fields | Rules |
+|---|---|---|
+| `payments` (extended) | parents: `order_id`, `reservation_id`, `food_order_id`, `hotel_booking_id`, `booking_id` (exactly one); `type` (`CHARGE`, `REFUND`); `purpose` (`FULL`, `DEPOSIT`, `BALANCE`); `provider` (`SANDBOX`, later a live gateway), `method` (`BKASH`, `NAGAD`, `CARD`, `PAY_AT_VENUE`), `status` (`PENDING`, `SUCCEEDED`, `FAILED`); `amount_minor`, `commission_minor`, `provider_net_minor`, `currency`, `external_ref` unique, `idempotency_key` | Existing `MOCK` rows are relabelled `SANDBOX` by migration. `amount = commission + provider_net` |
+| `commission_rules` | `listing_type`, `provider_id` nullable, `rate_bps`, `effective_from`, `effective_to` | The applicable rule is snapshotted on the booking as `commission_bps` |
+| `ledger_entries` | `source_type`, `source_id`, `memo`, `posted_at`, `reverses_entry_id` nullable | Append-only |
+| `ledger_lines` | `entry_id`, `account` (`GATEWAY_CLEARING`, `PROVIDER_PAYABLE`, `COMMISSION_REVENUE`, `PAYOUTS_CLEARING`), `provider_id` nullable, `debit_minor`, `credit_minor`, `currency` | Each entry balances per currency (checked on posting and by a deferred trigger) |
+| `payouts` | `public_ref`, `provider_id`, `period_start`, `period_end`, `amount_minor`, `status` (`DRAFT`, `APPROVED`, `PAID`), `method_label`, `paid_at`, `reference` | Recorded by the operator; no money moves |
+| `payout_items` | `payout_id`, `payment_id` | A payment is in at most one payout |
+
+Posting rules are in [workflows.md](workflows.md) section 6.
+
+## 7. Help: lost and found, complaints
+
+| Table | Key fields | Rules |
+|---|---|---|
+| `lost_found_items` | `public_ref`, `kind` (`LOST`, `FOUND`), `destination_id`, `spot_id`, `category` (`PHONE`, `WALLET`, `BAG`, `DOCUMENT`, `KEYS`, `JEWELLERY`, `ELECTRONICS`, `CLOTHING`, `CHILD_ITEM`, `OTHER`), `title`, `public_description`, `private_details`, `occurred_from`, `occurred_to`, `reported_by`, `contact_phone`, `storage_location` (found), `status` (`OPEN`, `MATCHED`, `CLAIM_PENDING`, `RETURNED`, `EXPIRED`, `DISPOSED`, `CLOSED`), `expires_at` | `private_details` and private photos are never in public responses |
+| `lost_found_media` | `item_id`, `media_id`, `is_private` | |
+| `verification_questions` | `item_id`, `question`, `answer_hash` | Answers are normalised and hashed |
+| `lost_found_matches` | `lost_item_id`, `found_item_id`, `score`, `status` (`SUGGESTED`, `CONFIRMED`, `DISMISSED`) | Unique pair |
+| `claims` | `public_ref`, `found_item_id`, `claimant_id`, `answers_passed`, `pickup_at`, `status` (`SUBMITTED`, `VERIFIED`, `REJECTED`, `HANDED_OVER`, `CANCELLED`), `handed_over_by`, `handover_note` | One open claim per claimant per item |
+| `complaints` | `public_ref`, `tourist_id`, `destination_id`, `spot_id`, `booking_ref` nullable, `provider_id` nullable, `category` (`OVERCHARGING`, `SAFETY`, `CLEANLINESS`, `LISTING_WRONG`, `PROVIDER_CONDUCT`, `PAYMENT`, `OTHER`), `description`, `status` (`OPEN`, `ACKNOWLEDGED`, `IN_PROGRESS`, `ESCALATED`, `RESOLVED`, `CLOSED`), `assigned_to` | |
+| `complaint_events` | `complaint_id`, `actor_id`, `action`, `note`, `visible_to_tourist` | Append-only history |
+| `desk_assignments` | `user_id`, `destination_id` | Desk staff act only inside their destinations |
+
+## 8. Communication and engagement
+
+| Table | Key fields | Rules |
+|---|---|---|
+| `conversations` | `subject_type` (`BOOKING`, `REQUEST`, `COMPLAINT`, `CLAIM`), `subject_id`, `tourist_id`, `provider_id` nullable | One conversation per subject and pair |
+| `messages` | `conversation_id`, `sender_id`, `body` (max 2,000 characters), `created_at`, `read_at` | Text only |
+| `notifications` | `user_id`, `kind`, `title`, `body`, `link`, `read_at` | In-app inbox items |
+| `reviews` | `booking_ref` unique, `listing_id`, `provider_id`, `tourist_id`, `rating` 1-5, `body`, `reply`, `replied_at`, `status` (`PUBLISHED`, `HIDDEN`) | Only for completed bookings |
+| `saved_items` | `user_id`, `item_type` (`LISTING`, `SPOT`, `PROVIDER`), `item_id` | Unique triple |
+
+## 9. Platform
+
+| Table | Key fields | Rules |
+|---|---|---|
+| `users` (extended) | `phone` unique nullable, `email`, `name`, `locale`, `role` (`TOURIST`, `PROVIDER`, `DESK`, `ADMIN`) | Sign-in tables (`sessions`, `otp_codes`) arrive in the last phase |
+| `media` | `owner_user_id`, `storage_key`, `mime`, `bytes`, `width`, `height`, `purpose` (`LISTING`, `DESTINATION`, `SPOT`, `PORTFOLIO`, `LOST_FOUND`, `COMPLAINT`, `JOB_PREVIEW`, `PROVIDER_DOC`), `visibility` (`PUBLIC`, `PRIVATE`), `credit`, `created_at` | Images only; private media served through an authorised endpoint |
+| `settings` | `key`, `value` JSONB, `updated_by` | Commission default, deposit percent, hold minutes, lost-and-found holding days |
+| `idempotency_keys` | `scope`, `key`, `request_hash`, `response`, `expires_at` | Required on every payment and booking-creating call |
+| `audit_events` | unchanged | Append-only |
+
+## 10. Indexing and search
+
+Index every foreign key; `(destination_id, type, status)` and `(spot_id, type, status)` on
+listings; `(offering_id, starts_at)` on slots; `(status, bids_close_at)` on quote requests;
+`(destination_id, kind, status, category)` on lost-and-found items. Search uses PostgreSQL full
+text (`tsvector` over title, title_bn, summary, spot and destination names) with trigram similarity
+for typos. Distance for Nearby uses latitude and longitude with a bounding box, then a haversine
+sort; PostGIS is optional.
+
+## 11. Migration and data rules
+
+- Prisma schema and migrations live in `packages/db/prisma`. Never edit an applied migration;
+  add a new one with a backfill and a rollback note.
+- Places, providers and listings are hidden, never deleted, because bookings reference them.
+- Audit, ledger and payment rows are append-only; corrections are reversals.
+- Seeds are synthetic and deterministic: Cox's Bazar (existing data), Sylhet and Rangamati with
+  spots, providers of every type, facilities, alerts, emergency numbers and found items.
+- No secrets, credentials or real personal data in seeds or fixtures.

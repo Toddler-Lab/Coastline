@@ -2,38 +2,57 @@
 
 ## 1. Objectives
 
-Protect domain invariants, authorization boundaries, usability and proposal/demo labels. Tests use
-synthetic data and must never reach live payment or government systems.
+Protect inventory, money and privacy invariants and authorization boundaries, and keep the main
+journeys working on phones. Tests use synthetic data and never reach a live gateway or external
+service.
 
-## 2. Test layers
+## 2. Layers
 
-- **Unit (Vitest):** tariff effective-date and `rate_type` selection, fee split arithmetic, state
-  transitions, authorization policy, input validation.
-- **API (Vitest + Supertest):** OpenAPI accuracy, success/error mapping, role checks, validation,
-  pagination and cookie/CSRF behavior.
-- **PostgreSQL integration (Vitest):** migrations, foreign/check constraints, provider scoping,
-  balanced ledger, booking locking/idempotency/release, session persistence.
-- **UI:** critical routes, loading/error states, keyboard flow, responsive layout, demo disclaimers,
-  cancellation and no-refund copy, absence of upload/notification controls.
-- **E2E (Playwright):** search → hold → mock confirmation; listing submission → review; tariff
-  proposal → approval; notice → bid → recommendation; booking → ledger reconciliation; audit search.
+- **Unit (Vitest):** pricing and commission arithmetic, cancellation refunds, photographer
+  settlement (per photo, per package, per hour), match scoring, state machines, policy checks,
+  formatters, contract validation per listing type.
+- **API (Vitest + Supertest):** validation, status codes, role and scope checks for tourist,
+  provider owner and staff, desk and admin; sealed bids; private lost-and-found fields; OpenAPI
+  matches routes.
+- **PostgreSQL integration:** migrations from empty and from the `dev` data; backfill correctness;
+  constraints; slot locking; idempotency; ledger balance and reversal; payout netting.
+- **Web unit (Vitest + Testing Library):** components in light and dark, keyboard behaviour,
+  Bangla rendering, route helpers.
+- **End to end (Playwright):** at 360 and 1280 px:
+  1. Explore -> destination -> spot -> book a sunbed -> pay -> ticket offline.
+  2. Book a stay and a boat departure through the shared checkout.
+  3. Post a photographer request -> two providers bid -> counter -> accept -> pay deposit ->
+     deliver -> select photos -> pay balance -> commission visible to admin.
+  4. Report lost -> desk logs found -> match -> claim -> handover.
+  5. Complaint -> desk acknowledges -> resolves.
+  6. Provider applies -> admin approves -> listing submitted -> approved -> visible on Explore.
+  7. Admin creates a destination and spot -> visible on Explore -> hidden again.
 
-## 3. Concurrency and security tests
+## 3. Concurrency and money tests
 
-Use separate DB connections to race for the final inventory unit: exactly one hold succeeds and
-available never goes negative. Retrying with the same idempotency key returns the same result.
-Expiry and cancellation restore exactly once. Test cross-provider IDOR, privilege escalation, CSRF,
-session fixation, validation abuse and finance read/write separation.
+Race separate connections for the last slot, seat, room night, bed hour and table hour: exactly one
+wins. Repeat payment and bid-acceptance calls with the same key: one effect. Two acceptances on one
+request: one wins. Expiry and cancellation release once. Every ledger entry balances; refunds
+reverse commission proportionally; a payment is in at most one payout.
 
 ## 4. Quality gates
 
-CI runs: format check, lint, TypeScript typecheck, Prisma validation, migration validation,
-unit/integration/API tests, build and Playwright on the critical journeys. Accessibility automation
-plus manual keyboard/screen-reader spot checks. Dependency scan as available. Do not report a check
-as passed unless it was run; distinguish gaps from failures.
+Run after every work package:
+
+```bash
+pnpm format:check
+pnpm typecheck
+pnpm db:validate
+pnpm test
+pnpm build
+```
+
+Plus the Playwright suite once it exists, and a manual check of changed pages at 360, 768 and
+1280 px in light and dark, by keyboard. Do not report a check as passed unless it was run; list
+gaps separately from failures.
 
 ## 5. Fixtures
 
-Deterministic synthetic records and a controllable clock. Never use production personal data. Demo
-seeds are separate from test fixtures; tests use an isolated database or schema. PostgreSQL tests use
-the Docker Compose database or a disposable test container.
+Deterministic synthetic seeds and a controllable clock. Tests use the isolated test database
+(`TEST_DATABASE_URL`). Seeds for local use are separate from test fixtures. No real personal data,
+no real phone numbers other than public emergency numbers.

@@ -1,6 +1,7 @@
 # ADR-001: Web-first modular monolith and PostgreSQL
 
-- **Status:** Accepted for MVP baseline
+- **Status:** Accepted for MVP baseline; stack still current. Product scope superseded by
+  [ADR-002](ADR-002-multi-destination-platform.md)
 - **Date:** 2026-10-20
 - **Decision owners:** project team (revisit when hosting/vendor constraints are known)
 

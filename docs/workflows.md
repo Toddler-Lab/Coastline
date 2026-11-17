@@ -1,107 +1,234 @@
 # Domain Workflows
 
-**Applies to:** bookings, tariff governance, procurement and demo finance. All authority and
-monetary effects below are simulated.
+**Applies to:** places, providers, listings, bookings, photographers, payments, help operations.
+Payments go through the payment-provider port; the sandbox gateway moves no money but every payment,
+commission and payout is recorded as described here.
 
-## 1. Booking and inventory
+## 1. Places
 
-Modes: `SLOT_CAPACITY` (sunbed/time slot, tour), `QUANTITY` (rental units) and `INQUIRY_ONLY`
-(referral, not bookable). MVP creates one product per hold.
+- The operator creates a destination, then spots inside it. A destination or spot appears publicly
+  when it is active and, for service tiles, when at least one active listing of that type exists.
+- Hiding a destination hides its spots and listings from public reads. Bookings, tickets and
+  reports that reference them stay readable by their owners, providers, desk and admin.
+- Alerts are active while now is inside `[starts_at, ends_at)`. The highest severity active alert
+  for a destination shows on Explore and the destination page; spot alerts show on the spot hub.
 
-Booking states are `HELD`, `CONFIRMED`, `CANCELLED` and `EXPIRED`.
+## 2. Provider onboarding and listing approval
 
-For a hold, the API verifies the active approved listing/product and effective tariff, then in one
-database transaction locks the inventory row `FOR UPDATE`, checks quantity, decrements availability
-and creates a `HELD` booking with a 10-minute expiry, an idempotency key and immutable
-listing/product/price/tariff snapshots. The client never supplies an authoritative price.
+```text
+Provider:  APPLIED -> APPROVED | CHANGES_REQUESTED -> APPLIED | REJECTED
+           APPROVED -> SUSPENDED -> APPROVED
+Listing:   DRAFT -> PENDING_REVIEW -> ACTIVE | CHANGES_REQUESTED -> PENDING_REVIEW | REJECTED
+           ACTIVE -> SUSPENDED -> ACTIVE ;  any -> ARCHIVED
+Revision:  PENDING -> APPROVED (applied to the listing) | REJECTED
+```
 
-Confirmation locks the booking, validates expiry and transitions exactly once. It never charges.
-Expiry or cancellation restores inventory in the same transaction exactly once. A retry-safe worker
-handles bounded batches.
+- A provider may create listings only of service types approved for it.
+- Material changes to an active listing (price, capacity, photos, title, description,
+  cancellation policy) create a revision; the live listing is unchanged until the revision is
+  approved. Availability, blocked dates and stock changes apply immediately.
+- A suspended provider's listings are hidden; existing bookings stand and can be cancelled by the
+  operator with refunds.
+- Every decision records the reviewer and a reason in the audit log.
 
-Cancellation is free before the slot starts; inventory is restored exactly once and no refund is
-issued because payment is simulated. Cancellation after the start is rejected. The applicable policy
-is snapshotted on the booking.
+## 3. Generic booking (`TIME_SLOT`, `DEPARTURE`, `ENTRY`, packages)
 
-Hotel stays follow the same rule against the hotel's check-in time on the check-in date (snapshotted
-on the booking as Dhaka wall-clock `HH:mm`, default 14:00): a tourist may cancel until 60 minutes
-before it; an admin may cancel later. Cancelling releases the room nights exactly once and records
-the mock refund. Admin check-in marks hotel stays `CHECKED_IN` the same way as sunbed lines.
+```text
+PENDING_PAYMENT -> CONFIRMED -> CHECKED_IN -> COMPLETED
+PENDING_PAYMENT -> EXPIRED            (hold elapsed, inventory released)
+CONFIRMED -> CANCELLED                (tourist before deadline, provider or admin with reason)
+CONFIRMED -> NO_SHOW                  (provider, after the start plus grace)
+```
 
-The race for the last unit yields exactly one success. Availability never goes negative; the losing
-request receives `409` with safe availability refresh guidance.
+1. **Draft.** The API validates the listing, offering, slot, quantity and limits, prices every line
+   from the database, applies the commission rule, and in one transaction locks the slot row
+   `FOR UPDATE`, checks `booked + qty <= capacity`, increments `booked`, and creates the booking in
+   `PENDING_PAYMENT` with a 10-minute hold. The client never sends a price.
+2. **Pay.** Checkout creates a payment through the port (section 6). Success confirms the booking
+   exactly once; failure leaves it pending until it expires.
+3. **Expire.** A worker expires holds in small batches and releases inventory exactly once.
+4. **Cancel.** The snapshotted policy decides the refund: full refund before `freeUntilHours`,
+   `lateRefundPercent` after it, nothing after the start. Inventory is released once.
+5. **Complete.** Check-in, or the end time passing for no-check-in services, completes the booking
+   and opens the review window (14 days).
 
-### Dining (simulated)
+Last-unit races produce exactly one success; the loser gets `409` with fresh availability.
 
-Venue opening hours are Asia/Dhaka wall-clock hours `[open_hour, close_hour)`. Inactive venues are
-hidden from tourists and cannot take reservations or orders. Kitchen and venue management is
-`ADMIN`-only; there is no vendor role in MVP.
+## 4. Existing engines
 
-**Table reservations** are 1–3 whole hours on the hour, in the future, at most 7 days ahead, inside
-opening hours, with `party_size <= seats`. Creation runs in one transaction: it snapshots venue,
-table, deposit and currency, inserts one `table_slots` row per hour and, when the venue deposit is
-above zero, records a mock `CHARGE`. The partial unique index on active `(table_id, slot_start)`
-decides races: the loser receives `409`. States are `CONFIRMED → CHECKED_IN | CANCELLED`. A tourist
-may cancel until 60 minutes before the start; an admin may cancel at any time before check-in.
-Cancelling deactivates the slots (rows are kept) and records the deposit refund as a mock `REFUND`
-reversal. Admin check-in is allowed from 30 minutes before the start until the end.
+These keep their current rules and gain the shared checkout, commission and ledger.
 
-**Sunbed food delivery** goes only to the tourist's own sunbed booking line that is confirmed or
-checked in and whose window contains now, from an open, delivering venue at the same beach point.
-Prices and names come from the database and are snapshotted on the order lines; there is no delivery
-fee. A mock `CHARGE` is recorded at placement. States follow
-`PLACED → PREPARING → READY → DELIVERED`, with `PLACED → CANCELLED` as the only cancellation.
-Each status change is a conditional update on the current status, so two racing changes cannot both
-succeed; illegal moves return `409`. Cancellation (tourist or admin, from `PLACED` only) records a
-mock `REFUND` reversal. Menu price changes never alter placed orders.
+- **Sunbeds.** Hourly slots per bed, 1-4 hours, up to 7 days ahead, inside beach-point hours; the
+  unique active slot row decides races. Cancellation free until the start.
+- **Stays.** One `hotel_room_nights` row per room and night. Tourist cancellation until 60 minutes
+  before the snapshotted check-in time; admin later. Cancelling releases nights once and refunds.
+- **Tables.** 1-3 whole hours, up to 7 days ahead, `party_size <= seats`, optional deposit;
+  tourist cancellation until 60 minutes before the start; check-in from 30 minutes before.
+- **Food to a sunbed.** Only to the tourist's own active sunbed booking at the same beach point,
+  from an open venue that delivers. `PLACED -> PREPARING -> READY -> DELIVERED`, cancel only from
+  `PLACED`. Each status change is a conditional update; illegal moves return `409`.
 
-Reservation and food-order placement, cancellation, check-in, kitchen status changes and venue/menu
-edits append audit events.
+In v2 kitchen, reservation and check-in actions move from admin-only to the venue's provider
+members (and admin).
 
-## 2. Tariff governance
+## 5. Photographers (and other quotes)
 
-A tariff version stores amount, currency, `rate_type`, unit, effective window, rationale, source
-label/link, verified date, submitter, reviewer and decision/reason.
+Photographers at Bangladeshi spots usually charge per photo (for example Tk 5 per photo) or per
+package (for example 20 photos for Tk 100), take the photos on the spot, and the tourist keeps the
+photos they want. The flow models that.
 
-Flow: `DRAFT → SUBMITTED → UNDER_REVIEW → APPROVED | REJECTED | CHANGES_REQUESTED`. Submitted and
-approved versions are immutable; edits create a successor. Approved effective windows must not
-overlap for the same product and `rate_type`.
+### 5.1 Direct package booking
 
-Only an approved version inside its effective window may be shown or booked; otherwise the product
-is unavailable. Existing booking snapshots never change. The badge always says “indicative demo
-rate”; internal review is not legal approval.
+The photographer publishes offerings with `price_unit` `PER_PHOTO`, `PER_PACKAGE` or `PER_HOUR`,
+`included_count`, `extra_unit_price_minor`, delivery time and format. The tourist picks a package,
+date and time (a `TIME_SLOT` offering), pays the deposit, and a job is created.
 
-## 3. Procurement and contract workflow
+### 5.2 Request and bids
 
-Types: `OPEN_TENDER`, `RFQ`, `AUCTION_LEASE`, `CONCESSION` and `EVENT_STALL`.
+```text
+Request: OPEN -> ACCEPTED | EXPIRED (no acceptance by bids_close_at + 24 h) | CANCELLED
+Bid:     ACTIVE -> COUNTERED -> ACTIVE (revised) | DECLINED
+         ACTIVE -> ACCEPTED | WITHDRAWN | CLOSED (another bid accepted, or request ended)
+```
 
-A notice includes scope, lot, indicative value, eligibility, rubric, dates/timezone, contact,
-document rights and a clear non-binding demo label.
+1. The tourist posts a request: spot, time window, party size, type, expected photo count,
+   optional budget, bidding window (30 minutes to 24 hours, ending before the shoot).
+2. Approved photographers in that destination see open requests and bid: unit, unit price,
+   included count, extra price, delivery time, message. The API computes `estimated_total` for the
+   requested count. One active bid per photographer per request; a photographer may revise their
+   own bid while the window is open.
+3. Bids are sealed: a photographer never sees other bids or counts.
+4. The tourist may counter once per bid with a lower unit or total price. The photographer accepts
+   (the bid updates), declines, or revises once.
+5. The tourist accepts one bid (allowed until the shoot starts). In one transaction: bid `ACCEPTED`,
+   all other bids `CLOSED`, request `ACCEPTED`, booking created in `PENDING_PAYMENT` with
+   `deposit = deposit_percent x estimated_total` (setting, default 20 %), and a job linked to it.
+   Bidders are notified.
 
-Flow: `DRAFT → REVIEW → PUBLISHED/OPEN → CLOSED → EVALUATION → RECOMMENDATION →
-INTERNAL_DEMO_APPROVAL → AWARDED_DEMO → DRAFT_CONTRACT`.
+### 5.3 Job and settlement
 
-Preserve bids and evaluations. An evaluator declares a conflict through an audited action
-(`EVALUATOR_CONFLICT_DECLARED`); there is no separate conflict workflow in MVP. Seed at least two
-synthetic evaluators. There are no real bids, deposits, public e-procurement, signatures, legal
-awards or collections.
+```text
+Job: SCHEDULED -> IN_PROGRESS -> DELIVERED -> SETTLED
+     DELIVERED -> DISPUTED -> SETTLED (operator decides)
+     SCHEDULED -> CANCELLED
+```
 
-Contract dues are manually entered demo estimates and are never owed.
+1. On the day the provider checks the tourist in (ticket scan) and the job is `IN_PROGRESS`.
+2. The photographer delivers: uploads watermarked previews or states a count and a delivery link.
+3. Final amount:
+   - `PER_PHOTO`: `selected_count x unit_price`, where the tourist selects the photos they keep
+     (at least the minimum the bid stated, if any).
+   - `PER_PACKAGE`: package price, plus `(selected_count - included_count) x extra_unit_price` when
+     the tourist keeps more than included.
+   - `PER_HOUR`: hours on the booking, plus agreed extra time if both confirm.
+4. The tourist confirms the selection and pays the balance (`final_total - deposit`). If the final
+   total is below the deposit, the difference is refunded. The job becomes `SETTLED`, unwatermarked
+   delivery is released, and the booking completes.
+5. If the tourist does not respond within 48 hours of delivery, the job settles on the included
+   count (package) or the delivered count (per photo).
+6. Either side may open a dispute before settlement; the operator decides the final count and the
+   result is recorded with a reason.
 
-## 4. Finance and reconciliation
+Cancellation: tourist before 12 hours: full deposit refund; later: deposit kept by the provider
+(minus commission). Provider cancellation always refunds in full and is recorded against the
+provider.
 
-Every view and export states “SIMULATED — no money collected or owed.” There is no gateway, bank,
-payout or tax computation.
+The same flow serves private guides (`PER_HOUR`), boat charters and private rides
+(`PER_BOOKING`).
 
-Demo accounts: `CASH_CLEARING_SIM`, `PROVIDER_PAYABLE_SIM`, `PLATFORM_FEE_REVENUE_SIM`,
-`PROPOSED_PUBLIC_DUES_RECEIVABLE_SIM` and `DEMO_CONTRACT_DUES_RECEIVABLE_SIM`.
+## 6. Payments, commission and ledger
 
-The applicable `fee_rules` version supplies the platform fee `F` and proposed public share `R`. For
-gross `G`, with `F + R <= G`: debit simulated clearing `G`; credit provider payable `G − F − R`,
-fee revenue `F` and proposed public share `R`.
+### 6.1 Payment-provider port
 
-Every posted entry balances per currency and links to its source booking/contract and fee-rule
-version. Corrections use reversal, never edit or delete. Reconcile snapshots to postings and display
-exceptions. Use “prototype estimate,” not “amount owed.”
+```text
+createPayment(intent) -> { status: SUCCEEDED | FAILED | PENDING, externalRef }
+refund(payment, amount) -> { status, externalRef }
+```
 
-Contract dues are manual demo entries linked to a contract; they do not feed a calculation engine.
+The only adapter today is `SANDBOX`. Its gateway screen shows the method and amount with Approve and
+Decline and never collects card numbers, PINs or one-time codes. A live adapter (for example a bKash
+or SSLCommerz integration) is a separate, reviewed change. Every payment-creating call needs an
+`Idempotency-Key`; a retry returns the first result.
+
+### 6.2 Commission
+
+The applicable `commission_rules` row (provider override, else listing type, else the default
+setting) is snapshotted on the booking as `commission_bps`. For a charge of `G`:
+`commission = round_half_up(G x bps / 10000)`, `provider_net = G - commission`. A refund reverses
+commission in proportion to the refunded amount.
+
+### 6.3 Ledger postings
+
+| Event | Debit | Credit |
+|---|---|---|
+| Charge `G` | `GATEWAY_CLEARING` G | `PROVIDER_PAYABLE` (provider) G - C; `COMMISSION_REVENUE` C |
+| Refund `R` with commission share `c` | `PROVIDER_PAYABLE` R - c; `COMMISSION_REVENUE` c | `GATEWAY_CLEARING` R |
+| Payout `P` marked paid | `PROVIDER_PAYABLE` (provider) P | `PAYOUTS_CLEARING` P |
+| Pay at venue (provider collects `G`) | `PROVIDER_PAYABLE` (provider) C | `COMMISSION_REVENUE` C (commission owed by the provider, netted from the next payout) |
+
+Every entry balances per currency, references its source, and is never edited; mistakes are
+reversed with a new entry.
+
+### 6.4 Payouts
+
+The operator creates a payout draft per provider for a period: all succeeded, non-refunded payments
+not yet in a payout, net of commissions owed from pay-at-venue bookings. Approve, then mark paid
+with a reference. Paid payouts cannot change.
+
+## 7. Lost and found
+
+```text
+LOST item:  OPEN -> MATCHED -> RETURNED | CLOSED (owner closes) | EXPIRED
+FOUND item: OPEN -> MATCHED -> CLAIM_PENDING -> RETURNED
+            OPEN -> EXPIRED -> DISPOSED (after holding period, desk records how)
+Claim:      SUBMITTED -> VERIFIED -> HANDED_OVER
+            SUBMITTED -> REJECTED | CANCELLED
+```
+
+1. **Report lost.** Any tourist: category, spot, time window, title, public description, private
+   details, contact. Gets a reference; appears in Trips, Reports.
+2. **Log found.** Desk staff or a provider member at that destination: category, spot, time, public
+   description, private details, storage location, two or three verification questions with
+   answers, optional private photos. A tourist can report "I found something", which creates a
+   pending found item asking them to hand it to the named desk; it becomes `OPEN` when desk staff
+   confirm receipt.
+3. **Match.** On every new item the API scores open items of the other kind in the same destination:
+   same category, overlapping time window (with 24 h slack), same or nearby spot, keyword overlap.
+   Scores above a threshold create `SUGGESTED` matches and notify the owner and the desk. Desk staff
+   confirm or dismiss.
+4. **Claim.** The tourist answers the verification questions. Answers are normalised and compared
+   to the hashes; at least two correct answers pass. Three failed attempts lock claims on that item
+   for that tourist. A passed claim asks the tourist to pick a pickup time at the desk.
+5. **Handover.** Desk staff check the claimant's photo ID in person, then record the handover with
+   a note. Found and lost items become `RETURNED`; other open claims are rejected.
+6. **Expiry.** After the holding period (default 30 days) unclaimed found items become `EXPIRED`,
+   and the desk records disposal (donated, destroyed, returned to finder). Lost reports expire after
+   the same period unless renewed.
+7. **Privacy.** Public reads expose category, spot, date and the public description only. Private
+   details, private photos and answers are visible to desk staff and admin only.
+
+## 8. Complaints
+
+```text
+OPEN -> ACKNOWLEDGED -> IN_PROGRESS -> RESOLVED -> CLOSED
+any open state -> ESCALATED (to admin) -> IN_PROGRESS
+```
+
+Desk staff of the destination acknowledge within the service target (operator setting, default 2
+hours during desk hours). Notes may be internal or visible to the tourist. A complaint linked to a
+booking may lead to a refund through the normal refund command. The tourist can reopen a resolved
+complaint once within 7 days.
+
+## 9. Reviews
+
+Allowed for 14 days after a booking completes; one per booking; rating 1-5 and text. Providers reply
+once. The operator can hide a review with a reason. Listing and provider ratings are recalculated
+in the same transaction.
+
+## 10. Audit
+
+Append an audit event for: destination, spot, alert and emergency-contact changes; provider and
+listing decisions; revisions applied; booking cancellation by provider or admin; check-in; bid
+acceptance; job settlement and disputes; refunds; payout approval and payment; lost-and-found
+logging, claims, handover and disposal; complaint state changes; role and settings changes.
+Store actor, action, entity, entity ID, time, reason, request ID and a safe before and after summary.

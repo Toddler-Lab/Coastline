@@ -1,113 +1,148 @@
 # REST API Specification
 
-**Base path:** `/api/v1` · **Format:** JSON · **Contract:** OpenAPI generated from NestJS DTOs
+**Base path:** `/api/v1` · **Format:** JSON · **Contract:** OpenAPI generated from NestJS DTOs,
+shared types in `packages/api-contracts`
 
 ## 1. Conventions
 
-Dates use ISO-8601 UTC. Money uses integer minor units and an ISO currency code. Cursor pagination
-defaults to 20 and is capped at 100 with a stable sort. Require `Idempotency-Key` for booking holds
-and confirmation. Use explicit workflow commands; no arbitrary status `PATCH`. Validate path, query
-and body at the API boundary. Enforce authorization in the service/guard layer. Rate-limit login,
-holds and public search. CORS allows only the configured web origin.
+- Success: `{ "data": ..., "meta"?: { "nextCursor", ... } }`. Error:
+  `{ "error": { "code", "message", "details", "requestId" } }`.
+- Status codes: `400` validation, `401` no identity, `403` not allowed, `404` absent or out of
+  scope (also for other people's records), `409` state conflict (slot taken, illegal transition),
+  `422` business rule (time window, limits), `429` rate limit.
+- Dates are ISO-8601 UTC; date-only parameters are Asia/Dhaka calendar dates (`2026-11-23`).
+- Money is integer minor units plus ISO currency (`{ "amountMinor": 12000, "currency": "BDT" }`).
+- Cursor pagination: default 20, maximum 100, stable sort.
+- `Idempotency-Key` header is required on every call that creates a booking, payment, refund, bid
+  acceptance or payout.
+- State changes are explicit commands (`POST .../cancel`), never a free status `PATCH`.
+- The server derives every price, total, commission, provider scope and role. Unknown body fields
+  are rejected.
+- Identity: until sign-in exists, the web app sends the seeded account as `x-demo-user-id`
+  (enabled only when `DEMO_AUTH_ENABLED=true`). The sign-in phase replaces this with session
+  cookies; endpoints do not change.
 
-Success responses contain resource data and optional `meta`. Error shape:
-`{ "error": { "code", "message", "details", "requestId" } }`.
+## 2. Existing endpoints (on `dev`, kept)
 
-HTTP mapping: `400` validation, `401` unauthenticated, `403` forbidden, `404` absent/out of scope,
-`409` conflict, `422` domain rule, `429` rate limit, `5xx` internal. No stack traces or secret
-details.
+| Area | Endpoints |
+|---|---|
+| Identity | `GET /session`, `GET /demo/users` |
+| Sunbeds | `GET /beach-points?date=&destination=`, `GET /beach-points/{code}?date=` |
+| Sunbed orders | `POST /orders`, `GET /orders/me`, `GET /orders/{ref}`, `POST /orders/{ref}/cancel` |
+| Hotels | `GET /hotels?destination=`, `GET /hotels/{slug}`, `POST /hotels/bookings` |
+| Dining | `GET /dining/venues?destination=&kind=&beachPointCode=&reservable=&delivers=`, `GET /dining/venues/{code}`, `GET /dining/venues/{code}/availability?date=`, `POST /dining/reservations`, `GET /dining/reservations/me`, `GET /dining/reservations/{ref}`, `POST /dining/reservations/{ref}/cancel`, `GET /dining/delivery/beds`, `POST /dining/food-orders`, `GET /dining/food-orders/me`, `GET /dining/food-orders/{ref}`, `POST /dining/food-orders/{ref}/cancel` |
+| Admin (current) | `GET /admin/overview`, `GET /admin/beach-points`, `GET /admin/orders`, `POST /admin/orders/{ref}/cancel`, `POST /admin/orders/{ref}/check-in`, `POST /admin/tickets/validate`, `/admin/dining/*` |
+| Health | `GET /health/live`, `GET /health/ready` |
 
-## 2. Endpoint inventory
+Changes: list endpoints accept `destination` and `spot`; create endpoints stop accepting
+`paymentMethod` and return a booking in `PENDING_PAYMENT` that is paid through `/checkout`;
+`/admin/dining/*` kitchen, reservation and venue actions are also exposed under `/provider/*` for
+the venue's members. Old admin routes stay until the web app no longer uses them.
 
-**Public:** `GET /zones`, `GET /categories`, `GET /listings`, `GET /listings/{publicId}`,
-`GET /tariffs`, `GET /procurement/notices`, `GET /procurement/notices/{publicId}`.
+## 3. Public
 
-**Identity:** `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`.
+| Endpoint | Purpose |
+|---|---|
+| `GET /destinations` | Active destinations with accent, hero, service-type counts, active alert summary |
+| `GET /destinations/{slug}` | Destination with content, spots, service tiles, emergency contacts |
+| `GET /destinations/{slug}/spots/{spot}` | Spot hub in one call: spot, alerts, bookable types with top listings, nearby facilities, know content, help contacts |
+| `GET /listings?destination=&spot=&type=&q=&priceMin=&priceMax=&rating=&sort=&cursor=` | Listing cards |
+| `GET /listings/{publicId}` | Listing detail with media, offerings, policy, rating, provider card |
+| `GET /listings/{publicId}/availability?date=&offering=` | Slots or departures with remaining capacity |
+| `GET /listings/{publicId}/reviews?cursor=` | Reviews |
+| `GET /providers/{publicId}` | Public provider profile (photographer portfolio and packages) |
+| `GET /search?q=&destination=&type=` | Grouped results: destinations, spots, listings, providers |
+| `GET /nearby?lat=&lng=&type=&radius=` | Facilities and listings by distance |
+| `GET /lost-found?destination=&category=&spot=&cursor=` | Public board of found items (public fields only) |
+| `GET /media/{id}` | Public media; private media needs authorisation |
 
-**Visitor:** `POST /holds`, `POST /bookings` (confirm), `GET /bookings`,
-`GET /bookings/{publicRef}`, `POST /bookings/{publicRef}/cancel`,
-`POST /demo-payments/{publicRef}/simulate`.
+## 4. Tourist
 
-**Provider:** `POST/GET/PATCH /provider/listings`, `GET /provider/listings/{id}`,
-`POST /provider/listings/{id}/submit`, `POST/GET/PATCH /provider/listings/{id}/products`,
-`GET /provider/products/{id}`, `GET/PATCH /provider/products/{id}/inventory`,
-`GET /provider/availability`, `GET /provider/bookings`,
-`POST/GET /provider/products/{id}/tariff-proposals`.
+| Endpoint | Purpose |
+|---|---|
+| `POST /bookings` | Draft a generic booking (listing, offering, slot, quantity); holds inventory |
+| `GET /trips?tab=upcoming\|past\|requests\|reports` | One timeline across all engines |
+| `GET /trips/{ref}` | Ticket or order detail for any engine |
+| `POST /bookings/{ref}/cancel` | Cancel with the snapshotted policy |
+| `POST /checkout` | Create a checkout for a pending booking of any engine (`{ kind, ref }`); returns totals, fee lines and allowed methods |
+| `POST /checkout/{id}/pay` | `{ method }` with `Idempotency-Key`; returns the gateway step |
+| `POST /payments/sandbox/{externalRef}/approve` and `/decline` | Sandbox gateway result (sandbox adapter only) |
+| `GET /payments/{id}/receipt` | Receipt |
+| `POST /quote-requests` | Post a photographer, guide or charter request |
+| `GET /quote-requests/me`, `GET /quote-requests/{ref}` | Requests and their bids (sealed per provider) |
+| `POST /quote-requests/{ref}/cancel` | Cancel an open request |
+| `POST /bids/{id}/counter` | One counter-offer |
+| `POST /bids/{id}/accept` | Accept; creates booking and job |
+| `POST /jobs/{id}/selection` | Select kept photos or confirm count |
+| `POST /jobs/{id}/dispute` | Open a dispute |
+| `GET /inbox`, `GET /inbox/{conversationId}`, `POST /inbox/{conversationId}/messages`, `POST /conversations` | Messages and notifications |
+| `POST /notifications/read` | Mark read |
+| `POST /reviews` | Review a completed booking |
+| `GET/POST/DELETE /saved` | Saved items |
+| `POST /lost-found` | Report a lost item or a found item |
+| `GET /lost-found/me`, `GET /lost-found/{ref}` | Own reports and matches |
+| `POST /lost-found/{ref}/claims` | Claim with verification answers and pickup time |
+| `POST /complaints`, `GET /complaints/me`, `GET /complaints/{ref}`, `POST /complaints/{ref}/reopen` | Complaints |
+| `POST /media` | Upload an image (multipart, purpose required) |
 
-**Admin moderation:** `GET /admin/review/listings`, `GET /admin/review/tariffs`,
-`POST /admin/listings/{id}/approve`, `POST /admin/listings/{id}/request-changes`,
-`POST /admin/listings/{id}/reject`, `POST /admin/listings/{id}/suspend`,
-`POST /admin/tariffs/{id}/approve`, `POST /admin/tariffs/{id}/request-changes`,
-`POST /admin/tariffs/{id}/reject`.
+## 5. Provider (`/provider`, scoped by membership)
 
-**Procurement:** `POST /admin/procurement/notices`,
-`POST /admin/procurement/notices/{id}/publish`, `POST /admin/procurement/notices/{id}/close`,
-`POST /procurement/bids`, `POST /admin/procurement/bids/{id}/evaluations`,
-`POST /admin/procurement/notices/{id}/recommendation`,
-`POST /admin/procurement/recommendations/{id}/approve-demo`.
+| Endpoint | Purpose |
+|---|---|
+| `POST /provider/applications`, `GET /provider/applications/me` | Onboarding |
+| `GET /provider/me`, `PATCH /provider/me` | Business profile |
+| `GET /provider/today` | Arrivals, pending orders, open requests, earnings |
+| `GET/POST /provider/listings`, `GET/PATCH /provider/listings/{id}`, `POST /provider/listings/{id}/submit`, `POST /provider/listings/{id}/archive` | Listings and revisions |
+| `GET/POST/PATCH /provider/listings/{id}/offerings`, `/schedules`, `POST /provider/slots/{id}/block` | Inventory |
+| Engine-specific: `/provider/hotels/{id}/rooms`, `/provider/venues/{code}/menu`, `/provider/venues/{code}/tables`, `/provider/beach-points/{code}/sunbeds` | Existing engines' setup |
+| `GET /provider/bookings?status=&date=`, `GET /provider/bookings/{ref}`, `POST /provider/bookings/{ref}/check-in`, `POST /provider/bookings/{ref}/cancel`, `POST /provider/bookings/{ref}/no-show` | Bookings |
+| `POST /provider/tickets/validate` | Scan |
+| `GET /provider/food-orders`, `POST /provider/food-orders/{ref}/status`, `GET /provider/reservations`, `POST /provider/reservations/{ref}/check-in` | Kitchen and tables |
+| `GET /provider/requests`, `POST /provider/requests/{ref}/bids`, `PATCH /provider/bids/{id}`, `POST /provider/bids/{id}/withdraw`, `POST /provider/counters/{id}/accept\|decline` | Bidding |
+| `GET /provider/jobs`, `POST /provider/jobs/{id}/deliver` | Photographer jobs |
+| `GET /provider/earnings?from=&to=`, `GET /provider/payouts` | Money |
+| `POST /provider/reviews/{id}/reply` | Reply |
+| `POST /provider/lost-found` | Log a found item at the business |
 
-**Contracts:** `GET /admin/contracts`, `GET /admin/contracts/{id}`,
-`POST /admin/contracts/{id}/dues`.
+## 6. Desk (`/desk`, scoped by destination assignment)
 
-**Finance:** `GET /admin/finance/summary`, `GET /admin/finance/entries`,
-`POST /admin/finance/entries/{id}/reverse`, `GET /admin/finance/contract-dues`.
+`POST /desk/tickets/validate`, `POST /desk/bookings/{ref}/check-in`,
+`GET/POST /desk/lost-found`, `GET /desk/lost-found/{ref}`, `POST /desk/lost-found/{ref}/receive`,
+`POST /desk/matches/{id}/confirm|dismiss`, `GET /desk/claims`, `POST /desk/claims/{ref}/verify|reject`,
+`POST /desk/claims/{ref}/handover`, `POST /desk/lost-found/{ref}/dispose`,
+`GET /desk/complaints`, `POST /desk/complaints/{ref}/acknowledge|note|escalate|resolve`,
+`GET/POST /desk/alerts`, `POST /desk/alerts/{id}/end`.
 
-**Reporting and audit:** `GET /admin/reports/summary`, `GET /admin/reports/export.csv`,
-`GET /admin/audit-events`.
+## 7. Admin (`/admin`)
 
-**Administration:** `GET /admin/users`, `PATCH /admin/users/{id}/roles`, `GET /admin/providers`,
-`POST /admin/providers/{id}/memberships`, `GET/PATCH /admin/pilot-config`.
+| Area | Endpoints |
+|---|---|
+| Overview | `GET /admin/overview?destination=&from=&to=` |
+| Places | `GET/POST /admin/destinations`, `PATCH /admin/destinations/{id}`, `POST /admin/destinations/{id}/spots`, `PATCH /admin/spots/{id}`, `POST /admin/destinations/{id}/reorder`, `GET/POST/PATCH /admin/emergency-contacts`, `GET/POST/PATCH /admin/alerts` |
+| Providers | `GET /admin/providers?status=`, `POST /admin/providers/{id}/approve\|request-changes\|reject\|suspend\|reinstate`, `POST /admin/providers/{id}/service-types`, `POST /admin/providers/{id}/members` |
+| Listings | `GET /admin/listings?status=`, `GET /admin/revisions?status=`, `POST /admin/listings/{id}/approve\|request-changes\|reject\|suspend`, `POST /admin/revisions/{id}/approve\|reject` |
+| Bookings | `GET /admin/bookings?engine=&destination=&status=&q=`, `POST /admin/bookings/{ref}/cancel`, `POST /admin/jobs/{id}/resolve-dispute` |
+| Money | `GET /admin/payments`, `POST /admin/payments/{id}/refund`, `GET /admin/ledger`, `GET /admin/finance/summary`, `GET/POST /admin/commission-rules`, `GET/POST /admin/payouts`, `POST /admin/payouts/{id}/approve\|mark-paid`, `GET /admin/reports/export.csv` |
+| Help | `GET /admin/lost-found`, `GET /admin/complaints`, `POST /admin/complaints/{ref}/assign\|resolve`, `GET/POST /admin/desk-assignments` |
+| Platform | `GET /admin/users`, `PATCH /admin/users/{id}/role`, `GET/PATCH /admin/settings`, `GET /admin/audit-events`, `POST /admin/reviews/{id}/hide` |
 
-**Operations:** `GET /health/live`, `GET /health/ready`.
+## 8. Sign-in (last phase)
 
-**Dining (implemented demo, under `/api/v1`, all `{ data }`):**
+`POST /auth/otp/request`, `POST /auth/otp/verify`, `POST /auth/logout`, `GET /auth/me`. The
+`/demo/users` endpoint and the `x-demo-user-id` header are then disabled outside local
+development.
 
-- Public: `GET /dining/venues?kind=&beachPointCode=&reservable=&delivers=`,
-  `GET /dining/venues/{code}` (venue + menu), `GET /dining/venues/{code}/availability?date=`.
-- Tourist: `POST /dining/reservations`, `GET /dining/reservations/me`,
-  `GET /dining/reservations/{ref}`, `POST /dining/reservations/{ref}/cancel`,
-  `GET /dining/delivery/beds`, `POST /dining/food-orders`, `GET /dining/food-orders/me`,
-  `GET /dining/food-orders/{ref}`, `POST /dining/food-orders/{ref}/cancel`. An owner or admin may
-  read a reservation or food order; another tourist receives `404`.
-- Admin: `GET /admin/dining/overview?date=`, `GET /admin/dining/venues`,
-  `PATCH /admin/dining/venues/{code}`, `PATCH /admin/dining/menu-items/{id}`,
-  `GET /admin/dining/reservations?date=&venueCode=&status=`,
-  `POST /admin/dining/reservations/{ref}/check-in`, `POST /admin/dining/reservations/{ref}/cancel`,
-  `GET /admin/dining/food-orders?venueCode=&status=&date=`,
-  `POST /admin/dining/food-orders/{ref}/status`.
+## 9. Representative responses
 
-Malformed bodies or unknown fields return `400`; business-rule violations (time windows, limits,
-venue state, impossible dates) return `422`; state conflicts (slot taken, illegal food-order
-transition, already cancelled/checked in) return `409`. Reservation QR tickets are signed with the
-shared ticket service, but `POST /admin/tickets/validate` only resolves sunbed orders; dining
-check-in uses the reservation check-in endpoint.
-
-There are no upload endpoints, notification endpoints or real payment/government endpoints.
-
-## 3. Domain behavior
-
-The server derives all prices, availability and permitted state transitions. Provider ID comes from
-authorized membership, not trusted request input. Public catalogue returns only approved active
-listing versions and internally approved effective tariffs. Booking and payment simulation are
-idempotent. A conflict such as sold-out inventory returns `409` with safe availability refresh
-guidance.
-
-Booking commands follow `HELD → CONFIRMED | CANCELLED | EXPIRED`. Cancellation before start restores
-inventory once and is free; cancellation after start is rejected. Confirmation never charges.
-
-## 4. Security and versioning
-
-Never expose internal stack traces, password/session data, private provider records or unfiltered
-finance data. Validate maximum sizes, date ranges, enums and identifiers. Version breaking API
-changes and document deprecation. OpenAPI is generated from NestJS DTOs and must match implemented
-routes. Health endpoints are specified in [operations.md](operations.md).
-
-## 5. Representative response types
-
-Listing exposes public reference, approved content, provider display info, zone/category, products,
-indicative tariff provenance, image URLs, terms and `last_verified_at`.
-
-Booking exposes public reference, lifecycle state, item price snapshots, hold expiry, cancellation
-policy, simulated-payment label and tariff provenance.
-
-Finance responses and CSV exports include the demo watermark and `generated_at`.
+- **Listing card:** `publicId`, `type`, `title`, `titleBn`, `photo`, `destination`, `spot`,
+  `distanceMeters?`, `rating`, `ratingCount`, `fromPrice { amountMinor, currency, unit }`,
+  `keyFact`, `saved`.
+- **Trip item:** `ref`, `engine` (`SUNBED`, `STAY`, `TABLE`, `FOOD`, `BOOKING`, `JOB`), `title`,
+  `spot`, `startsAt`, `endsAt`, `status`, `total`, `paid`, `canCancelUntil`, `ticket?`.
+- **Bid (to the requesting tourist):** `id`, `provider { publicId, name, rating, jobsDone,
+  portfolio[] }`, `priceUnit`, `unitPrice`, `includedCount`, `extraUnitPrice`, `estimatedTotal`,
+  `deliveryHours`, `message`, `status`, `counter?`.
+- **Payment:** `id`, `type`, `purpose`, `provider`, `method`, `status`, `amount`, `commission`,
+  `providerNet`, `externalRef`, `createdAt`. Tourist responses omit `commission` and `providerNet`.
+- **Found item (public):** `ref`, `category`, `title`, `publicDescription`, `spot`, `foundOn`,
+  `desk`. Never private details, private photos or questions' answers.
