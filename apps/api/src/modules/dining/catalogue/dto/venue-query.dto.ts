@@ -8,6 +8,16 @@ import { IsOptional, IsString, MaxLength } from 'class-validator';
 export class VenueQueryDto {
   @IsOptional()
   @IsString()
+  @MaxLength(80)
+  destination?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  spot?: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(32)
   kind?: string;
 

@@ -10,6 +10,7 @@ import { PrismaClient, type PaymentMethod } from '../src/index';
 import { beachPointImageFor } from './beach-point-images';
 import { HOTELS } from './hotels-seed';
 import { seedDining } from './seed-dining';
+import { BEACH_SPOT_CONTENT, COXS_BAZAR_ID, seedPlaces, seedWorkspaces } from './seed-places';
 
 const prisma = new PrismaClient();
 
@@ -234,13 +235,37 @@ async function main(): Promise<void> {
     });
   }
 
+  await seedPlaces(prisma);
+
   const pointIds = new Map<string, string>();
+  const spotIds = new Map<string, string>();
   for (const point of POINTS) {
+    // A beach point is the sunbed row of one BEACH spot (WP-05).
+    const spotSlug = point.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const spotData = {
+      name: point.name,
+      kind: 'BEACH' as const,
+      description: point.description,
+      latitude: point.latitude,
+      longitude: point.longitude,
+      openHours: { open: point.openHour, close: point.closeHour },
+      content: BEACH_SPOT_CONTENT,
+      sortOrder: point.sortOrder,
+      isActive: true,
+    };
+    const spot = await prisma.spot.upsert({
+      where: { destinationId_slug: { destinationId: COXS_BAZAR_ID, slug: spotSlug } },
+      update: spotData,
+      create: { destinationId: COXS_BAZAR_ID, slug: spotSlug, ...spotData },
+    });
+    spotIds.set(point.code, spot.id);
+
     // Photos come from beach-point-images.ts (null until verified, licensed photos are set).
     const image = beachPointImageFor(point.code);
     const record = await prisma.beachPoint.upsert({
       where: { code: point.code },
       update: {
+        spotId: spot.id,
         name: point.name,
         description: point.description,
         latitude: point.latitude,
@@ -254,6 +279,7 @@ async function main(): Promise<void> {
       },
       create: {
         code: point.code,
+        spotId: spot.id,
         name: point.name,
         description: point.description,
         latitude: point.latitude,
@@ -309,6 +335,9 @@ async function main(): Promise<void> {
         nearestBeachCode: hotel.nearestBeachCode,
         distanceMeters: hotel.distanceMeters,
         isFeatured: hotel.isFeatured,
+        destinationId: COXS_BAZAR_ID,
+        spotId: spotIds.get(hotel.nearestBeachCode) ?? null,
+        area: hotel.zone.charAt(0) + hotel.zone.slice(1).toLowerCase(),
         isActive: true,
       },
       create: {
@@ -331,6 +360,9 @@ async function main(): Promise<void> {
         nearestBeachCode: hotel.nearestBeachCode,
         distanceMeters: hotel.distanceMeters,
         isFeatured: hotel.isFeatured,
+        destinationId: COXS_BAZAR_ID,
+        spotId: spotIds.get(hotel.nearestBeachCode) ?? null,
+        area: hotel.zone.charAt(0) + hotel.zone.slice(1).toLowerCase(),
       },
     });
 
@@ -391,7 +423,8 @@ async function main(): Promise<void> {
       }
     }
   }
-  await seedDining(prisma, pointIds);
+  await seedDining(prisma, pointIds, { destinationId: COXS_BAZAR_ID, spotIds });
+  await seedWorkspaces(prisma);
 
   // Demo bookings are disposable; catalogue rows above are preserved.
   // Food orders reference sunbed bookings (RESTRICT), so they go first.

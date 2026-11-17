@@ -1,18 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Headers,
-  Param,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type {
-  HotelDetailDto,
-  HotelSummaryDto,
-  OrderDto,
-} from '@coastline/api-contracts';
+import type { HotelDetailDto, HotelSummaryDto, OrderDto } from '@coastline/api-contracts';
 import type { Actor } from '../../common/auth/actor';
 import { AllowAnonymous } from '../../common/auth/auth.decorators';
 import { CurrentActor } from '../../common/auth/current-actor.decorator';

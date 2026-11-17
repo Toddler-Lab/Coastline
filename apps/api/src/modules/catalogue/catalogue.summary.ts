@@ -118,6 +118,7 @@ function toSummary(
   reference: ReferenceSlot,
   totalBeds: number,
   freeBeds: number,
+  place: { spotSlug: string; destinationSlug: string },
 ): BeachPointSummary {
   return {
     id: point.id,
@@ -138,6 +139,8 @@ function toSummary(
     imageUrl: point.imageUrl,
     imageAlt: point.imageAlt,
     imageCredit: point.imageCredit,
+    destinationSlug: place.destinationSlug,
+    spotSlug: place.spotSlug,
   };
 }
 
@@ -167,7 +170,7 @@ export async function buildSummaries(
     ...new Set([...references.values()].map((slot) => slot.start.getTime())),
   ].map((time) => new Date(time));
 
-  const [counts, occupied] = await Promise.all([
+  const [counts, occupied, spots] = await Promise.all([
     prisma.sunbed.groupBy({
       by: ['beachPointId', 'status'],
       where: { beachPointId: { in: ids }, status: { not: 'RETIRED' } },
@@ -181,6 +184,10 @@ export async function buildSummaries(
         orderItem: { status: { not: 'CANCELLED' } },
       },
       select: { sunbedId: true, sunbed: { select: { beachPointId: true } } },
+    }),
+    prisma.spot.findMany({
+      where: { id: { in: ordered.map((point) => point.spotId) } },
+      select: { id: true, slug: true, destination: { select: { slug: true } } },
     }),
   ]);
 
@@ -199,6 +206,10 @@ export async function buildSummaries(
     }
   }
 
+  const placeBySpot = new Map(
+    spots.map((spot) => [spot.id, { spotSlug: spot.slug, destinationSlug: spot.destination.slug }]),
+  );
+
   const takenByPoint = new Map<string, Set<string>>();
   for (const slot of occupied) {
     const pointId = slot.sunbed.beachPointId;
@@ -213,6 +224,7 @@ export async function buildSummaries(
       0,
       (availableByPoint.get(point.id) ?? 0) - (takenByPoint.get(point.id)?.size ?? 0),
     );
-    return toSummary(point, reference, totalByPoint.get(point.id) ?? 0, freeBeds);
+    const place = placeBySpot.get(point.spotId) ?? { spotSlug: '', destinationSlug: '' };
+    return toSummary(point, reference, totalByPoint.get(point.id) ?? 0, freeBeds, place);
   });
 }

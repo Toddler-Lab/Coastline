@@ -10,11 +10,15 @@ import type { Prisma } from '@coastline/db';
 /** Include for a venue row with its beach point label. */
 export const DINING_VENUE_SUMMARY_INCLUDE = {
   beachPoint: { select: { code: true, name: true } },
+  destination: { select: { slug: true } },
+  spot: { select: { slug: true } },
 } satisfies Prisma.DiningVenueInclude;
 
 /** Include for a venue with its full menu in display order. */
 export const DINING_VENUE_DETAIL_INCLUDE = {
   beachPoint: { select: { code: true, name: true } },
+  destination: { select: { slug: true } },
+  spot: { select: { slug: true } },
   categories: {
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     include: {
@@ -92,6 +96,8 @@ export function serializeVenueSummary(
     deliveryEnabled: venue.deliveryEnabled,
     priceFromMinor,
     currency: venue.currency,
+    destinationSlug: venue.destination.slug,
+    spotSlug: venue.spot?.slug ?? null,
   };
 }
 

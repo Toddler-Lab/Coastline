@@ -18,12 +18,16 @@ import type {
  */
 export type AdminVenueRecord = PrismaDiningVenue & {
   beachPoint: Pick<PrismaBeachPoint, 'code' | 'name'> | null;
+  destination: { slug: string };
+  spot: { slug: string } | null;
   categories: Array<PrismaMenuCategory & { items: PrismaMenuItem[] }>;
 };
 
 /** Prisma include that loads everything `serializeAdminVenue` needs, in display order. */
 export const ADMIN_VENUE_INCLUDE = {
   beachPoint: { select: { code: true, name: true } },
+  destination: { select: { slug: true } },
+  spot: { select: { slug: true } },
   categories: {
     orderBy: [{ sortOrder: 'asc' as const }, { name: 'asc' as const }],
     include: { items: { orderBy: [{ sortOrder: 'asc' as const }, { name: 'asc' as const }] } },
@@ -76,6 +80,8 @@ export function serializeAdminVenue(venue: AdminVenueRecord): DiningAdminVenueDt
     deliveryEnabled: venue.deliveryEnabled,
     priceFromMinor: availablePrices.length > 0 ? Math.min(...availablePrices) : null,
     currency: venue.currency.trim(),
+    destinationSlug: venue.destination.slug,
+    spotSlug: venue.spot?.slug ?? null,
     address: venue.address,
     contactPhone: venue.contactPhone,
     reservationDepositMinor: venue.reservationDepositMinor,

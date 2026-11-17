@@ -2,6 +2,7 @@ import {
   type CallHandler,
   type ExecutionContext,
   HttpException,
+  Inject,
   Injectable,
   type NestInterceptor,
 } from '@nestjs/common';
@@ -38,7 +39,7 @@ const REPLAYABLE_ERROR_STATUSES = new Set([400, 404, 409, 422]);
 export class IdempotencyInterceptor implements NestInterceptor {
   constructor(
     private readonly store: IdempotencyService,
-    private readonly reflector: Reflector,
+    @Inject(Reflector) private readonly reflector: Reflector,
   ) {}
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {

@@ -3,6 +3,16 @@ import { Type } from 'class-transformer';
 import { HOTEL_ZONES, type HotelZone } from '@coastline/api-contracts';
 
 export class HotelQueryDto {
+  /** Destination slug. */
+  @IsOptional()
+  @Matches(/^[a-z0-9-]{1,80}$/, { message: 'destination must be a destination slug' })
+  destination?: string;
+
+  /** Spot slug inside the destination. */
+  @IsOptional()
+  @Matches(/^[a-z0-9-]{1,80}$/, { message: 'spot must be a spot slug' })
+  spot?: string;
+
   @IsOptional()
   @IsEnum(HOTEL_ZONES)
   zone?: HotelZone;

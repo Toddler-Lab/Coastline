@@ -7,6 +7,7 @@ import { unprocessable } from '../../../common/errors/api-errors';
 import type { VenueQueryDto } from './dto/venue-query.dto';
 
 const BEACH_POINT_CODE = /^[A-Za-z0-9-]{1,32}$/;
+const PLACE_SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 function parseStrictBoolean(name: string, value: string | undefined): boolean | undefined {
   if (value === undefined) {
@@ -43,6 +44,16 @@ export function parseVenueQuery(raw: VenueQueryDto): DiningVenueQuery {
       });
     }
     query.beachPointCode = raw.beachPointCode.toUpperCase();
+  }
+
+  for (const field of ['destination', 'spot'] as const) {
+    const value = raw[field];
+    if (value !== undefined) {
+      if (!PLACE_SLUG.test(value)) {
+        throw unprocessable(`${field} must be a slug such as "coxs-bazar".`, { field, value });
+      }
+      query[field] = value;
+    }
   }
 
   const reservable = parseStrictBoolean('reservable', raw.reservable);

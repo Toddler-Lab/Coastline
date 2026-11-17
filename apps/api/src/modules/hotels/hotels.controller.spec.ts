@@ -41,9 +41,7 @@ describeDb('hotels API', () => {
   }, TEST_TIMEOUT);
 
   it('lists verified Cox’s Bazar hotels with zone filters', async () => {
-    const res = await request(app.getHttpServer())
-      .get(`${API}/hotels`)
-      .expect(200);
+    const res = await request(app.getHttpServer()).get(`${API}/hotels`).expect(200);
 
     const hotels = res.body.data as HotelSummaryDto[];
     expect(hotels.length).toBeGreaterThanOrEqual(10);

@@ -2,7 +2,12 @@ import type { INestApplication } from '@nestjs/common';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import '../catalogue/testing/test-bootstrap';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { TEST_USERS, createTestApp, testDbReady } from '../../common/testing/integration-fixture';
+import {
+  TEST_DESTINATION,
+  TEST_USERS,
+  createTestApp,
+  testDbReady,
+} from '../../common/testing/integration-fixture';
 import { reseedTestDatabase } from '../catalogue/testing/test-database';
 
 const describeDb = testDbReady() ? describe : describe.skip;
@@ -28,7 +33,14 @@ describeDb('dining foundation (schema guarantees)', () => {
 
   async function createVenue(code: string) {
     return prisma.diningVenue.create({
-      data: { code, name: `Venue ${code}`, kind: 'RESTAURANT', openHour: 10, closeHour: 22 },
+      data: {
+        code,
+        name: `Venue ${code}`,
+        kind: 'RESTAURANT',
+        destinationId: TEST_DESTINATION,
+        openHour: 10,
+        closeHour: 22,
+      },
     });
   }
 

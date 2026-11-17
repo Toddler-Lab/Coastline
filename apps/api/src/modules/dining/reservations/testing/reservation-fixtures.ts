@@ -1,4 +1,5 @@
 import type { PrismaService } from '../../../../common/prisma/prisma.service';
+import { TEST_DESTINATION } from '../../../../common/testing/integration-fixture';
 import { dhakaDateKey, dhakaHourToUtc } from '../../../../common/time/dhaka';
 
 /** Deterministic dining fixtures for the reservation specs (stream B only). */
@@ -32,6 +33,7 @@ export async function seedReservationVenues(prisma: PrismaService): Promise<void
         id: RES_VENUES.main.id,
         code: RES_VENUES.main.code,
         name: 'Test Grill House',
+        destinationId: TEST_DESTINATION,
         kind: 'RESTAURANT',
         openHour: 8,
         closeHour: 22,
@@ -42,6 +44,7 @@ export async function seedReservationVenues(prisma: PrismaService): Promise<void
         id: RES_VENUES.free.id,
         code: RES_VENUES.free.code,
         name: 'Test All-Day Cafe',
+        destinationId: TEST_DESTINATION,
         kind: 'RESTAURANT',
         openHour: 0,
         closeHour: 24,
@@ -51,6 +54,7 @@ export async function seedReservationVenues(prisma: PrismaService): Promise<void
         id: RES_VENUES.noRes.id,
         code: RES_VENUES.noRes.code,
         name: 'Test Beach Stall',
+        destinationId: TEST_DESTINATION,
         kind: 'BEACH_STALL',
         openHour: 8,
         closeHour: 20,
@@ -60,6 +64,7 @@ export async function seedReservationVenues(prisma: PrismaService): Promise<void
         id: RES_VENUES.inactive.id,
         code: RES_VENUES.inactive.code,
         name: 'Test Closed Kitchen',
+        destinationId: TEST_DESTINATION,
         kind: 'SEAFOOD_KITCHEN',
         openHour: 8,
         closeHour: 22,

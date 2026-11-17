@@ -26,7 +26,11 @@ export class DiningCatalogueService {
 
   /** Active venues matching the filter, ordered by sort order then name. */
   async listVenues(query: DiningVenueQuery = {}): Promise<DiningVenueSummary[]> {
-    const where: Prisma.DiningVenueWhereInput = { isActive: true };
+    const where: Prisma.DiningVenueWhereInput = {
+      isActive: true,
+      destination: { isActive: true, ...(query.destination ? { slug: query.destination } : {}) },
+      ...(query.spot ? { spot: { slug: query.spot, isActive: true } } : {}),
+    };
     if (query.kind !== undefined) {
       where.kind = query.kind;
     }
@@ -74,7 +78,7 @@ export class DiningCatalogueService {
       return null;
     }
     return this.prisma.diningVenue.findFirst({
-      where: { code: code.toUpperCase(), isActive: true },
+      where: { code: code.toUpperCase(), isActive: true, destination: { isActive: true } },
       include: DINING_VENUE_DETAIL_INCLUDE,
     });
   }

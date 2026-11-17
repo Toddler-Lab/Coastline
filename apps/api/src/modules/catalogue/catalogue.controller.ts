@@ -15,7 +15,7 @@ export class CatalogueController {
 
   @Get()
   async list(@Query() query: AvailabilityQueryDto): Promise<{ data: BeachPointSummary[] }> {
-    return this.catalogue.list(query.date);
+    return this.catalogue.list(query.date, new Date(), query.destination);
   }
 
   @Get(':code')

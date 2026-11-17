@@ -9,7 +9,13 @@ import type {
   ReservationDto,
 } from '@coastline/api-contracts';
 import { PrismaService } from '../prisma/prisma.service';
-import { TEST_BEDS, TEST_USERS, auth, createTestApp, testDbReady } from '../testing/integration-fixture';
+import {
+  TEST_BEDS,
+  TEST_USERS,
+  auth,
+  createTestApp,
+  testDbReady,
+} from '../testing/integration-fixture';
 import { dhakaDateKey, dhakaHourToUtc } from '../time/dhaka';
 import { reseedTestDatabase } from '../../modules/catalogue/testing/test-database';
 import {
@@ -127,9 +133,11 @@ describeDb('Idempotency-Key', () => {
     it('scopes keys to the caller', async () => {
       const key = 'shared-key-0001';
       await postOrder(key, orderBody(TEST_BEDS.kol001), TEST_USERS.tourist).expect(201);
-      const other = await postOrder(key, orderBody(TEST_BEDS.kol002), TEST_USERS.otherTourist).expect(
-        201,
-      );
+      const other = await postOrder(
+        key,
+        orderBody(TEST_BEDS.kol002),
+        TEST_USERS.otherTourist,
+      ).expect(201);
       expect(other.headers['idempotent-replayed']).toBeUndefined();
       expect(await prisma.order.count()).toBe(2);
     });
@@ -138,7 +146,11 @@ describeDb('Idempotency-Key', () => {
       const key = 'order-past-00001';
       const past = {
         items: [
-          { sunbedId: TEST_BEDS.kol001, startsAt: dhakaHourToUtc(day(-1), 10).toISOString(), hours: 1 },
+          {
+            sunbedId: TEST_BEDS.kol001,
+            startsAt: dhakaHourToUtc(day(-1), 10).toISOString(),
+            hours: 1,
+          },
         ],
       };
       const first = await postOrder(key, past).expect(422);

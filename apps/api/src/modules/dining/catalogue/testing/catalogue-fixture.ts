@@ -1,5 +1,5 @@
 import type { PrismaService } from '../../../../common/prisma/prisma.service';
-import { TEST_POINTS } from '../../../../common/testing/integration-fixture';
+import { TEST_DESTINATION, TEST_POINTS } from '../../../../common/testing/integration-fixture';
 
 /**
  * Deterministic dining catalogue for the stream A specs. Runs on top of
@@ -26,6 +26,7 @@ export async function seedDiningCatalogue(prisma: PrismaService): Promise<void> 
       code: CATALOGUE_VENUES.sugGrill,
       name: 'Test Sugandha Grill',
       nameBn: 'টেস্ট সুগন্ধা গ্রিল',
+      destinationId: TEST_DESTINATION,
       kind: 'SEAFOOD_KITCHEN',
       description: 'Grill by the sunbed line.',
       address: 'Sugandha road (test)',
@@ -88,6 +89,7 @@ export async function seedDiningCatalogue(prisma: PrismaService): Promise<void> 
     data: {
       code: CATALOGUE_VENUES.kolStall,
       name: 'Test Kolatoli Stall',
+      destinationId: TEST_DESTINATION,
       kind: 'BEACH_STALL',
       cuisineTags: ['Snacks'],
       beachPointId: TEST_POINTS.kolatoli,
@@ -124,6 +126,7 @@ export async function seedDiningCatalogue(prisma: PrismaService): Promise<void> 
       {
         code: CATALOGUE_VENUES.bTown,
         name: 'Test B Town Kitchen',
+        destinationId: TEST_DESTINATION,
         kind: 'RESTAURANT',
         openHour: 12,
         closeHour: 23,
@@ -133,6 +136,7 @@ export async function seedDiningCatalogue(prisma: PrismaService): Promise<void> 
       {
         code: CATALOGUE_VENUES.aTown,
         name: 'Test A Town Kitchen',
+        destinationId: TEST_DESTINATION,
         kind: 'RESTAURANT',
         openHour: 12,
         closeHour: 23,
@@ -141,6 +145,7 @@ export async function seedDiningCatalogue(prisma: PrismaService): Promise<void> 
       {
         code: CATALOGUE_VENUES.hidden,
         name: 'Test Hidden Venue',
+        destinationId: TEST_DESTINATION,
         kind: 'RESTAURANT',
         beachPointId: TEST_POINTS.sugandha,
         openHour: 10,

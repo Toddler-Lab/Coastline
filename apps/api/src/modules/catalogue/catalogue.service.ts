@@ -17,10 +17,17 @@ export class CatalogueService {
   async list(
     date: string | undefined,
     now: Date = new Date(),
+    destination?: string,
   ): Promise<{ data: BeachPointSummary[] }> {
     const day = resolveDhakaDay(date, now);
     const points = await this.prisma.beachPoint.findMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        spot: {
+          isActive: true,
+          destination: { isActive: true, ...(destination ? { slug: destination } : {}) },
+        },
+      },
       orderBy: [{ sortOrder: 'asc' }, { code: 'asc' }],
     });
 

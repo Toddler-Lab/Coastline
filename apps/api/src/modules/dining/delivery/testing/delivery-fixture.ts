@@ -1,5 +1,9 @@
 import type { PrismaService } from '../../../../common/prisma/prisma.service';
-import { TEST_BEDS, TEST_POINTS } from '../../../../common/testing/integration-fixture';
+import {
+  TEST_BEDS,
+  TEST_DESTINATION,
+  TEST_POINTS,
+} from '../../../../common/testing/integration-fixture';
 import { HOUR_MS, dhakaHour } from '../../../../common/time/dhaka';
 
 /**
@@ -44,6 +48,7 @@ export async function seedDeliveryVenues(prisma: PrismaService): Promise<void> {
         id: FOOD_IDS.kolVenue,
         code: 'T-KOL-KITCHEN',
         name: 'Kolatoli Test Kitchen',
+        destinationId: TEST_DESTINATION,
         kind: 'BEACH_STALL',
         beachPointId: TEST_POINTS.kolatoli,
         openHour: 0,
@@ -54,6 +59,7 @@ export async function seedDeliveryVenues(prisma: PrismaService): Promise<void> {
         id: FOOD_IDS.sugVenue,
         code: 'T-SUG-KITCHEN',
         name: 'Sugandha Test Kitchen',
+        destinationId: TEST_DESTINATION,
         kind: 'SEAFOOD_KITCHEN',
         beachPointId: TEST_POINTS.sugandha,
         openHour: 0,

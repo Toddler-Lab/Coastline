@@ -57,7 +57,11 @@ export class HotelsService {
     assertDateKey(query.checkInDate, 'checkInDate');
     assertDateKey(query.checkOutDate, 'checkOutDate');
 
-    const where: Prisma.HotelWhereInput = { isActive: true };
+    const where: Prisma.HotelWhereInput = {
+      isActive: true,
+      destination: { isActive: true, ...(query.destination ? { slug: query.destination } : {}) },
+      ...(query.spot ? { spot: { slug: query.spot, isActive: true } } : {}),
+    };
     if (query.zone) {
       where.zone = query.zone;
     }
@@ -68,6 +72,8 @@ export class HotelsService {
     const hotels = await this.prisma.hotel.findMany({
       where,
       include: {
+        destination: { select: { slug: true } },
+        spot: { select: { slug: true } },
         roomTypes: {
           where: { isActive: true },
           include: {
@@ -132,6 +138,9 @@ export class HotelsService {
         nearestBeachCode: h.nearestBeachCode,
         distanceMeters: h.distanceMeters,
         isFeatured: h.isFeatured,
+        destinationSlug: h.destination.slug,
+        spotSlug: h.spot?.slug ?? null,
+        area: h.area,
         minPriceMinor,
         totalRooms,
         availableRoomsCount,
@@ -152,6 +161,8 @@ export class HotelsService {
     const hotel = await this.prisma.hotel.findUnique({
       where: { slug },
       include: {
+        destination: { select: { slug: true } },
+        spot: { select: { slug: true } },
         roomTypes: {
           where: { isActive: true },
           orderBy: { sortOrder: 'asc' },
@@ -229,6 +240,9 @@ export class HotelsService {
       nearestBeachCode: hotel.nearestBeachCode,
       distanceMeters: hotel.distanceMeters,
       isFeatured: hotel.isFeatured,
+      destinationSlug: hotel.destination.slug,
+      spotSlug: hotel.spot?.slug ?? null,
+      area: hotel.area,
       minPriceMinor,
       totalRooms,
       availableRoomsCount,
@@ -245,9 +259,7 @@ export class HotelsService {
     requestId?: string,
   ): Promise<OrderDto> {
     if (actor.role !== 'TOURIST') {
-      throw forbidden(
-        'Admins cannot place tourist bookings. Switch to a visitor account to book.',
-      );
+      throw forbidden('Admins cannot place tourist bookings. Switch to a visitor account to book.');
     }
 
     assertDateKey(dto.checkInDate, 'checkInDate');

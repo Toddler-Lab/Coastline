@@ -1,5 +1,10 @@
 import type { PrismaService } from '../../../../common/prisma/prisma.service';
-import { TEST_BEDS, TEST_POINTS, TEST_USERS } from '../../../../common/testing/integration-fixture';
+import {
+  TEST_BEDS,
+  TEST_DESTINATION,
+  TEST_POINTS,
+  TEST_USERS,
+} from '../../../../common/testing/integration-fixture';
 import { dhakaHourToUtc } from '../../../../common/time/dhaka';
 
 /**
@@ -42,6 +47,7 @@ export async function seedAdminDiningFixture(
     data: {
       code: ADMIN_FIXTURE.activeVenue,
       name: 'Fixture Seafood',
+      destinationId: TEST_DESTINATION,
       kind: 'SEAFOOD_KITCHEN',
       beachPointId: TEST_POINTS.sugandha,
       openHour: 10,
@@ -56,6 +62,7 @@ export async function seedAdminDiningFixture(
     data: {
       code: ADMIN_FIXTURE.inactiveVenue,
       name: 'Fixture Closed Stall',
+      destinationId: TEST_DESTINATION,
       kind: 'BEACH_STALL',
       beachPointId: TEST_POINTS.kolatoli,
       openHour: 8,
@@ -68,6 +75,7 @@ export async function seedAdminDiningFixture(
     data: {
       code: ADMIN_FIXTURE.townVenue,
       name: 'Fixture Town Kitchen',
+      destinationId: TEST_DESTINATION,
       kind: 'RESTAURANT',
       openHour: 11,
       closeHour: 23,

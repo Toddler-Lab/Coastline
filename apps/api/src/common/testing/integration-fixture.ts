@@ -11,6 +11,13 @@ export const TEST_USERS = {
   otherTourist: '00000000-0000-4000-8000-000000000003',
 } as const;
 
+export const TEST_DESTINATION = '40000000-0000-4000-8000-000000000001';
+
+export const TEST_SPOTS = {
+  kolatoli: '41000000-0000-4000-8000-000000000001',
+  sugandha: '41000000-0000-4000-8000-000000000002',
+} as const;
+
 export const TEST_POINTS = {
   kolatoli: '10000000-0000-4000-8000-000000000001',
   sugandha: '10000000-0000-4000-8000-000000000002',
@@ -56,7 +63,9 @@ export async function resetDatabase(prisma: PrismaService): Promise<void> {
       "table_slots", "table_reservations", "dining_tables", "menu_items",
       "menu_categories", "dining_venues", "booking_slots", "hotel_room_nights",
       "order_items", "hotel_bookings", "hotel_rooms", "room_types", "hotels",
-      "orders", "sunbeds", "beach_points", "users", "idempotency_keys"
+      "orders", "sunbeds", "beach_points", "users", "idempotency_keys", "saved_items",
+      "desk_assignments", "provider_members", "providers", "spot_alerts", "emergency_contacts",
+      "spots", "destinations"
       RESTART IDENTITY CASCADE`,
   );
 }
@@ -83,13 +92,50 @@ export async function seedTestCatalogue(prisma: PrismaService): Promise<void> {
     ],
   });
 
+  await prisma.destination.create({
+    data: {
+      id: TEST_DESTINATION,
+      slug: 'coxs-bazar',
+      name: "Cox's Bazar",
+      tagline: 'Test destination',
+      accent: 'SEA',
+      latitude: 21.42,
+      longitude: 91.98,
+    },
+  });
+  await prisma.spot.createMany({
+    data: [
+      {
+        id: TEST_SPOTS.kolatoli,
+        destinationId: TEST_DESTINATION,
+        slug: 'kolatoli',
+        name: 'Kolatoli',
+        kind: 'BEACH',
+        latitude: 21.415,
+        longitude: 91.9835,
+        sortOrder: 1,
+      },
+      {
+        id: TEST_SPOTS.sugandha,
+        destinationId: TEST_DESTINATION,
+        slug: 'sugandha',
+        name: 'Sugandha',
+        kind: 'BEACH',
+        latitude: 21.4212,
+        longitude: 91.9775,
+        sortOrder: 2,
+      },
+    ],
+  });
+
   await prisma.beachPoint.createMany({
     data: [
       {
         id: TEST_POINTS.kolatoli,
+        spotId: TEST_SPOTS.kolatoli,
         code: 'KOL',
         name: 'Kolatoli',
-        latitude: 21.4150,
+        latitude: 21.415,
         longitude: 91.9835,
         openHour: 8,
         closeHour: 18,
@@ -98,6 +144,7 @@ export async function seedTestCatalogue(prisma: PrismaService): Promise<void> {
       },
       {
         id: TEST_POINTS.sugandha,
+        spotId: TEST_SPOTS.sugandha,
         code: 'SUG',
         name: 'Sugandha',
         latitude: 21.4212,
@@ -161,6 +208,8 @@ export async function seedTestCatalogue(prisma: PrismaService): Promise<void> {
   const hotel = await prisma.hotel.create({
     data: {
       slug: 'sayeman-beach-resort',
+      destinationId: TEST_DESTINATION,
+      spotId: TEST_SPOTS.kolatoli,
       name: 'Sayeman Beach Resort',
       banglaName: 'সায়মন বিচ রিসোর্ট',
       zone: 'KOLATOLI',
@@ -206,6 +255,8 @@ export async function seedTestCatalogue(prisma: PrismaService): Promise<void> {
     await prisma.hotel.create({
       data: {
         slug: `hotel-demo-${i}`,
+        destinationId: TEST_DESTINATION,
+        spotId: TEST_SPOTS.sugandha,
         name: `Hotel Demo ${i}`,
         zone: 'SUGANDHA',
         address: 'Hotel-Motel Zone',

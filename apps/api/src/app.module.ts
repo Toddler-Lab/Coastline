@@ -14,6 +14,7 @@ import { CatalogueModule } from './modules/catalogue/catalogue.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
 import { HotelsModule } from './modules/hotels/hotels.module';
 import { DiningModule } from './modules/dining/dining.module';
+import { PlacesModule } from './modules/places/places.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
@@ -34,6 +35,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
     BookingsModule,
     HotelsModule,
     DiningModule,
+    PlacesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: DemoAuthGuard },

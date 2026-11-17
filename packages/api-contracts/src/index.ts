@@ -5,7 +5,7 @@
  * Validation DTOs live in the API; only stable values live here.
  */
 
-export const ROLES = ['TOURIST', 'ADMIN'] as const;
+export const ROLES = ['TOURIST', 'PROVIDER', 'DESK', 'ADMIN'] as const;
 export type Role = (typeof ROLES)[number];
 
 export const SUNBED_STATUSES = ['AVAILABLE', 'OUT_OF_SERVICE', 'RETIRED'] as const;
@@ -67,6 +67,10 @@ export interface SessionUser {
   name: string;
   email: string | null;
   role: Role;
+  /** Providers this account belongs to (PROVIDER role). Empty for others. */
+  providers?: ProviderMembershipDto[];
+  /** Destination slugs this account staffs a desk in (DESK role). */
+  deskDestinations?: string[];
 }
 
 export interface BeachPointSummary {
@@ -94,6 +98,9 @@ export interface BeachPointSummary {
   imageAlt: string | null;
   /** Attribution the photo's licence requires; null when none is required. */
   imageCredit: string | null;
+  /** Destination and spot this sunbed row belongs to. */
+  destinationSlug: string;
+  spotSlug: string;
 }
 
 export interface SlotDto {
@@ -382,6 +389,11 @@ export interface HotelSummaryDto {
   email: string | null;
   nearestBeachCode: string;
   distanceMeters: number;
+  /** Destination and, when the hotel sits at a spot, its spot. */
+  destinationSlug: string;
+  spotSlug: string | null;
+  /** Free-text neighbourhood. */
+  area: string | null;
   isFeatured: boolean;
   minPriceMinor: number;
   totalRooms: number;
@@ -437,6 +449,8 @@ export interface CreateHotelOrderRequest extends CreateHotelBookingItem {
 }
 
 export interface HotelAvailabilityQuery {
+  destination?: string;
+  spot?: string;
   checkInDate?: string;
   checkOutDate?: string;
   zone?: HotelZone;
@@ -532,6 +546,8 @@ export interface DiningVenueSummary {
   /** Cheapest available menu item, null when the menu is empty. */
   priceFromMinor: number | null;
   currency: string;
+  destinationSlug: string;
+  spotSlug: string | null;
 }
 
 export interface DiningVenueDetail extends DiningVenueSummary {
@@ -542,6 +558,8 @@ export interface DiningVenueDetail extends DiningVenueSummary {
 }
 
 export interface DiningVenueQuery {
+  destination?: string;
+  spot?: string;
   kind?: DiningVenueKind;
   beachPointCode?: string;
   reservable?: boolean;
@@ -773,3 +791,199 @@ export const DINING_ADMIN_LIMITS = {
   maxMenuPriceMinor: 10_000_000,
   maxSortOrder: 10_000,
 } as const;
+
+/* -------------------------------------------------------------------------- */
+/* Places (WP-05)                                                             */
+/* -------------------------------------------------------------------------- */
+
+export const DESTINATION_ACCENTS = [
+  'SEA',
+  'FOREST',
+  'LAKE',
+  'HILL',
+  'HERITAGE',
+  'NEUTRAL',
+] as const;
+export type DestinationAccent = (typeof DESTINATION_ACCENTS)[number];
+
+export const SPOT_KINDS = [
+  'BEACH',
+  'HILL',
+  'LAKE',
+  'RIVER',
+  'WATERFALL',
+  'FOREST',
+  'TEA_GARDEN',
+  'ISLAND',
+  'HERITAGE',
+  'PARK',
+  'MARKET',
+  'OTHER',
+] as const;
+export type SpotKind = (typeof SPOT_KINDS)[number];
+
+export const EMERGENCY_CONTACT_KINDS = [
+  'NATIONAL',
+  'POLICE',
+  'FIRE',
+  'HOSPITAL',
+  'COAST_GUARD',
+  'DESK',
+  'OTHER',
+] as const;
+export type EmergencyContactKind = (typeof EMERGENCY_CONTACT_KINDS)[number];
+
+export const SPOT_ALERT_KINDS = ['WEATHER', 'SEA', 'CLOSURE', 'EVENT', 'NOTICE'] as const;
+export type SpotAlertKind = (typeof SPOT_ALERT_KINDS)[number];
+export const SPOT_ALERT_SEVERITIES = ['INFO', 'CAUTION', 'DANGER'] as const;
+export type SpotAlertSeverity = (typeof SPOT_ALERT_SEVERITIES)[number];
+
+/** Number of active listings per service type; tiles show only non-zero ones. */
+export interface ServiceCountsDto {
+  stay: number;
+  food: number;
+  /** Beach spots with bookable sunbeds. */
+  sunbeds: number;
+}
+
+export interface DestinationContentDto {
+  about: string | null;
+  bestTime: string | null;
+  gettingThere: string | null;
+}
+
+export interface SpotContentDto {
+  rules: string[];
+  tips: string[];
+}
+
+export interface SpotAlertDto {
+  id: string;
+  kind: SpotAlertKind;
+  severity: SpotAlertSeverity;
+  title: string;
+  body: string | null;
+  /** Null when the alert covers the whole destination. */
+  spotSlug: string | null;
+  startsAt: string;
+  endsAt: string | null;
+}
+
+/** A public number entered by the operator. Coastline does not dispatch help. */
+export interface EmergencyContactDto {
+  label: string;
+  labelBn: string | null;
+  phone: string;
+  kind: EmergencyContactKind;
+}
+
+export interface DestinationSummaryDto {
+  slug: string;
+  name: string;
+  nameBn: string | null;
+  tagline: string;
+  accent: DestinationAccent;
+  latitude: number;
+  longitude: number;
+  mapZoom: number;
+  spotCount: number;
+  services: ServiceCountsDto;
+  /** The highest-severity alert active now, if any. */
+  topAlert: SpotAlertDto | null;
+}
+
+export interface SpotSummaryDto {
+  slug: string;
+  name: string;
+  nameBn: string | null;
+  kind: SpotKind;
+  description: string | null;
+  latitude: number;
+  longitude: number;
+  /** Asia/Dhaka hours; null when the spot is always open. */
+  openHours: { open: number; close: number } | null;
+  entryInfo: string | null;
+  /** Code of the spot's sunbed row, when it has one. */
+  beachPointCode: string | null;
+  services: ServiceCountsDto;
+}
+
+export interface DestinationDetailDto extends DestinationSummaryDto {
+  description: string | null;
+  content: DestinationContentDto;
+  spots: SpotSummaryDto[];
+  emergencyContacts: EmergencyContactDto[];
+  alerts: SpotAlertDto[];
+}
+
+export interface SpotDetailDto extends SpotSummaryDto {
+  destination: { slug: string; name: string; accent: DestinationAccent };
+  content: SpotContentDto;
+  /** Alerts for this spot and for the whole destination, active now. */
+  alerts: SpotAlertDto[];
+  emergencyContacts: EmergencyContactDto[];
+}
+
+/* -------------------------------------------------------------------------- */
+/* Workspaces (WP-04)                                                         */
+/* -------------------------------------------------------------------------- */
+
+export const PROVIDER_MEMBER_ROLES = ['OWNER', 'STAFF'] as const;
+export type ProviderMemberRole = (typeof PROVIDER_MEMBER_ROLES)[number];
+
+export interface ProviderMembershipDto {
+  providerId: string;
+  name: string;
+  role: ProviderMemberRole;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Saved items (WP-25)                                                        */
+/* -------------------------------------------------------------------------- */
+
+export const SAVED_ITEM_TYPES = ['HOTEL', 'VENUE', 'SPOT'] as const;
+export type SavedItemType = (typeof SAVED_ITEM_TYPES)[number];
+
+/** `key`: hotel slug, venue code, or `"<destination>/<spot>"`. */
+export interface SaveItemRequest {
+  type: SavedItemType;
+  key: string;
+}
+
+export interface SavedItemDto {
+  type: SavedItemType;
+  key: string;
+  title: string;
+  subtitle: string | null;
+  imageUrl: string | null;
+  /** Web path of the saved thing. */
+  href: string;
+  savedAt: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Checkout quote                                                             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * `POST /checkout/quote`: the server's price for a booking before payment.
+ * The body is the create request of that engine; nothing is booked.
+ */
+export type CheckoutQuoteRequest =
+  | { kind: 'sunbed'; request: CreateOrderRequest }
+  | { kind: 'stay'; request: CreateHotelBookingItem }
+  | { kind: 'table'; request: CreateReservationRequest }
+  | { kind: 'food'; request: CreateFoodOrderRequest };
+
+export interface CheckoutQuoteLineDto {
+  label: string;
+  detail: string | null;
+  amountMinor: number;
+}
+
+export interface CheckoutQuoteDto {
+  lines: CheckoutQuoteLineDto[];
+  /** What is charged now (the full total, or a table deposit). */
+  totalMinor: number;
+  currency: string;
+}

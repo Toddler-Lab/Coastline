@@ -59,7 +59,10 @@ describe('IdempotencyInterceptor (unit)', () => {
     const store = storeDouble();
     const error = new ConflictException({ code: 'CONFLICT', message: 'Taken' });
     await expect(run(store, { handle: () => throwError(() => error) })).rejects.toBe(error);
-    expect(store.complete).toHaveBeenCalledWith('row-1', 409, { code: 'CONFLICT', message: 'Taken' });
+    expect(store.complete).toHaveBeenCalledWith('row-1', 409, {
+      code: 'CONFLICT',
+      message: 'Taken',
+    });
     expect(store.release).not.toHaveBeenCalled();
   });
 

@@ -198,6 +198,7 @@ const VENUES: VenueSeed[] = [
 export async function seedDining(
   prisma: PrismaClient,
   beachPointIds: Map<string, string>,
+  places: { destinationId: string; spotIds: Map<string, string> },
 ): Promise<void> {
   for (const venue of VENUES) {
     const beachPointId = venue.beachPointCode ? beachPointIds.get(venue.beachPointCode) : undefined;
@@ -214,6 +215,8 @@ export async function seedDining(
       contactPhone: venue.contactPhone ?? null,
       cuisineTags: venue.cuisineTags,
       beachPointId: beachPointId ?? null,
+      destinationId: places.destinationId,
+      spotId: venue.beachPointCode ? (places.spotIds.get(venue.beachPointCode) ?? null) : null,
       openHour: venue.openHour,
       closeHour: venue.closeHour,
       reservationsEnabled: venue.reservationsEnabled,
