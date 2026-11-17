@@ -4,7 +4,6 @@ import { MAX_ADVANCE_DAYS, type BeachPointSummary } from '@coastline/api-contrac
 import { serverApi } from '@/lib/api';
 import { getViewer } from '@/lib/session';
 import { apiErrorMessage } from '@/lib/places-server';
-import { DEFAULT_DESTINATION } from '@/lib/places';
 import { addDays, dhakaDateKey, isDateKey } from '@/lib/format';
 import { ErrorState } from '@/components/ui/states';
 import { SunbedPicker } from '@/components/flows/sunbed-picker';
@@ -42,10 +41,12 @@ export default async function SunbedPickerPage({
       </div>
     );
   }
+  const current = points.find((point) => point.code === code && point.isActive && point.totalBeds > 0);
+  if (!current) notFound();
+  // Beach chips switch between the sunbed rows of the same destination.
   const active = points
-    .filter((point) => point.isActive && point.totalBeds > 0)
+    .filter((point) => point.isActive && point.totalBeds > 0 && point.destinationSlug === current.destinationSlug)
     .sort((a, b) => a.sortOrder - b.sortOrder);
-  if (!active.some((point) => point.code === code)) notFound();
 
   return (
     <SunbedPicker
@@ -54,7 +55,6 @@ export default async function SunbedPickerPage({
       code={code}
       initialDate={date}
       today={today}
-      destinationSlug={DEFAULT_DESTINATION.slug}
     />
   );
 }

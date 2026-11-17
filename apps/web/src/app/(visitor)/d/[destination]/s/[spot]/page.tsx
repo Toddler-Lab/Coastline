@@ -1,42 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import {
-  Clock,
-  MapPinned,
-  Navigation,
-  PackageSearch,
-  Phone,
-  ScrollText,
-  Umbrella,
-} from 'lucide-react';
-import {
-  CANCEL_CUTOFF_MINUTES,
-  MAX_ADVANCE_DAYS,
-  MAX_HOURS_PER_ITEM,
-} from '@coastline/api-contracts';
+import { Clock, Lightbulb, MapPinned, Navigation, PackageSearch, Phone, ScrollText, Ticket, Umbrella } from 'lucide-react';
+import { CANCEL_CUTOFF_MINUTES, MAX_ADVANCE_DAYS, MAX_HOURS_PER_ITEM } from '@coastline/api-contracts';
 import { getViewer } from '@/lib/session';
-import { loadInventory } from '@/lib/places-server';
-import {
-  findDestination,
-  findSpot,
-  servicesPresent,
-  spotInventory,
-  spotSlug,
-  sunbedPickerHref,
-  serviceCount,
-} from '@/lib/places';
+import { apiErrorMessage, loadInventory, loadSpot } from '@/lib/places-server';
+import { SPOT_KIND_LABELS, servicesPresent, spotInventory, sunbedPickerHref } from '@/lib/places';
 import { formatMoney, hoursRange, slotLabel } from '@/lib/format';
 import { buttonClass } from '@/components/ui/button';
 import { Card, Section } from '@/components/ui/display';
-import { EmptyState } from '@/components/ui/states';
+import { EmptyState, ErrorState } from '@/components/ui/states';
+import { AlertList } from '@/components/patterns/alerts';
 import { HotelCard, VenueCard } from '@/components/patterns/cards';
-import {
-  EmergencyCallCard,
-  HelpShortcuts,
-  NATIONAL_EMERGENCY,
-  NoDispatchNote,
-} from '@/components/patterns/help-blocks';
+import { EmergencyContacts, HelpShortcuts, NATIONAL_EMERGENCY, NoDispatchNote } from '@/components/patterns/help-blocks';
 import {
   AerialImage,
   BackLink,
@@ -46,48 +22,41 @@ import {
   ServiceTile,
   ServiceTileGrid,
 } from '@/components/patterns/hub';
+import { SaveButton } from '@/components/patterns/save-button';
 import { SectionTabs } from '@/components/patterns/section-tabs';
 
 type Params = { destination: string; spot: string };
 
-async function load(params: Promise<Params>) {
-  const { destination: destinationSlug, spot: spotSlugParam } = await params;
-  const destination = findDestination(destinationSlug);
-  if (!destination) return null;
-  const viewer = await getViewer();
-  const inventory = await loadInventory(viewer.userId);
-  const spot = findSpot(inventory.spots, spotSlugParam);
-  if (!spot) return { destination, spot: null, inventory };
-  return { destination, spot, inventory };
-}
-
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
-  const data = await load(params);
-  return { title: data?.spot ? data.spot.name : 'Spot' };
+  const { destination, spot } = await params;
+  const viewer = await getViewer();
+  const found = await loadSpot(destination, spot, viewer.userId).catch(() => null);
+  return { title: found ? `${found.name}, ${found.destination.name}` : 'Spot' };
 }
 
 export default async function SpotPage({ params }: { params: Promise<Params> }) {
-  const data = await load(params);
-  if (!data) notFound();
-  const { destination, spot, inventory } = data;
-  if (!spot) {
-    if (inventory.offline) {
-      return (
-        <div className="page py-10">
-          <EmptyState
-            title="This spot could not be loaded"
-            body="Coastline's booking service did not answer. Try again in a moment."
-            action={{ label: 'Back to Explore', href: '/' }}
-          />
-        </div>
-      );
-    }
-    notFound();
+  const { destination: destinationSlug, spot: spotSlug } = await params;
+  const viewer = await getViewer();
+  let spot;
+  try {
+    spot = await loadSpot(destinationSlug, spotSlug, viewer.userId);
+  } catch (error) {
+    return (
+      <div className="page py-10">
+        <ErrorState title="This spot could not be loaded" message={apiErrorMessage(error)} retryHref={`/d/${destinationSlug}/s/${spotSlug}`} />
+      </div>
+    );
   }
+  if (!spot) notFound();
 
-  const here = spotInventory(inventory, spot);
-  const services = servicesPresent(here);
+  const destination = spot.destination;
+  const inventory = await loadInventory(viewer.userId, destination.slug);
+  const here = spotInventory(inventory, spot.slug);
+  const point = here.spots[0] ?? null;
+  const services = servicesPresent(spot.services);
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${spot.latitude},${spot.longitude}`;
+  const firstNumber = spot.emergencyContacts[0] ?? NATIONAL_EMERGENCY;
+  const hours = spot.openHours ? hoursRange(spot.openHours.open, spot.openHours.close) : null;
 
   const tabs = [
     { id: 'book', label: 'Book' },
@@ -102,21 +71,31 @@ export default async function SpotPage({ params }: { params: Promise<Params> }) 
         At a glance
       </h2>
       <dl className="mt-3 space-y-3 text-body-sm">
-        <div className="flex gap-3">
-          <Clock aria-hidden className="size-5 flex-none text-muted" />
-          <div>
-            <dt className="text-muted">Sunbed hours</dt>
-            <dd>{hoursRange(spot.openHour, spot.closeHour)}</dd>
+        {hours ? (
+          <div className="flex gap-3">
+            <Clock aria-hidden className="size-5 flex-none text-muted" />
+            <div>
+              <dt className="text-muted">{point ? 'Sunbed hours' : 'Hours'}</dt>
+              <dd>{hours}</dd>
+            </div>
           </div>
-        </div>
-        {spot.totalBeds > 0 ? (
+        ) : null}
+        {spot.entryInfo ? (
+          <div className="flex gap-3">
+            <Ticket aria-hidden className="size-5 flex-none text-muted" />
+            <div>
+              <dt className="text-muted">Entry</dt>
+              <dd>{spot.entryInfo}</dd>
+            </div>
+          </div>
+        ) : null}
+        {point && point.totalBeds > 0 ? (
           <div className="flex gap-3">
             <Umbrella aria-hidden className="size-5 flex-none text-muted" />
             <div>
               <dt className="text-muted">Sunbeds</dt>
               <dd>
-                from {formatMoney(spot.defaultHourlyPriceMinor, spot.currency)} / hour ·{' '}
-                {spot.freeBeds} of {spot.totalBeds} free
+                from {formatMoney(point.defaultHourlyPriceMinor, point.currency)} / hour · {point.freeBeds} of {point.totalBeds} free
               </dd>
             </div>
           </div>
@@ -126,26 +105,18 @@ export default async function SpotPage({ params }: { params: Promise<Params> }) 
           <div>
             <dt className="text-muted">Emergency</dt>
             <dd>
-              <a
-                href={`tel:${NATIONAL_EMERGENCY.number}`}
-                className="font-semibold text-danger underline-offset-2 hover:underline"
-              >
-                {NATIONAL_EMERGENCY.number}
+              <a href={`tel:${firstNumber.phone}`} className="font-semibold text-danger underline-offset-2 hover:underline">
+                {firstNumber.phone}
               </a>
             </dd>
           </div>
         </div>
       </dl>
       <div className="mt-4 grid gap-2">
-        <a
-          href={directions}
-          target="_blank"
-          rel="noreferrer"
-          className={buttonClass('secondary', 'md', 'w-full')}
-        >
+        <a href={directions} target="_blank" rel="noreferrer" className={buttonClass('secondary', 'md', 'w-full')}>
           <Navigation aria-hidden className="size-5" /> Directions
         </a>
-        <Link href="/help/lost-found?kind=lost" className={buttonClass('text', 'md', 'w-full')}>
+        <Link href="/help/lost-found" className={buttonClass('text', 'md', 'w-full')}>
           <PackageSearch aria-hidden className="size-5" /> Report a lost item
         </Link>
       </div>
@@ -154,11 +125,7 @@ export default async function SpotPage({ params }: { params: Promise<Params> }) 
 
   return (
     <div data-accent={destination.accent} className="page">
-      <BackLink
-        href={`/d/${destination.slug}`}
-        label={destination.name}
-        className="mt-2 lg:hidden"
-      />
+      <BackLink href={`/d/${destination.slug}`} label={destination.name} className="mt-2 lg:hidden" />
       <div className="overflow-hidden rounded-lg lg:mt-6">
         <AerialImage
           latitude={spot.latitude}
@@ -173,27 +140,37 @@ export default async function SpotPage({ params }: { params: Promise<Params> }) 
       </div>
       <ImageCredit className="mt-1" />
 
-      <div className="mt-3 border-l-4 border-accent pl-4">
-        <h1 className="text-display">{spot.name}</h1>
-        <p className="text-body text-muted">
-          <Link href={`/d/${destination.slug}`} className="underline-offset-2 hover:underline">
-            {destination.name}
-          </Link>{' '}
-          · Beach · Sunbeds {hoursRange(spot.openHour, spot.closeHour)}
-        </p>
+      <div className="mt-3 flex items-start gap-2">
+        <div className="min-w-0 flex-1 border-l-4 border-accent pl-4">
+          <h1 className="text-display">{spot.name}</h1>
+          <p className="text-body text-muted">
+            <Link href={`/d/${destination.slug}`} className="underline-offset-2 hover:underline">
+              {destination.name}
+            </Link>{' '}
+            · {SPOT_KIND_LABELS[spot.kind]}
+            {hours ? ` · ${point ? 'Sunbeds ' : ''}${hours}` : ''}
+            {spot.nameBn ? (
+              <>
+                {' · '}
+                <span lang="bn">{spot.nameBn}</span>
+              </>
+            ) : null}
+          </p>
+        </div>
+        <SaveButton type="SPOT" itemKey={`${destination.slug}/${spot.slug}`} label={spot.name} />
       </div>
-      {spot.totalBeds > 0 ? (
+      {point && point.totalBeds > 0 ? (
         <p className="mt-3 flex flex-wrap gap-2 text-body-sm">
           <span className="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-alt px-3">
             <Umbrella aria-hidden className="size-4 text-primary" />
-            <span className="tabular font-semibold">{spot.freeBeds}</span> free at{' '}
-            {slotLabel(spot.referenceSlotLabel)}
+            <span className="tabular font-semibold">{point.freeBeds}</span> free at {slotLabel(point.referenceSlotLabel)}
           </span>
           <span className="inline-flex h-8 items-center rounded-full bg-surface-alt px-3">
-            from {formatMoney(spot.defaultHourlyPriceMinor, spot.currency)} / hour
+            from {formatMoney(point.defaultHourlyPriceMinor, point.currency)} / hour
           </span>
         </p>
       ) : null}
+      <AlertList alerts={spot.alerts} className="mt-4" />
 
       <div className="mt-4">
         <SectionTabs label={`${spot.name} sections`} tabs={tabs} />
@@ -210,11 +187,11 @@ export default async function SpotPage({ params }: { params: Promise<Params> }) 
                       key={service}
                       service={service}
                       href={
-                        service === 'sunbeds'
-                          ? sunbedPickerHref(spot)
-                          : `/d/${destination.slug}/s/${spotSlug(spot)}/${service}`
+                        service === 'sunbeds' && spot.beachPointCode
+                          ? sunbedPickerHref({ code: spot.beachPointCode })
+                          : `/d/${destination.slug}/s/${spot.slug}/${service}`
                       }
-                      count={service === 'sunbeds' ? spot.freeBeds : serviceCount(here, service)}
+                      count={service === 'sunbeds' ? (point?.freeBeds ?? 0) : spot.services[service]}
                       countLabel={service === 'sunbeds' ? 'free now' : undefined}
                     />
                   ))}
@@ -259,12 +236,7 @@ export default async function SpotPage({ params }: { params: Promise<Params> }) 
               title="Facilities are not listed yet"
               body="ATMs, pharmacies, washrooms and prayer rooms near this spot will appear here. Use Directions for the way there."
               action={
-                <a
-                  href={directions}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={buttonClass('secondary')}
-                >
+                <a href={directions} target="_blank" rel="noreferrer" className={buttonClass('secondary')}>
                   <Navigation aria-hidden className="size-5" /> Directions
                 </a>
               }
@@ -279,28 +251,52 @@ export default async function SpotPage({ params }: { params: Promise<Params> }) 
                   <p className="mt-1 text-body-sm text-muted">{spot.description}</p>
                 </div>
               ) : null}
-              <div className="flex gap-3 p-4">
-                <ScrollText aria-hidden className="mt-0.5 size-5 flex-none text-muted" />
-                <div>
-                  <h3 className="text-title-sm">Sunbed booking rules</h3>
-                  <ul className="mt-1 list-disc space-y-1 pl-5 text-body-sm text-muted">
-                    <li>
-                      Book up to {MAX_ADVANCE_DAYS} days ahead, for 1 to {MAX_HOURS_PER_ITEM} hours.
-                    </li>
-                    <li>
-                      Cancel free until {CANCEL_CUTOFF_MINUTES} minutes before your start time.
-                    </li>
-                    <li>Show the QR ticket from Trips to the attendant at the bed.</li>
-                    <li>All times are Bangladesh time.</li>
-                  </ul>
+              {spot.content.rules.length > 0 ? (
+                <div className="flex gap-3 p-4">
+                  <ScrollText aria-hidden className="mt-0.5 size-5 flex-none text-muted" />
+                  <div>
+                    <h3 className="text-title-sm">Rules</h3>
+                    <ul className="mt-1 list-disc space-y-1 pl-5 text-body-sm text-muted">
+                      {spot.content.rules.map((rule) => (
+                        <li key={rule}>{rule}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-              </div>
+              ) : null}
+              {spot.content.tips.length > 0 ? (
+                <div className="flex gap-3 p-4">
+                  <Lightbulb aria-hidden className="mt-0.5 size-5 flex-none text-muted" />
+                  <div>
+                    <h3 className="text-title-sm">Tips</h3>
+                    <ul className="mt-1 list-disc space-y-1 pl-5 text-body-sm text-muted">
+                      {spot.content.tips.map((tip) => (
+                        <li key={tip}>{tip}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ) : null}
+              {point ? (
+                <div className="flex gap-3 p-4">
+                  <Umbrella aria-hidden className="mt-0.5 size-5 flex-none text-muted" />
+                  <div>
+                    <h3 className="text-title-sm">Sunbed booking</h3>
+                    <ul className="mt-1 list-disc space-y-1 pl-5 text-body-sm text-muted">
+                      <li>Book up to {MAX_ADVANCE_DAYS} days ahead, for 1 to {MAX_HOURS_PER_ITEM} hours.</li>
+                      <li>Cancel free until {CANCEL_CUTOFF_MINUTES} minutes before your start time.</li>
+                      <li>Show the QR ticket from Trips to the attendant at the bed.</li>
+                    </ul>
+                  </div>
+                </div>
+              ) : null}
+              <p className="p-4 text-body-sm text-muted">All times are Bangladesh time.</p>
             </Card>
           </Section>
 
           <Section id="help" title="Need help?">
             <div className="space-y-3">
-              <EmergencyCallCard />
+              <EmergencyContacts contacts={spot.emergencyContacts} />
               <HelpShortcuts />
               <NoDispatchNote />
             </div>

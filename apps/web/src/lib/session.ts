@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { cookies } from 'next/headers';
 import type { SessionUser } from '@coastline/api-contracts';
 import { DEFAULT_DEMO_USER, DEMO_COOKIE, serverApi } from './api';
@@ -7,7 +8,8 @@ export interface Viewer {
   user: SessionUser | null;
 }
 
-export async function getViewer(): Promise<Viewer> {
+/** Cached per request: layouts and pages share one `/session` call. */
+export const getViewer = cache(async function getViewer(): Promise<Viewer> {
   const store = await cookies();
   const userId = store.get(DEMO_COOKIE)?.value || DEFAULT_DEMO_USER;
 
@@ -17,7 +19,7 @@ export async function getViewer(): Promise<Viewer> {
   } catch {
     return { userId, user: null };
   }
-}
+});
 
 /**
  * Dev-only persona directory. Returns an empty list when the API is offline so

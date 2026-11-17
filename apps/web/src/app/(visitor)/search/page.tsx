@@ -2,8 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ChevronRight, MapPin, Search, Sparkles, Store } from 'lucide-react';
 import { getViewer } from '@/lib/session';
-import { loadInventory } from '@/lib/places-server';
-import { DEFAULT_DESTINATION } from '@/lib/places';
+import {
+  currentDestinationSlug,
+  loadDestination,
+  loadDestinations,
+  loadInventory,
+} from '@/lib/places-server';
 import { buildSearchIndex, rankSuggestions } from '@/lib/search';
 import { SERVICES } from '@/lib/services';
 import { EmptyState, ErrorState } from '@/components/ui/states';
@@ -23,8 +27,15 @@ export default async function SearchPage({
   const query = await searchParams;
   const q = typeof query.q === 'string' ? query.q.trim() : '';
   const viewer = await getViewer();
-  const inventory = await loadInventory(viewer.userId);
-  const index = buildSearchIndex(DEFAULT_DESTINATION, inventory);
+  const { destinations, offline } = await loadDestinations(viewer.userId);
+  const slug = await currentDestinationSlug(destinations);
+  const [current, inventory] = slug
+    ? await Promise.all([
+        loadDestination(slug, viewer.userId).catch(() => null),
+        loadInventory(viewer.userId, slug),
+      ])
+    : [null, { spots: [], hotels: [], venues: [], failed: [], offline }];
+  const index = buildSearchIndex(destinations, current, inventory);
   const results = q ? rankSuggestions(index, q) : [];
   const groups = (['place', 'service', 'listing'] as const)
     .map((kind) => ({ kind, items: results.filter((entry) => entry.kind === kind) }))
@@ -35,7 +46,7 @@ export default async function SearchPage({
       <PageHeader title="Search" backHref="/" backLabel="Back to Explore" className="lg:pt-6" />
       <SearchField index={index} defaultValue={q} />
       <div className="mt-6">
-        {inventory.offline ? (
+        {offline ? (
           <ErrorState
             message="Search could not reach Coastline's booking service. Try again in a moment."
             retryHref={`/search?q=${encodeURIComponent(q)}`}

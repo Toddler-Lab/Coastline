@@ -24,7 +24,6 @@ import {
 import { foodOrderTimeline } from '@/lib/dining/delivery';
 import { paymentTypeLabel } from '@/lib/booking';
 import {
-  DEFAULT_DESTINATION,
   hotelListingId,
   listingHref,
   spotHref,
@@ -178,7 +177,7 @@ export default async function TripPage({ params }: { params: Promise<Params> }) 
           : []),
       ];
       if (data.place) {
-        placeHref = spotHref(DEFAULT_DESTINATION.slug, data.place);
+        placeHref = spotHref(data.place.destinationSlug, data.place.spotSlug);
         directions = `https://www.google.com/maps/dir/?api=1&destination=${data.place.latitude},${data.place.longitude}`;
       } else if (order.items[0]) {
         placeHref = sunbedPickerHref({ code: order.items[0].beachPointCode });

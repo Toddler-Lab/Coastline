@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { ArrowUpDown, Umbrella } from 'lucide-react';
-import type { BeachPointSummary } from '@coastline/api-contracts';
-import type { Destination, PlaceInventory } from '@/lib/places';
-import { spotSlug, sunbedPickerHref } from '@/lib/places';
+import type { BeachPointSummary, DestinationDetailDto, SpotSummaryDto } from '@coastline/api-contracts';
+import type { PlaceInventory } from '@/lib/places';
+import { sunbedPickerHref } from '@/lib/places';
 import { SERVICES, type ServiceKey } from '@/lib/services';
 import { formatMoney, hoursRange, slotLabel } from '@/lib/format';
 import { ChipLink, ChipRow } from '@/components/ui/chip';
@@ -23,36 +23,34 @@ function withParams(base: string, params: Record<string, string | undefined>): s
   return query ? `${base}?${query}` : base;
 }
 
-function SunbedPointCard({ spot }: { spot: BeachPointSummary }) {
+function SunbedPointCard({ point }: { point: BeachPointSummary }) {
   return (
     <Link
-      href={sunbedPickerHref(spot)}
+      href={sunbedPickerHref(point)}
       className="group flex h-full overflow-hidden rounded-md border border-line bg-surface hover:shadow-soft"
     >
       <AerialImage
-        latitude={spot.latitude}
-        longitude={spot.longitude}
+        latitude={point.latitude}
+        longitude={point.longitude}
         zoom={17}
         cols={1}
         rows={1}
-        label={`Aerial view of ${spot.name}`}
+        label={`Aerial view of ${point.name}`}
         className="aspect-square w-28 flex-none md:w-36"
       />
       <div className="flex min-w-0 flex-1 flex-col gap-1 p-3">
-        <h2 className="text-title-sm group-hover:text-primary">{spot.name}</h2>
-        <p className="text-body-sm text-muted">{hoursRange(spot.openHour, spot.closeHour)}</p>
+        <h2 className="text-title-sm group-hover:text-primary">{point.name}</h2>
+        <p className="text-body-sm text-muted">{hoursRange(point.openHour, point.closeHour)}</p>
         <p className="flex items-center gap-1.5 text-body-sm">
           <Umbrella aria-hidden className="size-4 text-primary" />
-          <span className="tabular font-semibold">{spot.freeBeds}</span>
+          <span className="tabular font-semibold">{point.freeBeds}</span>
           <span className="text-muted">
-            of {spot.totalBeds} free at {slotLabel(spot.referenceSlotLabel)}
+            of {point.totalBeds} free at {slotLabel(point.referenceSlotLabel)}
           </span>
         </p>
         <p className="mt-auto text-body-sm text-muted">
           from{' '}
-          <span className="text-title-sm text-fg">
-            {formatMoney(spot.defaultHourlyPriceMinor, spot.currency)}
-          </span>{' '}
+          <span className="text-title-sm text-fg">{formatMoney(point.defaultHourlyPriceMinor, point.currency)}</span>{' '}
           / hour
         </p>
       </div>
@@ -69,57 +67,55 @@ export function ServiceListView({
   params,
   offline,
 }: {
-  destination: Destination;
-  spot: BeachPointSummary | null;
+  destination: DestinationDetailDto;
+  spot: SpotSummaryDto | null;
   service: ServiceKey;
   inventory: PlaceInventory;
   params: ListParams;
   offline: boolean;
 }) {
   const meta = SERVICES[service];
-  const base = spot
-    ? `/d/${destination.slug}/s/${spotSlug(spot)}/${service}`
-    : `/d/${destination.slug}/${service}`;
+  const base = spot ? `/d/${destination.slug}/s/${spot.slug}/${service}` : `/d/${destination.slug}/${service}`;
   const placeName = spot ? spot.name : destination.name;
-  const backHref = spot ? `/d/${destination.slug}/s/${spotSlug(spot)}` : `/d/${destination.slug}`;
+  const backHref = spot ? `/d/${destination.slug}/s/${spot.slug}` : `/d/${destination.slug}`;
   const sort = one(params.sort) ?? 'recommended';
   const filter = one(params.filter);
-  const spotFilter = spot ? spot.code : one(params.spot)?.toUpperCase();
-  const spotNames = new Map(inventory.spots.map((item) => [item.code, item.name]));
+  const spotFilter = spot ? spot.slug : one(params.spot);
+  const spotNames = new Map(destination.spots.map((item) => [item.slug, item.name]));
 
-  let body: React.ReactNode;
+  let body: React.ReactNode = null;
   let count = 0;
   const filters: React.ReactNode[] = [];
 
   if (!spot && (service === 'stay' || service === 'food')) {
-    const codes = [
+    const slugs = [
       ...new Set(
-        service === 'stay'
-          ? inventory.hotels.map((hotel) => hotel.nearestBeachCode)
-          : inventory.venues
-              .map((venue) => venue.beachPointCode)
-              .filter((code): code is string => Boolean(code)),
+        (service === 'stay' ? inventory.hotels : inventory.venues)
+          .map((item) => item.spotSlug)
+          .filter((slug): slug is string => Boolean(slug)),
       ),
     ];
-    filters.push(
-      <ChipLink key="all" href={withParams(base, { sort, filter })} selected={!spotFilter}>
-        All spots
-      </ChipLink>,
-      ...codes.map((code) => (
-        <ChipLink
-          key={code}
-          href={withParams(base, { spot: code.toLowerCase(), sort, filter })}
-          selected={spotFilter === code}
-        >
-          {spotNames.get(code) ?? code}
-        </ChipLink>
-      )),
-    );
+    if (slugs.length > 1) {
+      filters.push(
+        <ChipLink key="all" href={withParams(base, { sort: sort === 'recommended' ? undefined : sort, filter })} selected={!spotFilter}>
+          All spots
+        </ChipLink>,
+        ...slugs.map((slug) => (
+          <ChipLink
+            key={slug}
+            href={withParams(base, { spot: slug, sort: sort === 'recommended' ? undefined : sort, filter })}
+            selected={spotFilter === slug}
+          >
+            {spotNames.get(slug) ?? slug}
+          </ChipLink>
+        )),
+      );
+    }
   }
 
   if (service === 'stay') {
     const hotels = inventory.hotels
-      .filter((hotel) => !spotFilter || hotel.nearestBeachCode === spotFilter)
+      .filter((hotel) => !spotFilter || hotel.spotSlug === spotFilter)
       .sort((a, b) =>
         sort === 'price'
           ? a.minPriceMinor - b.minPriceMinor
@@ -132,48 +128,25 @@ export function ServiceListView({
       <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {hotels.map((hotel) => (
           <li key={hotel.id}>
-            <HotelCard hotel={hotel} spotName={spotNames.get(hotel.nearestBeachCode)} />
+            <HotelCard hotel={hotel} spotName={hotel.spotSlug ? spotNames.get(hotel.spotSlug) : undefined} />
           </li>
         ))}
       </ul>
     );
   } else if (service === 'food') {
+    const keep = { spot: spot ? undefined : one(params.spot), sort: sort === 'recommended' ? undefined : sort };
     filters.push(
-      <ChipLink
-        key="reserve"
-        href={withParams(base, {
-          spot: one(params.spot),
-          sort,
-          filter: filter === 'reserve' ? undefined : 'reserve',
-        })}
-        selected={filter === 'reserve'}
-      >
+      <ChipLink key="reserve" href={withParams(base, { ...keep, filter: filter === 'reserve' ? undefined : 'reserve' })} selected={filter === 'reserve'}>
         Reserve a table
       </ChipLink>,
-      <ChipLink
-        key="delivers"
-        href={withParams(base, {
-          spot: one(params.spot),
-          sort,
-          filter: filter === 'delivers' ? undefined : 'delivers',
-        })}
-        selected={filter === 'delivers'}
-      >
+      <ChipLink key="delivers" href={withParams(base, { ...keep, filter: filter === 'delivers' ? undefined : 'delivers' })} selected={filter === 'delivers'}>
         Delivers to your sunbed
       </ChipLink>,
     );
     const venues = inventory.venues
-      .filter((venue) => !spotFilter || venue.beachPointCode === spotFilter)
-      .filter((venue) =>
-        filter === 'reserve'
-          ? venue.reservationsEnabled
-          : filter === 'delivers'
-            ? venue.deliveryEnabled
-            : true,
-      )
-      .sort((a, b) =>
-        sort === 'price' ? (a.priceFromMinor ?? Infinity) - (b.priceFromMinor ?? Infinity) : 0,
-      );
+      .filter((venue) => !spotFilter || venue.spotSlug === spotFilter)
+      .filter((venue) => (filter === 'reserve' ? venue.reservationsEnabled : filter === 'delivers' ? venue.deliveryEnabled : true))
+      .sort((a, b) => (sort === 'price' ? (a.priceFromMinor ?? Infinity) - (b.priceFromMinor ?? Infinity) : 0));
     count = venues.length;
     body = (
       <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -185,25 +158,23 @@ export function ServiceListView({
       </ul>
     );
   } else if (service === 'sunbeds') {
-    const spots = inventory.spots.filter(
-      (item) => item.totalBeds > 0 && (!spot || item.code === spot.code),
-    );
-    count = spots.length;
+    const points = inventory.spots.filter((item) => item.totalBeds > 0 && (!spot || item.spotSlug === spot.slug));
+    count = points.length;
     body = (
       <ul className="grid gap-3 md:grid-cols-2">
-        {spots.map((item) => (
+        {points.map((item) => (
           <li key={item.code}>
-            <SunbedPointCard spot={item} />
+            <SunbedPointCard point={item} />
           </li>
         ))}
       </ul>
     );
   }
 
-  const sortable = service === 'stay' || service === 'food';
+  const sortable = (service === 'stay' || service === 'food') && count > 1;
 
   return (
-    <div className="page">
+    <div className="page" data-accent={destination.accent}>
       <PageHeader
         title={`${meta.label} ${spot ? 'at' : 'in'} ${placeName}`}
         subtitle={count > 0 ? `${count} ${count === 1 ? 'result' : 'results'}` : undefined}
@@ -211,25 +182,20 @@ export function ServiceListView({
         backLabel={`Back to ${placeName}`}
         className="lg:pt-6"
       />
-      {filters.length > 0 || sortable ? (
-        <div className="flex items-center gap-2">
-          <ChipRow label="Filters" className="min-w-0 flex-1">
-            {filters}
-          </ChipRow>
-        </div>
+      {filters.length > 0 ? (
+        <ChipRow label="Filters" className="min-w-0">
+          {filters}
+        </ChipRow>
       ) : null}
       {sortable ? (
         <div className="mt-2 flex items-center gap-2 text-body-sm">
           <ArrowUpDown aria-hidden className="size-4 text-muted" />
           <span className="text-muted">Sort:</span>
-          {(service === 'stay'
-            ? ['recommended', 'price', 'distance']
-            : ['recommended', 'price']
-          ).map((option) => (
+          {(service === 'stay' ? ['recommended', 'price', 'distance'] : ['recommended', 'price']).map((option) => (
             <Link
               key={option}
               href={withParams(base, {
-                spot: one(params.spot),
+                spot: spot ? undefined : one(params.spot),
                 filter,
                 sort: option === 'recommended' ? undefined : option,
               })}
@@ -248,10 +214,7 @@ export function ServiceListView({
 
       <div className="mt-4">
         {offline ? (
-          <ErrorState
-            message="Coastline's booking service did not answer. Try again in a moment."
-            retryHref={base}
-          />
+          <ErrorState message="Coastline's booking service did not answer. Try again in a moment." retryHref={base} />
         ) : count > 0 ? (
           body
         ) : (
@@ -267,10 +230,7 @@ export function ServiceListView({
             }
             action={
               spot
-                ? {
-                    label: `${meta.label} in ${destination.name}`,
-                    href: `/d/${destination.slug}/${service}`,
-                  }
+                ? { label: `${meta.label} in ${destination.name}`, href: `/d/${destination.slug}/${service}` }
                 : filter || spotFilter
                   ? { label: 'Clear filters', href: base }
                   : { label: `Back to ${destination.name}`, href: `/d/${destination.slug}` }

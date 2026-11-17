@@ -6,7 +6,6 @@ import { getViewer } from '@/lib/session';
 import { apiErrorMessage } from '@/lib/places-server';
 import { dhakaDateKey, formatMoney, isDateKey } from '@/lib/format';
 import { shortPointName } from '@/lib/booking';
-import { DEFAULT_DESTINATION } from '@/lib/places';
 import { Card } from '@/components/ui/display';
 import { ErrorState } from '@/components/ui/states';
 import { DateNav } from '@/components/workspace/date-nav';
@@ -44,7 +43,7 @@ export default async function AdminOverviewPage({
   return (
     <StaffPage
       title="Overview"
-      description={`${DEFAULT_DESTINATION.name}. Amounts are recorded payments through the sandbox gateway; no money moved.`}
+      description="All destinations. Amounts are recorded payments through the sandbox gateway; no money moved."
       actions={<DateNav base="/admin" date={date} today={today} />}
     >
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -86,7 +85,7 @@ export default async function AdminOverviewPage({
             Spots
           </h2>
           <Link
-            href={`/admin/destinations/${DEFAULT_DESTINATION.slug}`}
+            href="/admin/destinations"
             className="text-label text-primary"
           >
             Manage

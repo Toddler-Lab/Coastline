@@ -2,98 +2,47 @@ import type {
   BeachPointSummary,
   DiningVenueSummary,
   HotelSummaryDto,
+  ServiceCountsDto,
+  SpotKind,
 } from '@coastline/api-contracts';
 import type { ServiceKey } from './services';
 
 /**
- * Places adapter for the v2 UI.
- *
- * Destinations and spots are not tables yet (WP-05). Until they are, the UI
- * reads the destination descriptor below and treats each live beach point as a
- * spot. Everything that varies per spot (beds, venues, hotels) still comes
- * from the API, so the pages do not change when the places module lands: only
- * this file is replaced by API calls.
+ * Place helpers shared by server and client. Destinations and spots come from
+ * the places API (WP-05); this file only builds links and derives what a page
+ * shows from the API's data.
  */
 
-export type Accent = 'SEA' | 'FOREST' | 'LAKE' | 'HILL' | 'HERITAGE' | 'NEUTRAL';
+/** Remembers the destination picked on Explore. */
+export const DESTINATION_COOKIE = 'coastline_destination';
 
-export interface Destination {
-  slug: string;
-  name: string;
-  nameBn: string;
-  tagline: string;
-  accent: Accent;
-  latitude: number;
-  longitude: number;
-  /** Aerial hero framing: centre and zoom. */
-  hero: { latitude: number; longitude: number; zoom: number };
-  about: string;
-  bestTime: string;
-  gettingThere: string;
-}
-
-export const DESTINATIONS: Destination[] = [
-  {
-    slug: 'coxs-bazar',
-    name: "Cox's Bazar",
-    nameBn: 'কক্সবাজার',
-    tagline: 'A long sandy sea beach on the Bay of Bengal',
-    accent: 'SEA',
-    latitude: 21.4272,
-    longitude: 91.9786,
-    hero: { latitude: 21.385, longitude: 91.995, zoom: 13 },
-    about:
-      "Cox's Bazar is a coastal town in south-east Bangladesh with an unbroken sandy beach that runs south towards Teknaf. Laboni, Sugandha and Kolatoli are the busy town beaches; Himchari and Inani are quieter and further south.",
-    bestTime:
-      'November to March is dry and mild and the busiest season. The monsoon months bring rough sea and heavy rain.',
-    gettingThere:
-      "Flights from Dhaka land at Cox's Bazar airport. Long-distance buses and trains also run from Dhaka and Chattogram.",
-  },
-];
-
-export const DEFAULT_DESTINATION = DESTINATIONS[0];
-
-export function findDestination(slug: string): Destination | null {
-  return DESTINATIONS.find((destination) => destination.slug === slug) ?? null;
-}
-
-export function destinationHref(destination: Pick<Destination, 'slug'>): string {
+export function destinationHref(destination: { slug: string }): string {
   return `/d/${destination.slug}`;
 }
 
-/* Spots ------------------------------------------------------------------ */
-
-export function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-export function spotSlug(point: Pick<BeachPointSummary, 'name'>): string {
-  return slugify(point.name);
-}
-
-export function spotHref(destinationSlug: string, point: Pick<BeachPointSummary, 'name'>): string {
-  return `/d/${destinationSlug}/s/${spotSlug(point)}`;
-}
-
-export function findSpot<T extends Pick<BeachPointSummary, 'name' | 'code'>>(
-  points: T[],
-  slug: string,
-): T | null {
-  const lower = slug.toLowerCase();
-  return (
-    points.find((point) => spotSlug(point) === lower || point.code.toLowerCase() === lower) ?? null
-  );
+export function spotHref(destinationSlug: string, spotSlug: string): string {
+  return `/d/${destinationSlug}/s/${spotSlug}`;
 }
 
 export function sunbedPickerHref(point: Pick<BeachPointSummary, 'code'>, date?: string): string {
   const base = `/sunbeds/${point.code.toLowerCase()}`;
   return date ? `${base}?date=${date}` : base;
 }
+
+export const SPOT_KIND_LABELS: Record<SpotKind, string> = {
+  BEACH: 'Beach',
+  HILL: 'Hill',
+  LAKE: 'Lake',
+  RIVER: 'River',
+  WATERFALL: 'Waterfall',
+  FOREST: 'Forest',
+  TEA_GARDEN: 'Tea garden',
+  ISLAND: 'Island',
+  HERITAGE: 'Heritage site',
+  PARK: 'Park',
+  MARKET: 'Market',
+  OTHER: 'Place',
+};
 
 /* Listings --------------------------------------------------------------- */
 
@@ -124,38 +73,35 @@ export function parseListingId(id: string): ListingRef | null {
 
 /* Services present ------------------------------------------------------- */
 
+/** What can be booked in a destination or at a spot, from the engines' lists. */
 export interface PlaceInventory {
   spots: BeachPointSummary[];
   hotels: HotelSummaryDto[];
   venues: DiningVenueSummary[];
 }
 
+/** The service types that have engines today; each is also a `ServiceKey`. */
+export type CountedService = keyof ServiceCountsDto & ServiceKey;
+
+const SERVICE_ORDER: CountedService[] = ['stay', 'food', 'sunbeds'];
+
 /** Service types with at least one active listing; tiles show only these. */
-export function servicesPresent(inventory: PlaceInventory): ServiceKey[] {
-  const keys: ServiceKey[] = [];
-  if (inventory.hotels.length > 0) keys.push('stay');
-  if (inventory.venues.length > 0) keys.push('food');
-  if (inventory.spots.some((spot) => spot.isActive && spot.totalBeds > 0)) keys.push('sunbeds');
-  return keys;
+export function servicesPresent(counts: ServiceCountsDto): CountedService[] {
+  return SERVICE_ORDER.filter((key) => counts[key] > 0);
 }
 
-export function spotInventory(inventory: PlaceInventory, point: BeachPointSummary): PlaceInventory {
+export function inventoryCounts(inventory: PlaceInventory): ServiceCountsDto {
   return {
-    spots: [point],
-    hotels: inventory.hotels.filter((hotel) => hotel.nearestBeachCode === point.code),
-    venues: inventory.venues.filter((venue) => venue.beachPointCode === point.code),
+    stay: inventory.hotels.length,
+    food: inventory.venues.length,
+    sunbeds: inventory.spots.filter((spot) => spot.isActive && spot.totalBeds > 0).length,
   };
 }
 
-export function serviceCount(inventory: PlaceInventory, key: ServiceKey): number {
-  switch (key) {
-    case 'stay':
-      return inventory.hotels.length;
-    case 'food':
-      return inventory.venues.length;
-    case 'sunbeds':
-      return inventory.spots.filter((spot) => spot.isActive && spot.totalBeds > 0).length;
-    default:
-      return 0;
-  }
+export function spotInventory(inventory: PlaceInventory, spotSlug: string): PlaceInventory {
+  return {
+    spots: inventory.spots.filter((point) => point.spotSlug === spotSlug),
+    hotels: inventory.hotels.filter((hotel) => hotel.spotSlug === spotSlug),
+    venues: inventory.venues.filter((venue) => venue.spotSlug === spotSlug),
+  };
 }

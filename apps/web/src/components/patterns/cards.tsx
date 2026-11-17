@@ -4,11 +4,18 @@ import type {
   BeachPointSummary,
   DiningVenueSummary,
   HotelSummaryDto,
+  SpotSummaryDto,
 } from '@coastline/api-contracts';
 import { cn } from '@/lib/cn';
 import { formatDistance, hoursRange, slotLabel } from '@/lib/format';
 import { VENUE_KIND_LABELS } from '@/lib/dining/admin';
-import { hotelListingId, listingHref, spotHref, venueListingId } from '@/lib/places';
+import {
+  SPOT_KIND_LABELS,
+  hotelListingId,
+  listingHref,
+  spotHref,
+  venueListingId,
+} from '@/lib/places';
 import { SERVICES } from '@/lib/services';
 import { Badge } from '@/components/ui/badge';
 import { PriceUnit } from '@/components/ui/display';
@@ -125,17 +132,23 @@ export function VenueCard({ venue }: { venue: DiningVenueSummary }) {
   );
 }
 
+/** A spot from the places API, with live sunbed counts when it has a sunbed row. */
 export function SpotCard({
   spot,
-  destinationSlug,
-  destinationName,
+  destination,
+  beds,
 }: {
-  spot: BeachPointSummary;
-  destinationSlug: string;
-  destinationName: string;
+  spot: SpotSummaryDto;
+  destination: { slug: string; name: string };
+  beds?: BeachPointSummary;
 }) {
+  const facts = [
+    SPOT_KIND_LABELS[spot.kind],
+    spot.openHours ? hoursRange(spot.openHours.open, spot.openHours.close) : null,
+  ].filter(Boolean);
+  const bookable = spot.services.stay + spot.services.food;
   return (
-    <CardShell href={spotHref(destinationSlug, spot)}>
+    <CardShell href={spotHref(destination.slug, spot.slug)}>
       <AerialImage
         latitude={spot.latitude}
         longitude={spot.longitude}
@@ -148,19 +161,25 @@ export function SpotCard({
       <div className="flex flex-1 flex-col gap-1 p-3">
         <h3 className="text-title-sm group-hover:text-primary">{spot.name}</h3>
         <p className="text-body-sm text-muted">
-          {destinationName} · Beach · {hoursRange(spot.openHour, spot.closeHour)}
+          {destination.name} · {facts.join(' · ')}
         </p>
-        {spot.totalBeds > 0 ? (
+        {beds && beds.totalBeds > 0 ? (
           <p className="mt-auto flex items-center gap-1.5 pt-2 text-body-sm">
             <Umbrella aria-hidden className="size-4 text-primary" />
             <span>
-              <span className="tabular font-semibold">{spot.freeBeds}</span>
+              <span className="tabular font-semibold">{beds.freeBeds}</span>
               <span className="text-muted">
                 {' '}
-                of {spot.totalBeds} sunbeds free at {slotLabel(spot.referenceSlotLabel)}
+                of {beds.totalBeds} sunbeds free at {slotLabel(beds.referenceSlotLabel)}
               </span>
             </span>
           </p>
+        ) : bookable > 0 ? (
+          <p className="mt-auto pt-2 text-body-sm text-muted">
+            {bookable} {bookable === 1 ? 'place' : 'places'} to book
+          </p>
+        ) : spot.description ? (
+          <p className="mt-auto line-clamp-2 pt-2 text-body-sm text-muted">{spot.description}</p>
         ) : null}
       </div>
     </CardShell>

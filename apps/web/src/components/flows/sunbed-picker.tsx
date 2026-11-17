@@ -60,13 +60,11 @@ export function SunbedPicker({
   code,
   initialDate,
   today,
-  destinationSlug,
 }: {
   points: BeachPointSummary[];
   code: string;
   initialDate: string;
   today: string;
-  destinationSlug: string;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -234,7 +232,7 @@ export function SunbedPicker({
     <div className="page pb-36">
       <div className="flex items-center gap-2 py-2 lg:py-4">
         <Link
-          href={spotHref(destinationSlug, point)}
+          href={spotHref(point.destinationSlug, point.spotSlug)}
           aria-label={`Back to ${point.name}`}
           className="-ml-2 inline-flex size-11 items-center justify-center rounded-full hover:bg-surface-alt"
         >

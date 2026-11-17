@@ -1,7 +1,16 @@
-import type { PlaceInventory, Destination } from './places';
-import { destinationHref, hotelListingId, listingHref, spotHref, venueListingId } from './places';
+import type { DestinationDetailDto, DestinationSummaryDto } from '@coastline/api-contracts';
+import type { PlaceInventory } from './places';
+import {
+  SPOT_KIND_LABELS,
+  destinationHref,
+  hotelListingId,
+  inventoryCounts,
+  listingHref,
+  servicesPresent,
+  spotHref,
+  venueListingId,
+} from './places';
 import { SERVICES, type ServiceKey } from './services';
-import { servicesPresent } from './places';
 
 export interface SearchEntry {
   kind: 'place' | 'listing' | 'service';
@@ -14,28 +23,31 @@ export interface SearchEntry {
   service?: ServiceKey;
 }
 
-/** Builds the client-side search index from the live inventory. */
+/**
+ * Builds the client-side search index: every destination, plus the spots,
+ * listings and services of the current one (from the live API data).
+ */
 export function buildSearchIndex(
-  destination: Destination,
+  destinations: DestinationSummaryDto[],
+  current: DestinationDetailDto | null,
   inventory: PlaceInventory,
 ): SearchEntry[] {
-  const entries: SearchEntry[] = [
-    {
-      kind: 'place',
-      label: destination.name,
-      sublabel: 'Destination',
-      href: destinationHref(destination),
-      keywords: `${destination.nameBn} destination`,
-    },
-  ];
+  const entries: SearchEntry[] = destinations.map((destination) => ({
+    kind: 'place' as const,
+    label: destination.name,
+    sublabel: 'Destination',
+    href: destinationHref(destination),
+    keywords: [destination.nameBn, destination.tagline, 'destination'].filter(Boolean).join(' '),
+  }));
+  if (!current) return entries;
 
-  for (const spot of inventory.spots) {
+  for (const spot of current.spots) {
     entries.push({
       kind: 'place',
       label: spot.name,
-      sublabel: `Spot in ${destination.name}`,
-      href: spotHref(destination.slug, spot),
-      keywords: `${spot.code} beach spot ${destination.name}`,
+      sublabel: `${SPOT_KIND_LABELS[spot.kind]} in ${current.name}`,
+      href: spotHref(current.slug, spot.slug),
+      keywords: [spot.nameBn, spot.beachPointCode, spot.kind, 'spot', current.name].filter(Boolean).join(' '),
     });
   }
 
@@ -43,9 +55,11 @@ export function buildSearchIndex(
     entries.push({
       kind: 'listing',
       label: hotel.name,
-      sublabel: `Stay · ${hotel.address}`,
+      sublabel: `Stay · ${hotel.area ?? hotel.address}`,
       href: listingHref(hotelListingId(hotel)),
-      keywords: `stay hotel resort room ${hotel.banglaName ?? ''} ${hotel.zone} ${destination.name}`,
+      keywords: ['stay hotel resort room', hotel.banglaName, hotel.area, hotel.spotSlug, current.name]
+        .filter(Boolean)
+        .join(' '),
       service: 'stay',
     });
   }
@@ -54,20 +68,29 @@ export function buildSearchIndex(
     entries.push({
       kind: 'listing',
       label: venue.name,
-      sublabel: `Food · ${venue.beachPointName ?? destination.name}`,
+      sublabel: `Food · ${venue.beachPointName ?? current.name}`,
       href: listingHref(venueListingId(venue)),
-      keywords: `food eat restaurant ${venue.nameBn ?? ''} ${venue.cuisineTags.join(' ')} ${venue.kind} ${venue.beachPointName ?? ''}`,
+      keywords: [
+        'food eat restaurant',
+        venue.nameBn,
+        venue.cuisineTags.join(' '),
+        venue.kind,
+        venue.beachPointName,
+        venue.spotSlug,
+      ]
+        .filter(Boolean)
+        .join(' '),
       service: 'food',
     });
   }
 
-  for (const key of servicesPresent(inventory)) {
+  for (const key of servicesPresent(inventoryCounts(inventory))) {
     const meta = SERVICES[key];
     entries.push({
       kind: 'service',
-      label: `${meta.label} in ${destination.name}`,
+      label: `${meta.label} in ${current.name}`,
       sublabel: meta.blurb,
-      href: `/d/${destination.slug}/${key}`,
+      href: `/d/${current.slug}/${key}`,
       keywords: `${meta.label} ${meta.noun}`,
       service: key,
     });

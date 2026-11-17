@@ -20,7 +20,8 @@ import { CANCEL_CUTOFF_MINUTES, RESERVATION_CANCEL_CUTOFF_MINUTES } from '@coast
 import { serverApi } from '@/lib/api';
 import { getViewer } from '@/lib/session';
 import { apiErrorMessage, isNotFound } from '@/lib/places-server';
-import { DEFAULT_DESTINATION, listingHref, parseListingId } from '@/lib/places';
+import { listingHref, parseListingId } from '@/lib/places';
+import { SaveButton } from '@/components/patterns/save-button';
 import { formatDistance, formatMoney, hoursRange, slotLabel } from '@/lib/format';
 import { VENUE_KIND_LABELS } from '@/lib/dining/admin';
 import { buttonClass } from '@/components/ui/button';
@@ -138,7 +139,6 @@ export default async function ListingPage({ params }: { params: Promise<Params> 
     );
   }
 
-  const destination = DEFAULT_DESTINATION;
   const bookHref = `${listingHref(id)}/book`;
 
   if (data.kind === 'hotel') {
@@ -159,9 +159,14 @@ export default async function ListingPage({ params }: { params: Promise<Params> 
     );
     return (
       <DetailLayout
-        backHref={`/d/${destination.slug}/stay`}
+        backHref={`/d/${hotel.destinationSlug}/stay`}
         backLabel="All stays"
-        headerActions={<HelpLink />}
+        headerActions={
+          <>
+            <SaveButton type="HOTEL" itemKey={hotel.slug} label={hotel.name} />
+            <HelpLink />
+          </>
+        }
         gallery={
           <Gallery images={[hotel.featuredImage, ...hotel.galleryImages]} alt={hotel.name} />
         }
@@ -336,9 +341,14 @@ export default async function ListingPage({ params }: { params: Promise<Params> 
 
   return (
     <DetailLayout
-      backHref={`/d/${destination.slug}/food`}
+      backHref={`/d/${venue.destinationSlug}/food`}
       backLabel="All food"
-      headerActions={<HelpLink />}
+      headerActions={
+        <>
+          <SaveButton type="VENUE" itemKey={venue.code} label={venue.name} />
+          <HelpLink />
+        </>
+      }
       gallery={<Gallery images={venue.imageUrl ? [venue.imageUrl] : []} alt={venue.name} />}
       bookingCard={card}
       bookingBar={
@@ -381,7 +391,7 @@ export default async function ListingPage({ params }: { params: Promise<Params> 
           </p>
         ) : null}
         <p className="mt-1 flex items-center gap-1 text-body-sm text-muted">
-          <MapPin aria-hidden className="size-4" /> {venue.beachPointName ?? destination.name}
+          <MapPin aria-hidden className="size-4" /> {venue.beachPointName ?? 'In town'}
         </p>
       </header>
       <FactChips
