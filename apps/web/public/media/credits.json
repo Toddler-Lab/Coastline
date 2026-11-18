@@ -1,0 +1,227 @@
+[
+  {
+    "file": "video/bd_cinematic.mp4",
+    "source_title": "Cinematic BANGLADESH in 4K - DJI Mini 2 - Part 1.webm",
+    "author": "Nishaan Ahmed",
+    "license": "CC BY 3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Cinematic_BANGLADESH_in_4K_-_DJI_Mini_2_-_Part_1.webm",
+    "used_for": "Hero slide 1 (video, 18 s loop cut from 0:12.5, letterbox cropped)",
+    "modified": "Trimmed to 18 s, scaled to 1600 px, H.264, audio removed"
+  },
+  {
+    "file": "video/rangamati_floating_market.mp4",
+    "source_title": "Traditional floating fruits market.webm",
+    "author": "Azimronnie",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Traditional_floating_fruits_market.webm",
+    "used_for": "Rangamati hero (video, 18 s loop cut from 0:06)",
+    "modified": "Trimmed to 18 s, scaled to 1600 px, H.264, audio removed"
+  },
+  {
+    "file": "places/hero_saintmartin_sunrise.webp",
+    "source_title": "Aerial panoramic view of Saint Martin’s Island at sunrise, Bangladesh.jpg",
+    "author": "Khondoker Zobaed",
+    "license": "CC BY 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Aerial_panoramic_view_of_Saint_Martin%E2%80%99s_Island_at_sunrise,_Bangladesh.jpg",
+    "used_for": "Cox's Bazar hero",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/coxs_saintmartin.webp",
+    "source_title": "Sunrise aerial view of Saint Martin’s Island, Bangladesh.jpg",
+    "author": "Khondoker Zobaed",
+    "license": "CC BY 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Sunrise_aerial_view_of_Saint_Martin%E2%80%99s_Island,_Bangladesh.jpg",
+    "used_for": "Spot: Saint Martin's Island",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/coxs_himchari_aerial.webp",
+    "source_title": "Himchari National Park Image-4.jpg",
+    "author": "Zitu.madcap0901125",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Himchari_National_Park_Image-4.jpg",
+    "used_for": "Spot: Himchari; map card",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/coxs_himchari_coast.webp",
+    "source_title": "Himchari National Park Image-3.jpg",
+    "author": "Zitu.madcap0901125",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Himchari_National_Park_Image-3.jpg",
+    "used_for": "Spot: Marine Drive coast",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/coxs_inani.webp",
+    "source_title": "Inani Beach in the day (21 February 2014).jpg",
+    "author": "Arjit Chowdhury",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Inani_Beach_in_the_day_(21_February_2014).jpg",
+    "used_for": "Spot: Inani Beach",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/coxs_beach_waves.webp",
+    "source_title": "Aerial view of Saint Martin’s Island coral formations.jpg",
+    "author": "Khondoker Zobaed",
+    "license": "CC BY 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_Saint_Martin%E2%80%99s_Island_coral_formations.jpg",
+    "used_for": "Photographers section",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/sylhet_ratargul_boats.webp",
+    "source_title": "Ratargul 0276.jpg",
+    "author": "Abdulmominbd",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Ratargul_0276.jpg",
+    "used_for": "Sylhet hero",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/sylhet_ratargul_aerial.webp",
+    "source_title": "Aerial view of Ratargul.jpg",
+    "author": "Jayedju149",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_Ratargul.jpg",
+    "used_for": "Spot: Ratargul",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/sylhet_tea.webp",
+    "source_title": "Malnichora Tea Garden at Sylhet 01.jpg",
+    "author": "IqbalHossain",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Malnichora_Tea_Garden_at_Sylhet_01.jpg",
+    "used_for": "Spot: Malnicherra",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/sylhet_jaflong.webp",
+    "source_title": "Jaflong Sylhet.jpg",
+    "author": "Abdul Momin",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Jaflong_Sylhet.jpg",
+    "used_for": "Spot: Jaflong",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/rangamati_kaptai_islands.webp",
+    "source_title": "Kaptai Lake 05.jpg",
+    "author": "Jacob Fring",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Kaptai_Lake_05.jpg",
+    "used_for": "Rangamati still / next-destination",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/rangamati_fishing_net.webp",
+    "source_title": "Traditional Fishing Net.jpg",
+    "author": "Muhammad Amdad Hossain",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Traditional_Fishing_Net.jpg",
+    "used_for": "Spot: Kaptai Lake; photographers section",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/rangamati_hanging_bridge.webp",
+    "source_title": "Rangamati Hanging Bridge View.jpg",
+    "author": "Md. Asifur Rahaman",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Rangamati_Hanging_Bridge_View.jpg",
+    "used_for": "Spot: Hanging Bridge",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/rangamati_sajek.webp",
+    "source_title": "Sajek Valley Bangladesh.jpg",
+    "author": "Zohrakeya",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Sajek_Valley_Bangladesh.jpg",
+    "used_for": "Spot: Sajek Valley",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/bandarban_golden_temple.webp",
+    "source_title": "Buddha Dhatu Jadi 01.jpg",
+    "author": "Azimronnie",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Buddha_Dhatu_Jadi_01.jpg",
+    "used_for": "Bandarban hero; spot",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/bandarban_nilgiri.webp",
+    "source_title": "Nilgiri, Bandarban, Bangladesh 4.jpg",
+    "author": "Tanvir Rahat",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Nilgiri,_Bandarban,_Bangladesh_4.jpg",
+    "used_for": "Spot: Nilgiri",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/bandarban_boga.webp",
+    "source_title": "Boga Lake (20180915).jpg",
+    "author": "Mhr golpo",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Boga_Lake_(20180915).jpg",
+    "used_for": "Spot: Boga Lake",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/sundarbans_aerial.webp",
+    "source_title": "Aerial view of Sundarbans East Wildlife Sanctuary.jpg",
+    "author": "Knowshin",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_Sundarbans_East_Wildlife_Sanctuary.jpg",
+    "used_for": "Sundarbans hero; spot",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/sundarbans_forest.webp",
+    "source_title": "Aerial view of the Sundarban.JPG",
+    "author": "Jyotirmoy Banik",
+    "license": "CC BY 3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_the_Sundarban.JPG",
+    "used_for": "Spot: mangrove channels",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/bd_river_delta.webp",
+    "source_title": "Some where in Bangladesh 1.jpg",
+    "author": "Shirin Kona",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Some_where_in_Bangladesh_1.jpg",
+    "used_for": "Spare aerial (rivers)",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/bd_wooden_boats.webp",
+    "source_title": "Traditional wooden boats 53.jpg",
+    "author": "Azimronnie",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Traditional_wooden_boats_53.jpg",
+    "used_for": "Services band background",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/bd_cinematic_poster.webp",
+    "source_title": "Frame from Cinematic BANGLADESH in 4K - DJI Mini 2 - Part 1.webm",
+    "author": "Nishaan Ahmed",
+    "license": "CC BY 3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Cinematic_BANGLADESH_in_4K_-_DJI_Mini_2_-_Part_1.webm",
+    "used_for": "Poster for hero video",
+    "modified": "Single frame, WebP"
+  },
+  {
+    "file": "places/rangamati_floating_market_poster.webp",
+    "source_title": "Frame from Traditional floating fruits market.webm",
+    "author": "Azimronnie",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Traditional_floating_fruits_market.webm",
+    "used_for": "Poster for Rangamati video",
+    "modified": "Single frame, WebP"
+  }
+]

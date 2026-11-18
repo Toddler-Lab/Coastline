@@ -1,0 +1,11 @@
+import fs from 'fs';
+import {feature} from 'topojson-client';
+import {geoMercator, geoPath} from 'd3-geo';
+const topo = JSON.parse(fs.readFileSync('node_modules/world-atlas/countries-50m.json'));
+const f = feature(topo, topo.objects.countries).features.find(d=>d.id==='050');
+const proj = geoMercator().fitExtent([[10,10],[410,510]], f);
+const p = geoPath(proj).digits(1)(f);
+const pins = {coxs:[91.98,21.43],sylhet:[91.87,24.89],rangamati:[92.18,22.65],sundarbans:[89.4,22.0],bandarban:[92.22,22.0],dhaka:[90.41,23.81]};
+const out = {path:p, pins:Object.fromEntries(Object.entries(pins).map(([k,v])=>[k,proj(v).map(n=>Math.round(n))]))};
+console.log(p.length); console.log(JSON.stringify(out.pins));
+fs.writeFileSync('bd.json', JSON.stringify(out));
