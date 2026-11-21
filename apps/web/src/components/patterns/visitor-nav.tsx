@@ -63,7 +63,7 @@ export function BottomBar() {
   return (
     <nav
       aria-label="Main"
-      className="no-print fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="no-print fixed inset-x-0 bottom-0 z-50 border-t border-line/70 bg-surface/90 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(0,0,0,0.06)] lg:hidden"
     >
       <ul className="mx-auto grid h-[var(--bottombar-h)] max-w-xl grid-cols-5">
         {VISITOR_NAV.map((item) => {
@@ -74,19 +74,19 @@ export function BottomBar() {
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex h-full flex-col items-center justify-center gap-0.5 text-caption',
-                  active ? 'text-primary' : 'text-muted hover:text-fg',
+                  'flex h-full flex-col items-center justify-center gap-0.5 text-caption font-medium transition-all',
+                  active ? 'text-primary font-bold' : 'text-muted hover:text-fg',
                 )}
               >
                 <span
                   className={cn(
-                    'grid h-8 w-14 place-items-center rounded-full transition-colors',
-                    active && 'bg-primary-soft',
+                    'grid h-8 w-14 place-items-center rounded-full transition-all duration-300',
+                    active && 'bg-primary-soft text-primary scale-105 shadow-sm',
                   )}
                 >
-                  <item.icon aria-hidden className="size-6" strokeWidth={1.75} />
+                  <item.icon aria-hidden className="size-5" strokeWidth={active ? 2.2 : 1.75} />
                 </span>
-                {item.label}
+                <span className="text-[11px] leading-tight">{item.label}</span>
               </Link>
             </li>
           );

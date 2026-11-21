@@ -44,6 +44,47 @@ export function destinationContent(value: Prisma.JsonValue): DestinationContentD
   };
 }
 
+export function resolveDestinationSlug(slug: string): string {
+  const normalized = (slug ?? '').trim().toLowerCase();
+  if (normalized === 'coxs') {
+    return 'coxs-bazar';
+  }
+  return slug;
+}
+
+export function resolveSpotSlug(destSlug: string, spotSlug: string): string {
+  const normDest = resolveDestinationSlug(destSlug);
+  const normSpot = (spotSlug ?? '').trim().toLowerCase();
+
+  if (normDest === 'coxs-bazar') {
+    const coxsAliases: Record<string, string> = {
+      inani: 'inani-coral-beach',
+      laboni: 'laboni-beach',
+      sugandha: 'sugandha-beach',
+      kolatoli: 'kolatoli-beach',
+      teknaf: 'teknaf-beach',
+      saintmartin: 'inani-coral-beach',
+      marine: 'himchari',
+    };
+    if (coxsAliases[normSpot]) {
+      return coxsAliases[normSpot];
+    }
+  }
+
+  if (normDest === 'rangamati') {
+    const rangamatiAliases: Record<string, string> = {
+      kaptai: 'kaptai-lake',
+      hanging: 'hanging-bridge',
+      rajban: 'rajban-vihara',
+    };
+    if (rangamatiAliases[normSpot]) {
+      return rangamatiAliases[normSpot];
+    }
+  }
+
+  return spotSlug;
+}
+
 export function spotContent(value: Prisma.JsonValue): SpotContentDto {
   const content = record(value);
   return { rules: strings(content.rules), tips: strings(content.tips) };
@@ -163,10 +204,46 @@ export class PlacesService {
     now: Date = new Date(),
   ): Promise<SpotDetailDto> {
     const destination = await this.findDestination(destinationSlug);
-    const spot = await this.prisma.spot.findFirst({
-      where: { destinationId: destination.id, slug: spotSlug, isActive: true },
+    const resolvedSpotSlug = resolveSpotSlug(destination.slug, spotSlug);
+    let spot = await this.prisma.spot.findFirst({
+      where: { destinationId: destination.id, slug: resolvedSpotSlug, isActive: true },
       include: { beachPoint: { select: { code: true, isActive: true } } },
     });
+
+    if (!spot && spotSlug !== resolvedSpotSlug) {
+      spot = await this.prisma.spot.findFirst({
+        where: { destinationId: destination.id, slug: spotSlug, isActive: true },
+        include: { beachPoint: { select: { code: true, isActive: true } } },
+      });
+    }
+
+    if (!spot) {
+      const secondaryFallbacks: Record<string, string[]> = {
+        'inani-coral-beach': ['inani-beach', 'inani'],
+        himchari: ['inani-coral-beach', 'inani-beach'],
+      };
+      const alternatives = secondaryFallbacks[resolvedSpotSlug] ?? [];
+      for (const altSlug of alternatives) {
+        spot = await this.prisma.spot.findFirst({
+          where: { destinationId: destination.id, slug: altSlug, isActive: true },
+          include: { beachPoint: { select: { code: true, isActive: true } } },
+        });
+        if (spot) break;
+      }
+    }
+
+    if (!spot && (spotSlug === 'saintmartin' || spotSlug === 'marine')) {
+      spot = await this.prisma.spot.findFirst({
+        where: {
+          destinationId: destination.id,
+          isActive: true,
+          kind: 'BEACH',
+        },
+        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+        include: { beachPoint: { select: { code: true, isActive: true } } },
+      });
+    }
+
     if (!spot) {
       throw notFound('Spot not found.');
     }
@@ -185,8 +262,9 @@ export class PlacesService {
   }
 
   private async findDestination(slug: string): Promise<Destination> {
+    const resolvedSlug = resolveDestinationSlug(slug);
     const destination = await this.prisma.destination.findFirst({
-      where: { slug, isActive: true },
+      where: { slug: resolvedSlug, isActive: true },
     });
     if (!destination) {
       throw notFound('Destination not found.');

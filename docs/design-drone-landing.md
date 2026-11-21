@@ -1,13 +1,14 @@
 # Drone-landing design: specification and implementation plan
 
-**Status:** Design ready, implementation not started. Depends on ADR-003 (Proposed).
+**Status:** Implemented in `apps/web` on the immersive Hub pages (ADR-003 Accepted 2026-11-21);
+remaining work is listed in section 7 and the open decisions in section 9.
 **Branch:** `design/drone-landing` (cut from `redesign/v2` at `3ecca8d`)
 **Prototype:** `design/drone-landing/` · **Screens:** `design/drone-landing/screens/`
 **Media:** `apps/web/public/media/` · **Credits:** `apps/web/public/media/CREDITS.md`
 
 This document is written for whoever continues the work, human or agent. Read it together with
-`AGENTS.md`, `docs/design.md` and ADR-003. Where this document and `docs/design.md` disagree, the
-disagreement is listed in ADR-003 and **design.md wins until ADR-003 is accepted**.
+`AGENTS.md`, `docs/design.md` and ADR-003. ADR-003 is accepted and its amendments are applied to
+`docs/design.md`, so this document is the source of truth for the immersive Hub pages.
 
 ---
 
@@ -178,6 +179,14 @@ Do not start before ADR-003 is accepted, except DL-01.
 | **DL-10** | Data model | `hero_video` (or destination media), spot hero photo, media credit fields; admin editor fields | Migration + API + admin form; seeds updated |
 
 Suggested order: DL-01 → DL-02 → DL-03 → DL-04 → DL-07 → DL-05 → DL-06 → DL-08 → DL-10 → DL-09.
+
+**Implemented in the app (2026-11-21):** DL-01 media and credits, DL-02 tokens and type, DL-03
+`DroneStage`, DL-04 Explore hero with rail and search, DL-05 map and spots rail, DL-06 services band,
+photographers and help, DL-07 destination and spot heroes with nested backgrounds, and DL-08
+fly-through. The EN/BN switch now writes a cookie and is shared by all Hub components. Still open:
+DL-09 measured quality (axe, Lighthouse, 320 px pass), DL-10 data-model fields for operator media,
+full Bangla copy across the whole site (WP-29), and the web test runner's wider Playwright journeys
+(WP-01). Prices, distances, tips and desk numbers remain samples.
 
 ## 8. Acceptance criteria
 

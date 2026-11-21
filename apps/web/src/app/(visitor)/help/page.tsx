@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { CANCEL_CUTOFF_MINUTES } from '@coastline/api-contracts';
-import { Card } from '@/components/ui/display';
+import { ChevronDown, LifeBuoy, Phone, ShieldCheck } from 'lucide-react';
 import { HelpMenu } from '@/components/patterns/help';
 import { PageHeader } from '@/components/patterns/hub';
 
-export const metadata: Metadata = { title: 'Help' };
+export const metadata: Metadata = { title: 'Help & Support | Coastline' };
 
 const FAQ = [
   {
@@ -31,34 +31,55 @@ const FAQ = [
 
 export default function HelpPage() {
   return (
-    <div className="page max-w-3xl">
+    <div className="page max-w-3xl pb-24">
       <PageHeader
-        title="Help centre"
+        title="Help Centre & Safety"
+        subtitle="24/7 emergency hotlines, booking policies, refunds and FAQs"
         backHref="/"
         backLabel="Back to Explore"
         className="lg:pt-6"
       />
-      <HelpMenu />
+
+      {/* Emergency banner */}
+      <div className="mt-4 rounded-3xl border border-danger/30 bg-danger-soft/20 p-5 shadow-sm">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="grid size-11 place-items-center rounded-2xl bg-danger-soft text-danger">
+              <Phone className="size-5" />
+            </span>
+            <div>
+              <h3 className="text-sm font-bold text-danger">Emergency Hotlines</h3>
+              <p className="text-xs text-muted">999 National Service · 01320-169999 Tourist Police</p>
+            </div>
+          </div>
+          <a
+            href="tel:999"
+            className="rounded-full bg-danger px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-danger/90 transition-colors"
+          >
+            Call 999
+          </a>
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <HelpMenu />
+      </div>
+
       <section aria-labelledby="faq-title" className="mt-10">
-        <h2 id="faq-title" className="mb-3 text-title">
-          Common questions
+        <h2 id="faq-title" className="mb-4 text-lg font-bold text-fg">
+          Frequently Asked Questions
         </h2>
-        <Card className="divide-y divide-line">
+        <div className="space-y-3">
           {FAQ.map((item) => (
-            <details key={item.q} className="group">
-              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-4 text-label">
+            <details key={item.q} className="group rounded-2xl border border-line bg-surface p-4 shadow-sm">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-sm text-fg">
                 {item.q}
-                <span
-                  aria-hidden
-                  className="text-title text-muted transition-transform group-open:rotate-45"
-                >
-                  +
-                </span>
+                <ChevronDown aria-hidden className="size-4 text-muted transition-transform group-open:rotate-180" />
               </summary>
-              <p className="px-4 pb-4 text-body-sm text-muted">{item.a}</p>
+              <p className="mt-2.5 text-xs text-muted leading-relaxed">{item.a}</p>
             </details>
           ))}
-        </Card>
+        </div>
       </section>
     </div>
   );

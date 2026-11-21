@@ -223,5 +223,50 @@
     "source_url": "https://commons.wikimedia.org/wiki/File:Traditional_floating_fruits_market.webm",
     "used_for": "Poster for Rangamati video",
     "modified": "Single frame, WebP"
+  },
+  {
+    "file": "places/coxs_laboni.webp",
+    "source_title": "Laboni Beach, Cox's Bazar",
+    "author": "Wikimedia Commons Contributors",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/Category:Laboni_Beach",
+    "used_for": "Spot: Laboni Beach",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/coxs_kolatoli.webp",
+    "source_title": "Kolatoli Beach, Cox's Bazar",
+    "author": "Wikimedia Commons Contributors",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/Category:Kolatoli_Beach",
+    "used_for": "Spot: Kolatoli Beach",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/coxs_sugandha.webp",
+    "source_title": "Sugandha Beach, Cox's Bazar",
+    "author": "Wikimedia Commons Contributors",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/Category:Sugandha_Beach",
+    "used_for": "Spot: Sugandha Beach",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/sylhet_bichanakandi.webp",
+    "source_title": "Bichanakandi, Sylhet",
+    "author": "Wikimedia Commons Contributors",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/Category:Bichnakandi",
+    "used_for": "Spot: Bichanakandi",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
+  },
+  {
+    "file": "places/rangamati_kaptai_lake.webp",
+    "source_title": "Kaptai Lake, Rangamati",
+    "author": "Wikimedia Commons Contributors",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/Category:Kaptai_Lake",
+    "used_for": "Spot: Kaptai Lake",
+    "modified": "Resized/re-encoded (WebP q80, max 2200 px)"
   }
 ]

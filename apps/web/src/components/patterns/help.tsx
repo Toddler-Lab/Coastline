@@ -82,6 +82,8 @@ export function HelpMenu({ onNavigate }: { onNavigate?: () => void }) {
 /** Screens where the floating Help button would cover the primary action. */
 function hidesHelpButton(pathname: string): boolean {
   return (
+    pathname === '/' ||
+    /^\/d\/[^/]+$/.test(pathname) ||
     pathname.startsWith('/checkout') ||
     /^\/trips\/[^/]+/.test(pathname) ||
     pathname.startsWith('/sunbeds/') ||
@@ -121,7 +123,7 @@ export function HelpSheet({ open, onClose }: { open: boolean; onClose: () => voi
 }
 
 /** Top-bar Help item on expanded screens. */
-export function HelpTopButton() {
+export function HelpTopButton({ className }: { className?: string } = {}) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -129,7 +131,10 @@ export function HelpTopButton() {
         type="button"
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
-        className="inline-flex h-11 items-center gap-2 rounded-full border border-line px-4 text-label hover:bg-surface-alt"
+        className={cn(
+          'inline-flex h-11 items-center gap-2 rounded-full border border-line px-4 text-label hover:bg-surface-alt',
+          className,
+        )}
       >
         <LifeBuoy aria-hidden className="size-5 text-danger" />
         Help

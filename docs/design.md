@@ -55,8 +55,9 @@ Bright, photo-led and calm. Photography of the actual places carries the emotion
 around it stays quiet: white and soft-grey surfaces, one deep teal brand colour, and a per-destination
 accent that tints hero areas and selected states. Shapes are soft but not bubbly.
 
-Avoid: glass blur, gradient washes, neon, stock tropical imagery, tiny uppercase technical labels,
-dense dashboards on visitor pages.
+Avoid: neon, stock tropical imagery, dense dashboards on visitor pages. Glass blur and photo-legibility
+gradients are allowed only over hero media on Hub pages (ADR-003). Uppercase technical labels are
+allowed only in the decorative drone HUD.
 
 ### 3.2 Colour roles
 
@@ -99,6 +100,10 @@ Status is never shown by colour alone: every status has a label and an icon.
 One family with Latin and Bangla cuts: **Hind Siliguri** for Bangla and **Inter** for Latin, loaded
 with `next/font`. Numbers use tabular figures in prices, times and tables.
 
+On Hub pages only (ADR-003), a `display-xl` role (56-112 px, 800, tracking -0.045em) is available for
+hero titles, with an optional Instrument Serif italic accent phrase and a decorative JetBrains Mono
+HUD. Inter and Hind Siliguri remain the only text faces for body, labels and Bangla.
+
 | Role | Size / line | Weight | Use |
 |---|---|---|---|
 | `display` | 32 / 40 (40 / 48 desktop) | 700 | Destination and spot names on heroes |
@@ -129,8 +134,10 @@ Body text is never below 14 px. Bangla line height is 1.6 or more.
 
 ### 3.6 Motion
 
-150-250 ms ease-out for sheets, tabs and expanding cards. No parallax, no autoplaying carousels.
-Respect `prefers-reduced-motion`.
+150-250 ms ease-out for sheets, tabs and expanding cards. On Hub pages only (ADR-003): hero drone
+drift, one parallax band, and an auto-advancing hero with a visible pause control, pause on
+interaction, and no auto-advance under reduced motion. Everywhere else: no parallax, no autoplay.
+All motion stops or becomes instant under `prefers-reduced-motion`.
 
 ## 4. Layout and responsiveness
 
@@ -288,6 +295,12 @@ Every old route answers with a permanent redirect.
 
 ### 7.1 Explore (`/`)
 
+> **Immersive Hub (ADR-003).** The 21:9 hero and destination chips described below are replaced by a
+> full-viewport drone stage with a place rail and search inside the hero, followed by the fly-the-map
+> section, spots rail, services band, photographers and help. See `docs/design-drone-landing.md`
+> section 2.1. Destination chips stay on phones. The text and rules below still apply to the search,
+> service tiles and alerts in those sections.
+
 ```text
 +-----------------------------------------+
 | (logo)          [Cox's Bazar v]   (bell) |
@@ -322,11 +335,20 @@ Every old route answers with a permanent redirect.
 
 ### 7.2 Destination (`/d/[destination]`)
 
+> **Immersive Hub (ADR-003).** The 21:9 hero is replaced by a full-height drone stage (media video
+> or photo, breadcrumb, giant name, Bangla name, serif tagline, facts). See
+> `docs/design-drone-landing.md` section 2.2. All content and behaviours below remain in scope.
+
 Hero (21:9 desktop, 4:3 phone) with name, tagline and accent. Section tab row. Overview holds: about,
 best time to visit, how to get there, the service tiles, the spot list, popular listings per service,
 current alerts, and help contacts for the destination.
 
 ### 7.3 Spot hub (`/d/[destination]/s/[spot]`)
+
+> **Immersive Hub (ADR-003).** The hero and spot hub use nested, crossfading spot backgrounds: the
+> selected spot's photo fills the hub and crossfades when another spot is picked, with a photo spot
+> picker and Book / Nearby / Know / Help segments. See `docs/design-drone-landing.md` section 2.2.
+> Every booking, alert, emergency and help behaviour below is preserved.
 
 ```text
 +-----------------------------------------+

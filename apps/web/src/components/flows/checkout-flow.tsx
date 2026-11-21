@@ -106,35 +106,37 @@ export function CheckoutFlow({ draftId }: { draftId: string }) {
   if (phase === 'done' && placed) {
     const shownTotal = draft?.totalMinor ?? placed.totalMinor;
     return (
-      <div className="page max-w-[640px] py-8">
+      <div className="page max-w-[640px] py-12">
         <div className="text-center">
-          <CircleCheck aria-hidden className="mx-auto size-16 text-success" />
-          <h1 className="mt-3 text-title-lg">Booking confirmed</h1>
-          <p className="mt-1 text-body text-muted">
-            Your ticket is in Trips. Show it at the venue.
+          <div className="mx-auto grid size-20 place-items-center rounded-3xl bg-emerald-500/10 text-emerald-500 shadow-lg shadow-emerald-500/10 border border-emerald-500/20">
+            <CircleCheck aria-hidden className="size-10" />
+          </div>
+          <h1 className="mt-4 text-3xl font-extrabold text-fg">Booking Confirmed!</h1>
+          <p className="mt-1 text-sm text-muted">
+            Your digital pass is ready in Trips. Show the QR ticket at the venue.
           </p>
         </div>
-        <Card className="mt-6 p-5">
+        <div className="mt-8 rounded-3xl border border-line bg-surface p-6 shadow-xl">
           <DetailRows
             rows={[
-              { label: 'Reference', value: <span className="font-mono">{placed.ref}</span> },
+              { label: 'Booking Reference', value: <span className="font-mono font-bold text-fg">{placed.ref}</span> },
               ...(draft ? [{ label: 'Booking', value: draft.title }] : []),
               ...(placed.totalMinor > 0
                 ? [
                     {
-                      label: 'Paid',
+                      label: 'Amount Paid',
                       value: formatMoney(placed.totalMinor, placed.currency),
                       strong: true,
                     },
                     {
-                      label: 'Payment provider',
+                      label: 'Payment Gateway',
                       value: <span className="font-mono">{placed.provider ?? '—'}</span>,
                     },
                   ]
                 : [{ label: 'Paid now', value: 'Nothing' }]),
             ]}
           />
-        </Card>
+        </div>
         {placed.totalMinor !== shownTotal ? (
           <Notice tone="info" icon={Info} className="mt-4" title="The final amount differs">
             The provider&apos;s current price was {formatMoney(placed.totalMinor, placed.currency)}{' '}
@@ -142,15 +144,18 @@ export function CheckoutFlow({ draftId }: { draftId: string }) {
             was recorded.
           </Notice>
         ) : null}
-        <div className="mt-6 grid gap-2">
+        <div className="mt-6 grid gap-3">
           <Link
             href={`/trips/${encodeURIComponent(placed.ref)}`}
-            className={buttonClass('primary', 'lg', 'w-full')}
+            className="flex items-center justify-center rounded-2xl bg-primary px-6 py-4 font-bold text-white shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all"
           >
-            Open ticket
+            Open Digital Ticket & QR Pass →
           </Link>
-          <Link href="/" className={buttonClass('secondary', 'lg', 'w-full')}>
-            Keep exploring
+          <Link
+            href="/"
+            className="flex items-center justify-center rounded-2xl border border-line bg-surface-alt px-6 py-3.5 font-semibold text-fg hover:bg-surface transition-all"
+          >
+            Keep Exploring Bangladesh
           </Link>
         </div>
       </div>

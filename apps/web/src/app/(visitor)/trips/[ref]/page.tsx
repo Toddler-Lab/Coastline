@@ -259,51 +259,80 @@ export default async function TripPage({ params }: { params: Promise<Params> }) 
   }
 
   return (
-    <div className="page max-w-3xl">
+    <div className="page max-w-3xl pb-20">
       <PageHeader
-        title="Ticket"
-        subtitle={`${meta.label} · ${trip.ref}`}
+        title="Digital Boarding Pass"
+        subtitle={`${meta.label} · Reference ${trip.ref}`}
         backHref="/trips"
         backLabel="Back to Trips"
         className="no-print lg:pt-6"
       />
-      <div className="space-y-4">
-        <Card className="overflow-hidden">
-          <div className="flex items-center gap-3 border-b border-line p-4">
-            <span className="grid size-11 flex-none place-items-center rounded-full bg-primary-soft text-primary">
-              <Icon aria-hidden className="size-6" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-title-sm">{trip.title}</p>
-              <p className="text-body-sm text-muted">{trip.subtitle}</p>
+      <div className="space-y-5">
+        {/* 2026 Boarding Pass Card */}
+        <div className="relative overflow-hidden rounded-3xl border border-line bg-surface shadow-xl">
+          {/* Airline-style pass header */}
+          <div className="flex items-center justify-between border-b border-line bg-surface-alt/60 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                <Icon aria-hidden className="size-5" />
+              </span>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted">
+                  Coastline Pass · {meta.label}
+                </span>
+                <p className="font-mono text-xs font-bold text-fg">{trip.ref}</p>
+              </div>
             </div>
             <StatusBadge tone={trip.status.tone} label={trip.status.label} />
           </div>
+
+          {/* Main title & subtitle */}
+          <div className="p-6">
+            <h1 className="text-2xl font-extrabold text-fg">{trip.title}</h1>
+            <p className="mt-1 text-sm text-muted">{trip.subtitle}</p>
+          </div>
+
+          {/* QR Code Section with Tear Line */}
           {ticket && trip.phase !== 'CANCELLED' ? (
-            <div className="border-b border-dashed border-line bg-surface-alt px-4 py-6">
-              <TicketQr payload={ticket.payload} code={ticket.code} />
-              <p className="mt-3 text-center text-body-sm text-muted">
-                Show this at the venue. Staff can also type the code.
-              </p>
+            <div className="relative border-y border-dashed border-line bg-surface-alt/40 px-6 py-8">
+              {/* Left and Right Notches */}
+              <div className="absolute -left-3 top-1/2 size-6 -translate-y-1/2 rounded-full border border-line bg-bg shadow-inner" />
+              <div className="absolute -right-3 top-1/2 size-6 -translate-y-1/2 rounded-full border border-line bg-bg shadow-inner" />
+
+              <div className="mx-auto max-w-xs text-center">
+                <div className="inline-block rounded-2xl bg-white p-4 shadow-md border border-black/5">
+                  <TicketQr payload={ticket.payload} code={ticket.code} />
+                </div>
+                <p className="mt-3 text-xs font-medium text-muted">
+                  Present this QR code to the on-site attendant for check-in.
+                </p>
+                {ticket.code ? (
+                  <p className="mt-1.5 font-mono text-xs tracking-wider text-fg bg-surface inline-block px-3 py-1 rounded-full border border-line">
+                    PASS CODE: <span className="font-bold">{ticket.code}</span>
+                  </p>
+                ) : null}
+              </div>
             </div>
           ) : (
-            <div className="border-b border-line px-4 py-3">
-              <p className="text-body-sm text-muted">
-                Reference <span className="font-mono text-fg">{trip.ref}</span>
+            <div className="border-b border-line px-6 py-3">
+              <p className="text-xs text-muted">
+                Reference ID: <span className="font-mono font-bold text-fg">{trip.ref}</span>
               </p>
             </div>
           )}
-          <div className="px-4">
+
+          {/* Details breakdown */}
+          <div className="p-6">
             <DetailRows rows={rows} />
           </div>
-        </Card>
+        </div>
 
         {extra}
 
-        <div className="no-print grid gap-2 md:grid-cols-2">
+        <div className="no-print grid gap-2.5 sm:grid-cols-2">
           {placeHref ? (
-            <Link href={placeHref} className={buttonClass('secondary', 'md', 'w-full')}>
-              <MapPin aria-hidden className="size-5" /> View place
+            <Link href={placeHref} className={buttonClass('secondary', 'md', 'w-full justify-center rounded-xl')}>
+              <MapPin aria-hidden className="size-4 mr-2" /> View place
             </Link>
           ) : null}
           {directions ? (
@@ -311,23 +340,25 @@ export default async function TripPage({ params }: { params: Promise<Params> }) 
               href={directions}
               target="_blank"
               rel="noreferrer"
-              className={buttonClass('secondary', 'md', 'w-full')}
+              className={buttonClass('secondary', 'md', 'w-full justify-center rounded-xl')}
             >
-              <Navigation aria-hidden className="size-5" /> Directions
+              <Navigation aria-hidden className="size-4 mr-2" /> Directions
             </a>
           ) : null}
           {ticket ? <PrintButton /> : null}
           <Link
             href={`/help/report?ref=${encodeURIComponent(trip.ref)}`}
-            className={buttonClass('text', 'md', 'w-full')}
+            className={buttonClass('text', 'md', 'w-full justify-center text-muted hover:text-fg')}
           >
-            <Flag aria-hidden className="size-5" /> Report a problem
+            <Flag aria-hidden className="size-4 mr-2" /> Report a problem
           </Link>
         </div>
 
-        <Card className="p-5">
-          <h2 className="text-title-sm">Receipt</h2>
-          <Receipt payments={payments} />
+        <Card className="rounded-2xl p-6 shadow-sm">
+          <h2 className="text-base font-bold text-fg">Payment & Receipts</h2>
+          <div className="mt-2">
+            <Receipt payments={payments} />
+          </div>
         </Card>
 
         {cancel ? <div className="no-print">{cancel}</div> : null}

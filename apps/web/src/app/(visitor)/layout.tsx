@@ -2,25 +2,23 @@ import { VisitorTopBar } from '@/components/patterns/visitor-top-bar';
 import { BottomBar, OfflineBar } from '@/components/patterns/visitor-nav';
 import { HelpButton } from '@/components/patterns/help';
 import { SiteFooter } from '@/components/patterns/site-footer';
+import { VisitorMainShell } from '@/components/patterns/visitor-main-shell';
 
 /**
- * Visitor shell: top bar on expanded screens, bottom bar on compact and medium
- * ones, and the floating Help button (design.md 5.1).
+ * Visitor shell: 2026 floating glass navigation across all pages,
+ * unified typography, responsive footer, and bottom bar on mobile.
  */
 export default function VisitorLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <OfflineBar />
-      <VisitorTopBar />
-      <main
-        id="main"
-        className="min-h-[60dvh] pb-[calc(var(--bottombar-h)+env(safe-area-inset-bottom)+24px)] lg:pb-16"
-      >
-        {children}
-      </main>
+    <div className="drone-landing-scope min-h-screen bg-bg text-fg flex flex-col justify-between">
+      <div>
+        <OfflineBar />
+        <VisitorTopBar />
+        <VisitorMainShell>{children}</VisitorMainShell>
+      </div>
       <SiteFooter />
       <BottomBar />
       <HelpButton />
-    </>
+    </div>
   );
 }

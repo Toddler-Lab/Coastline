@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './drone-landing.css';
 @import 'maplibre-gl/dist/maplibre-gl.css';
 
 /*
@@ -17,8 +18,45 @@
   --muted: #56656a;
   --line: #dde3e4;
   --primary: #0e6e6a;
+  --primary-ink: #08403d;
   --on-primary: #ffffff;
   --primary-soft: #ddf2ef;
+  --sun: #e8a93a;
+  --sun-ink: #9a5b00;
+  --cream: #f6e7c8;
+  /* Hub-only media tokens (ADR-003): glass controls and scrims over drone media. */
+  --glass: rgb(255 255 255 / 0.14);
+  --glass-strong: rgb(255 255 255 / 0.22);
+  --glass-border: rgb(255 255 255 / 0.28);
+  --on-media: #ffffff;
+  --on-media-muted: rgb(255 255 255 / 0.82);
+  --ink: #0c1a19;
+  --ink-2: #3b4a48;
+  --coral: #e2603f;
+  --accent-sea-alt: #1679a6;
+  --accent-forest-alt: #2f7d46;
+  --accent-lake-alt: #1e8c9a;
+  --accent-hill-alt: #6b7f2a;
+  --accent-mangrove: #3e6b4a;
+  --primary-hover: #7be1d8;
+  --on-primary-dark: #00302d;
+  --danger-deep: #2a0f0b;
+  --danger-hover: #8e1c15;
+  --danger-bright: #ff4d3d;
+  --danger-soft-fg: #ffb4a3;
+  --sun-soft-bg: #fff6e3;
+  --sun-soft-border: #f0d49a;
+  --sun-soft-fg: #5c3d00;
+  --sun-soft-bg-dark: #241d10;
+  --stage-scrim:
+    linear-gradient(
+      180deg,
+      rgba(6, 16, 15, 0.55) 0%,
+      rgba(6, 16, 15, 0) 26%,
+      rgba(6, 16, 15, 0) 50%,
+      rgba(6, 16, 15, 0.78) 100%
+    ),
+    radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
   --success: #1e7b3a;
   --warn: #9a5b00;
   --danger: #b3261e;
@@ -47,8 +85,12 @@
   --muted: #9aabae;
   --line: #2c3638;
   --primary: #5fd0c6;
+  --primary-ink: #042422;
   --on-primary: #00302d;
   --primary-soft: #123b39;
+  --sun: #f2c46d;
+  --sun-ink: #c2871f;
+  --cream: #f6e7c8;
   --success: #7bd88f;
   --warn: #f2c46d;
   --danger: #ff8a80;
@@ -74,8 +116,12 @@
     --muted: #9aabae;
     --line: #2c3638;
     --primary: #5fd0c6;
+    --primary-ink: #042422;
     --on-primary: #00302d;
     --primary-soft: #123b39;
+    --sun: #f2c46d;
+    --sun-ink: #c2871f;
+    --cream: #f6e7c8;
     --success: #7bd88f;
     --warn: #f2c46d;
     --danger: #ff8a80;
@@ -120,8 +166,12 @@
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-primary: var(--primary);
+  --color-primary-ink: var(--primary-ink);
   --color-on-primary: var(--on-primary);
   --color-primary-soft: var(--primary-soft);
+  --color-sun: var(--sun);
+  --color-sun-ink: var(--sun-ink);
+  --color-cream: var(--cream);
   --color-accent: var(--accent);
   --color-success: var(--success);
   --color-warn: var(--warn);
@@ -131,7 +181,9 @@
 
   --font-sans: var(--font-inter), var(--font-hind), system-ui, sans-serif;
   --font-bangla: var(--font-hind), var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-instrument), Georgia, serif;
   --font-mono: ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, Consolas, monospace;
+  --font-mono-hud: var(--font-jetbrains), ui-monospace, monospace;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -480,5 +532,177 @@
 @media print {
   .no-print {
     display: none !important;
+  }
+}
+
+/* Drone landing immersive utilities (DL-02, ADR-003) */
+@utility text-display-xl {
+  font-size: clamp(46px, 7.4vw, 112px);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  font-weight: 800;
+}
+
+@utility text-display-dest {
+  font-size: clamp(56px, 9vw, 150px);
+  line-height: 0.88;
+  letter-spacing: -0.05em;
+  font-weight: 800;
+}
+
+@utility glass-panel {
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+@utility glass-nav {
+  background: rgba(10, 24, 23, 0.35);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+@keyframes drone {
+  0% {
+    transform: scale(1.12) translate3d(-2%, 1.5%, 0) rotate(-0.6deg);
+  }
+  100% {
+    transform: scale(1.02) translate3d(2%, -1.5%, 0) rotate(0.5deg);
+  }
+}
+
+@keyframes dive {
+  from {
+    transform: scale(1.45) translate3d(0, 4%, 0) rotate(-2deg);
+    filter: blur(6px) saturate(1.3);
+  }
+  to {
+    transform: scale(1.12) translate3d(-2%, 1.5%, 0) rotate(-0.6deg);
+    filter: none;
+  }
+}
+
+@keyframes reveal-circle {
+  to {
+    clip-path: circle(150% at var(--cx, 50%) var(--cy, 50%));
+  }
+}
+
+@keyframes mist-drift {
+  to {
+    transform: translate3d(18%, -4%, 0);
+  }
+}
+
+@keyframes hud-blink {
+  50% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes text-swap {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: none;
+  }
+}
+
+@keyframes pin-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes bar-fill {
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes scroll-cue {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  51% {
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+@keyframes card-swap-in {
+  from {
+    opacity: 0;
+    transform: scale(1.15);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: none;
+  }
+}
+
+.animate-drone {
+  animation: drone 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.animate-dive {
+  animation: dive 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-reveal {
+  clip-path: circle(0% at var(--cx, 50%) var(--cy, 50%));
+  animation: reveal-circle 1.5s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+}
+
+.animate-mist {
+  animation: mist-drift 40s linear infinite alternate;
+}
+
+.animate-swap {
+  animation: text-swap 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-blink {
+  animation: hud-blink 1.2s steps(2) infinite;
+}
+
+.animate-pulse-ring {
+  animation: pin-pulse 2.4s ease-out infinite;
+}
+
+.animate-card-in {
+  animation: card-swap-in 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

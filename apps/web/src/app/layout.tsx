@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import { cookies } from 'next/headers';
-import { Hind_Siliguri, Inter } from 'next/font/google';
+import { Hind_Siliguri, Instrument_Serif, Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { SessionProvider } from '@/components/patterns/session';
+import { LanguageProvider } from '@/components/patterns/language';
 import { ToastProvider } from '@/components/ui/toast';
+import { LANG_COOKIE, parseLanguage } from '@/lib/i18n';
 import { getDemoUsers, getViewer } from '@/lib/session';
 import { THEME_COOKIE, parseTheme } from '@/lib/theme';
 
@@ -17,6 +19,21 @@ const hind = Hind_Siliguri({
   subsets: ['bengali', 'latin'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-hind',
+  display: 'swap',
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-instrument',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-jetbrains',
   display: 'swap',
 });
 
@@ -43,13 +60,14 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const store = await cookies();
   const theme = parseTheme(store.get(THEME_COOKIE)?.value);
+  const lang = parseLanguage(store.get(LANG_COOKIE)?.value);
   const [viewer, accounts] = await Promise.all([getViewer(), getDemoUsers()]);
 
   return (
     <html
-      lang="en"
+      lang={lang}
       data-theme={theme === 'system' ? undefined : theme}
-      className={`${inter.variable} ${hind.variable}`}
+      className={`${inter.variable} ${hind.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-dvh">
@@ -59,9 +77,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           Skip to content
         </a>
-        <SessionProvider value={{ user: viewer.user, userId: viewer.userId, accounts }}>
-          <ToastProvider>{children}</ToastProvider>
-        </SessionProvider>
+        <LanguageProvider initial={lang}>
+          <SessionProvider value={{ user: viewer.user, userId: viewer.userId, accounts }}>
+            <ToastProvider>{children}</ToastProvider>
+          </SessionProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

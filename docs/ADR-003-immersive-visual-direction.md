@@ -1,6 +1,6 @@
 # ADR-003: Immersive "from above" visual direction for visitor discovery pages
 
-- **Status:** Proposed (needs product owner approval before any implementation merges)
+- **Status:** Accepted (product owner approved 2026-11-21; amendments applied to `docs/design.md`)
 - **Date:** 2026-11-18
 - **Branch:** `design/drone-landing`
 - **Affects:** `docs/design.md` 3.1, 3.2, 3.3, 3.6, 7.1, 7.2, 7.3; visitor Hub pages only
@@ -80,5 +80,7 @@ Inside the Hub pages:
 
 ## Approval
 
-Approve by changing the status to **Accepted** and applying the amendments table to
-`docs/design.md` in the same pull request.
+Approved 2026-11-21. The status above is **Accepted** and the amendments table has been applied to
+`docs/design.md` in the same change. The immersive direction is authorised **only** on the three
+Hub-shape discovery pages (`/`, `/d/[destination]`, `/d/[destination]/s/[spot]`); lists, details,
+flows, help forms and the provider, desk and admin workspaces keep the calm spec unchanged.

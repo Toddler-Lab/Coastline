@@ -269,6 +269,14 @@ After Phase B, the API work of one phase can run in parallel with the UI work of
 
 ## 6. Progress
 
+**Immersive Hub pass (2026-11-21).** ADR-003 was accepted and its amendments applied to
+`docs/design.md`. The Explore, destination and spot-hub pages on branch `design/drone-landing` now use
+the full-viewport drone stage, nested spot backgrounds, fly-through navigation and the documented
+section order. Language selection moved from per-component state to a cookie-backed shared provider.
+A minimal Vitest + Testing Library harness was added to `apps/web` (the rest of WP-01, including
+Playwright journeys, is still open). No API, contract or schema change was made. See
+`docs/design-drone-landing.md` section 7 for the detailed implementation status.
+
 **UI pass (2026-11-17).** The whole web app was rebuilt on the v2 design against the existing API,
 with no API, contract or schema change. What it covers and what each WP still owes:
 

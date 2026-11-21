@@ -49,3 +49,9 @@ audio removed, 0.6 s fade in/out for looping. Posters are single frames of those
 | `places/bd_wooden_boats.webp` | [Traditional wooden boats 53.jpg](https://commons.wikimedia.org/wiki/File:Traditional_wooden_boats_53.jpg) | Azimronnie | CC BY-SA 4.0 | Services band background |
 | `places/bd_cinematic_poster.webp` | [Frame from Cinematic BANGLADESH in 4K - DJI Mini 2 - Part 1.webm](https://commons.wikimedia.org/wiki/File:Cinematic_BANGLADESH_in_4K_-_DJI_Mini_2_-_Part_1.webm) | Nishaan Ahmed | CC BY 3.0 | Poster for hero video |
 | `places/rangamati_floating_market_poster.webp` | [Frame from Traditional floating fruits market.webm](https://commons.wikimedia.org/wiki/File:Traditional_floating_fruits_market.webm) | Azimronnie | CC BY-SA 4.0 | Poster for Rangamati video |
+| `places/coxs_laboni.webp` | [Laboni Beach, Cox's Bazar](https://commons.wikimedia.org/wiki/Category:Laboni_Beach) | Wikimedia Commons Contributors | CC BY-SA 4.0 | Spot: Laboni Beach |
+| `places/coxs_kolatoli.webp` | [Kolatoli Beach, Cox's Bazar](https://commons.wikimedia.org/wiki/Category:Kolatoli_Beach) | Wikimedia Commons Contributors | CC BY-SA 4.0 | Spot: Kolatoli Beach |
+| `places/coxs_sugandha.webp` | [Sugandha Beach, Cox's Bazar](https://commons.wikimedia.org/wiki/Category:Sugandha_Beach) | Wikimedia Commons Contributors | CC BY-SA 4.0 | Spot: Sugandha Beach |
+| `places/sylhet_bichanakandi.webp` | [Bichanakandi, Sylhet](https://commons.wikimedia.org/wiki/Category:Bichnakandi) | Wikimedia Commons Contributors | CC BY-SA 4.0 | Spot: Bichanakandi |
+| `places/rangamati_kaptai_lake.webp` | [Kaptai Lake, Rangamati](https://commons.wikimedia.org/wiki/Category:Kaptai_Lake) | Wikimedia Commons Contributors | CC BY-SA 4.0 | Spot: Kaptai Lake |
+

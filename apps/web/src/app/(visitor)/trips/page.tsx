@@ -57,31 +57,32 @@ export default async function TripsPage({
   ).sort((a, b) => a.dateKey.localeCompare(b.dateKey));
 
   return (
-    <div className="page max-w-3xl">
-      <PageHeader title="Trips" className="lg:pt-6" />
-      <nav aria-label="Trip types" className="border-b border-line">
-        <ul className="scrollbar-none flex overflow-x-auto">
+    <div className="page max-w-3xl pb-24">
+      <PageHeader title="My Trips & Bookings" subtitle="Live tickets, reservations and past journeys" className="lg:pt-6" />
+      <nav aria-label="Trip types" className="mt-2 border-b border-line pb-3">
+        <ul className="scrollbar-none flex gap-2 overflow-x-auto py-1">
           {TABS.map((item) => (
             <li key={item.id}>
               <Link
                 href={item.id === 'upcoming' ? '/trips' : `/trips?tab=${item.id}`}
                 aria-current={tab === item.id ? 'page' : undefined}
                 className={cn(
-                  'relative inline-flex h-12 items-center gap-1.5 px-4 text-label',
-                  tab === item.id ? 'text-primary' : 'text-muted hover:text-fg',
+                  'inline-flex h-10 items-center gap-2 rounded-full px-4 text-xs font-semibold transition-all',
+                  tab === item.id
+                    ? 'bg-primary text-white shadow-md shadow-primary/20'
+                    : 'bg-surface-alt/70 text-muted hover:bg-surface-alt hover:text-fg',
                 )}
               >
                 {item.label}
                 {counts[item.id] ? (
-                  <span className="tabular rounded-full bg-surface-alt px-2 text-caption text-muted">
+                  <span
+                    className={cn(
+                      'tabular rounded-full px-1.5 py-0.5 text-[10px] font-bold',
+                      tab === item.id ? 'bg-white/20 text-white' : 'bg-line text-muted',
+                    )}
+                  >
                     {counts[item.id]}
                   </span>
-                ) : null}
-                {tab === item.id ? (
-                  <span
-                    aria-hidden
-                    className="absolute inset-x-3 bottom-0 h-[3px] rounded-full bg-primary"
-                  />
                 ) : null}
               </Link>
             </li>

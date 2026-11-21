@@ -230,87 +230,98 @@ export function SunbedPicker({
 
   return (
     <div className="page pb-36">
-      <div className="flex items-center gap-2 py-2 lg:py-4">
+      {/* 2026 Coastal Header */}
+      <div className="flex items-center gap-3 py-3 lg:py-5">
         <Link
           href={spotHref(point.destinationSlug, point.spotSlug)}
           aria-label={`Back to ${point.name}`}
-          className="-ml-2 inline-flex size-11 items-center justify-center rounded-full hover:bg-surface-alt"
+          className="-ml-2 inline-flex size-11 items-center justify-center rounded-full bg-surface-alt/80 hover:bg-surface-alt transition-colors"
         >
-          <ArrowLeft aria-hidden className="size-6" />
+          <ArrowLeft aria-hidden className="size-5" />
         </Link>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-title-lg">Sunbeds · {shortPointName(point.name)}</h1>
-          <p className="text-body-sm text-muted">
-            {hoursRange(point.openHour, point.closeHour)} · from{' '}
-            {formatMoney(point.defaultHourlyPriceMinor, point.currency)} / hour
-          </p>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+              Beach Front
+            </span>
+            <span className="text-xs text-muted">
+              {hoursRange(point.openHour, point.closeHour)}
+            </span>
+          </div>
+          <h1 className="truncate text-xl font-extrabold text-fg md:text-2xl">
+            {point.name}
+          </h1>
         </div>
         <button
           type="button"
           onClick={() => setHelpOpen(true)}
-          aria-label="Help"
-          className="inline-flex size-11 items-center justify-center rounded-full text-danger hover:bg-surface-alt"
+          aria-label="Help & Safety"
+          className="inline-flex size-11 items-center justify-center rounded-full bg-danger-soft/40 text-danger hover:bg-danger-soft transition-colors"
         >
-          <LifeBuoy aria-hidden className="size-6" />
+          <LifeBuoy aria-hidden className="size-5" />
         </button>
       </div>
 
-      <ChipRow label="Beaches">
-        {points.map((item) => (
-          <Chip
-            key={item.code}
-            selected={item.code === code}
-            onClick={() =>
-              item.code !== code && router.push(`/sunbeds/${item.code.toLowerCase()}?date=${date}`)
-            }
-          >
-            {shortPointName(item.name)}
-          </Chip>
-        ))}
-      </ChipRow>
+      <div className="mb-2">
+        <ChipRow label="Beaches">
+          {points.map((item) => (
+            <Chip
+              key={item.code}
+              selected={item.code === code}
+              onClick={() =>
+                item.code !== code && router.push(`/sunbeds/${item.code.toLowerCase()}?date=${date}`)
+              }
+            >
+              {shortPointName(item.name)}
+            </Chip>
+          ))}
+        </ChipRow>
+      </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-end">
-        <DateStrip
-          today={today}
-          days={MAX_ADVANCE_DAYS + 1}
-          value={date}
-          onChange={changeDate}
-          label="Date"
-        />
-        <Field label="Start" htmlFor="start" className="lg:w-44">
-          <Select
-            id="start"
-            value={startIso ?? ''}
-            disabled={!detail}
-            onChange={(event) => {
-              setStartIso(event.target.value || null);
-              setNotice(null);
-            }}
-          >
-            {startIso ? null : <option value="">No start time</option>}
-            {startOptions.map(({ slot, disabled, why }) => (
-              <option key={slot.startsAt} value={slot.startsAt} disabled={disabled}>
-                {formatIsoTime(slot.startsAt)}
-                {why ? ` (${why})` : ''}
-              </option>
-            ))}
-          </Select>
-        </Field>
-        <ChoiceGroup
-          name="hours"
-          legend="Hours"
-          value={hours}
-          onChange={setHours}
-          columns={4}
-          className="lg:w-64"
-          options={Array.from({ length: MAX_HOURS_PER_ITEM }, (_, index) => ({
-            value: index + 1,
-            label: `${index + 1} h`,
-            disabled: Boolean(
-              detail && startIso && !windowIsComplete(detail.slots, startIso, index + 1),
-            ),
-          }))}
-        />
+      <div className="mt-4 rounded-2xl border border-line bg-surface p-4 shadow-sm">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-end">
+          <DateStrip
+            today={today}
+            days={MAX_ADVANCE_DAYS + 1}
+            value={date}
+            onChange={changeDate}
+            label="Date"
+          />
+          <Field label="Start Time" htmlFor="start" className="lg:w-44">
+            <Select
+              id="start"
+              value={startIso ?? ''}
+              disabled={!detail}
+              onChange={(event) => {
+                setStartIso(event.target.value || null);
+                setNotice(null);
+              }}
+            >
+              {startIso ? null : <option value="">No start time</option>}
+              {startOptions.map(({ slot, disabled, why }) => (
+                <option key={slot.startsAt} value={slot.startsAt} disabled={disabled}>
+                  {formatIsoTime(slot.startsAt)}
+                  {why ? ` (${why})` : ''}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <ChoiceGroup
+            name="hours"
+            legend="Duration"
+            value={hours}
+            onChange={setHours}
+            columns={4}
+            className="lg:w-64"
+            options={Array.from({ length: MAX_HOURS_PER_ITEM }, (_, index) => ({
+              value: index + 1,
+              label: `${index + 1} h`,
+              disabled: Boolean(
+                detail && startIso && !windowIsComplete(detail.slots, startIso, index + 1),
+              ),
+            }))}
+          />
+        </div>
       </div>
 
       {notice ? (
@@ -339,8 +350,8 @@ export function SunbedPicker({
         </Notice>
       ) : null}
 
-      <div className="mt-4 overflow-hidden rounded-lg border border-line">
-        <div className="h-[56dvh] min-h-[320px] lg:h-[520px]">
+      <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-surface shadow-md">
+        <div className="h-[56dvh] min-h-[340px] lg:h-[540px]">
           <MapCanvas
             points={mapPoints}
             beds={mapBeds}
@@ -353,45 +364,46 @@ export function SunbedPicker({
         </div>
         <ul
           aria-label="Map key"
-          className="flex flex-wrap gap-x-4 gap-y-1 border-t border-line bg-surface px-4 py-2 text-body-sm"
+          className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line bg-surface/90 px-5 py-3 text-xs backdrop-blur-md"
         >
-          <li className="flex items-center gap-1.5">
-            <span aria-hidden className="size-3 rounded-sm border-2 border-success bg-surface" />{' '}
-            Free
+          <li className="flex items-center gap-2">
+            <span aria-hidden="true" className="size-2.5 rounded-full bg-emerald-500 shadow-sm" />{' '}
+            <span className="font-medium text-fg">Free</span>
           </li>
-          <li className="flex items-center gap-1.5">
-            <span aria-hidden className="size-3 rounded-sm bg-primary" /> Selected
+          <li className="flex items-center gap-2">
+            <span aria-hidden="true" className="size-2.5 rounded-full bg-primary shadow-sm" />{' '}
+            <span className="font-medium text-fg">Selected</span>
           </li>
-          <li className="flex items-center gap-1.5">
+          <li className="flex items-center gap-2">
             <span
-              aria-hidden
-              className="size-3 rounded-sm border-2 border-dashed border-primary bg-primary-soft"
+              aria-hidden="true"
+              className="size-2.5 rounded-full border border-primary bg-primary/30"
             />{' '}
-            Yours
+            <span className="font-medium text-fg">Yours</span>
           </li>
-          <li className="flex items-center gap-1.5">
-            <span aria-hidden className="size-3 rounded-sm border-2 border-danger bg-surface-alt" />{' '}
-            Booked
+          <li className="flex items-center gap-2">
+            <span aria-hidden="true" className="size-2.5 rounded-full bg-rose-500/80" />{' '}
+            <span className="font-medium text-fg">Booked</span>
           </li>
           {freeCount !== null ? (
-            <li className="ml-auto text-muted">
-              <span className="tabular font-semibold text-fg">{freeCount}</span> free for this time
+            <li className="ml-auto font-medium text-muted">
+              <span className="tabular font-bold text-primary">{freeCount}</span> beds available for this time
             </li>
           ) : null}
         </ul>
       </div>
 
-      <details className="group mt-4 rounded-md border border-line bg-surface" open>
-        <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 px-4 text-label">
+      <details className="group mt-4 rounded-2xl border border-line bg-surface shadow-sm" open>
+        <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 px-5 text-sm font-semibold text-fg">
           <List aria-hidden className="size-5 text-muted" />
-          Bed list
-          <span className="text-body-sm font-normal text-muted">· choose beds without the map</span>
+          Sunbed Grid List
+          <span className="text-xs font-normal text-muted">· choose beds directly without map</span>
         </summary>
-        <div className="border-t border-line p-4">
+        <div className="border-t border-line p-5">
           {isLoading && !detail ? (
-            <div className="grid grid-cols-3 gap-2 md:grid-cols-6" aria-busy>
+            <div className="grid grid-cols-3 gap-2.5 md:grid-cols-6" aria-busy>
               {Array.from({ length: 12 }, (_, index) => (
-                <Skeleton key={index} className="h-14" />
+                <Skeleton key={index} className="h-14 rounded-xl" />
               ))}
             </div>
           ) : error ? (
@@ -404,7 +416,7 @@ export function SunbedPicker({
           ) : detail ? (
             <fieldset>
               <legend className="sr-only">Sunbeds</legend>
-              <div className="grid grid-cols-3 gap-2 md:grid-cols-6 lg:grid-cols-8">
+              <div className="grid grid-cols-3 gap-2.5 md:grid-cols-6 lg:grid-cols-8">
                 {detail.sunbeds.map((bed) => {
                   const selected = selectedIds.includes(bed.id);
                   const state: BedWindowState | 'selected' = selected
@@ -419,13 +431,13 @@ export function SunbedPicker({
                     <label
                       key={bed.id}
                       className={cn(
-                        'relative flex min-h-14 cursor-pointer flex-col items-center justify-center rounded-sm border text-center has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary',
-                        state === 'selected' && 'border-primary bg-primary text-on-primary',
-                        state === 'free' && 'border-success/60 bg-surface hover:bg-surface-alt',
-                        state === 'mine' && 'border-dashed border-primary bg-primary-soft',
+                        'relative flex min-h-14 cursor-pointer flex-col items-center justify-center rounded-xl border text-center transition-all duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary',
+                        state === 'selected' && 'border-primary bg-primary text-white shadow-md scale-105',
+                        state === 'free' && 'border-emerald-500/30 bg-surface hover:bg-emerald-500/5 hover:border-emerald-500',
+                        state === 'mine' && 'border-dashed border-primary bg-primary/10',
                         (state === 'booked' || state === 'off') &&
-                          'border-line bg-surface-alt text-muted',
-                        disabled && 'cursor-not-allowed',
+                          'border-line/60 bg-surface-alt/60 text-muted opacity-60',
+                        disabled && 'cursor-not-allowed opacity-40',
                       )}
                     >
                       <input
@@ -435,8 +447,8 @@ export function SunbedPicker({
                         disabled={disabled}
                         onChange={() => toggleBed(bed.id)}
                       />
-                      <span className="tabular text-label">{bed.code}</span>
-                      <span className="text-caption">{STATE_LABEL[state]}</span>
+                      <span className="tabular text-sm font-bold">{bed.code}</span>
+                      <span className="text-[10px] uppercase tracking-wider">{STATE_LABEL[state]}</span>
                     </label>
                   );
                 })}
@@ -446,30 +458,32 @@ export function SunbedPicker({
         </div>
       </details>
 
-      <div className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[max(12px,env(safe-area-inset-bottom))] pt-3 shadow-soft">
-        <div className="page flex items-center gap-3">
+      {/* 2026 Floating Checkout Dock */}
+      <div className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-line/80 bg-surface/90 pb-[max(14px,env(safe-area-inset-bottom))] pt-3.5 backdrop-blur-xl shadow-2xl">
+        <div className="page flex items-center gap-4">
           <div className="min-w-0 flex-1" aria-live="polite">
             {selectedBeds.length > 0 && startIso ? (
               <>
-                <p className="tabular text-title-sm">
-                  {selectedBeds.length} {selectedBeds.length === 1 ? 'bed' : 'beds'} · {hours} h ·{' '}
-                  {formatMoney(totalMinor)}
+                <p className="tabular text-base font-extrabold text-fg">
+                  {selectedBeds.length} {selectedBeds.length === 1 ? 'bed' : 'beds'} · {hours} {hours === 1 ? 'hr' : 'hrs'} ·{' '}
+                  <span className="text-primary">{formatMoney(totalMinor)}</span>
                 </p>
-                <p className="truncate text-caption text-muted">
+                <p className="truncate text-xs text-muted">
                   {formatDateKey(date)}, {formatIsoTime(startIso)} ·{' '}
                   {selectedBeds.map((bed) => bed.code).join(', ')}
                 </p>
               </>
             ) : (
-              <p className="text-body-sm text-muted">Tap free beds on the map or in the list.</p>
+              <p className="text-xs text-muted">Select open sunbeds on the map or grid above to reserve.</p>
             )}
           </div>
           <Button
             size="lg"
+            className="rounded-xl px-6 font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105"
             disabled={!canBook || selectedBeds.length === 0 || !windowReady}
             onClick={continueToCheckout}
           >
-            Continue
+            Confirm & Reserve →
           </Button>
         </div>
       </div>

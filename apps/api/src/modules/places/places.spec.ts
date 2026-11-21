@@ -18,6 +18,7 @@ import {
   testDbReady,
 } from '../../common/testing/integration-fixture';
 import { reseedTestDatabase } from '../catalogue/testing/test-database';
+import { resolveDestinationSlug, resolveSpotSlug } from './places.service';
 
 const describeDb = testDbReady() ? describe : describe.skip;
 const TIMEOUT = 30_000;
@@ -142,6 +143,48 @@ describeDb('Places API', () => {
       'Destination notice',
     ]);
     expect((kolatoli.body.data as SpotDetailDto).destination.slug).toBe('coxs-bazar');
+  });
+
+  it('resolves destination and spot slug aliases', async () => {
+    expect(resolveDestinationSlug('coxs')).toBe('coxs-bazar');
+    expect(resolveDestinationSlug('coxs-bazar')).toBe('coxs-bazar');
+    expect(resolveDestinationSlug('sylhet')).toBe('sylhet');
+
+    expect(resolveSpotSlug('coxs-bazar', 'inani')).toBe('inani-coral-beach');
+    expect(resolveSpotSlug('coxs-bazar', 'laboni')).toBe('laboni-beach');
+    expect(resolveSpotSlug('coxs-bazar', 'sugandha')).toBe('sugandha-beach');
+    expect(resolveSpotSlug('coxs-bazar', 'kolatoli')).toBe('kolatoli-beach');
+    expect(resolveSpotSlug('coxs-bazar', 'teknaf')).toBe('teknaf-beach');
+    expect(resolveSpotSlug('coxs-bazar', 'saintmartin')).toBe('inani-coral-beach');
+    expect(resolveSpotSlug('coxs-bazar', 'marine')).toBe('himchari');
+
+    expect(resolveSpotSlug('coxs', 'kolatoli')).toBe('kolatoli-beach');
+
+    expect(resolveSpotSlug('rangamati', 'kaptai')).toBe('kaptai-lake');
+    expect(resolveSpotSlug('rangamati', 'hanging')).toBe('hanging-bridge');
+    expect(resolveSpotSlug('rangamati', 'rajban')).toBe('rajban-vihara');
+
+    expect(resolveSpotSlug('coxs-bazar', 'unknown-spot')).toBe('unknown-spot');
+  });
+
+  it('resolves destination alias /destinations/coxs and spot aliases via API', async () => {
+    const dest = await request(app.getHttpServer()).get(`${API}/destinations/coxs`).expect(200);
+    expect((dest.body.data as DestinationDetailDto).slug).toBe('coxs-bazar');
+
+    const spotViaDestAlias = await request(app.getHttpServer())
+      .get(`${API}/destinations/coxs/spots/kolatoli`)
+      .expect(200);
+    expect((spotViaDestAlias.body.data as SpotDetailDto).slug).toBe('kolatoli');
+
+    const saintmartin = await request(app.getHttpServer())
+      .get(`${API}/destinations/coxs-bazar/spots/saintmartin`)
+      .expect(200);
+    expect(saintmartin.body.data).toBeDefined();
+
+    const marine = await request(app.getHttpServer())
+      .get(`${API}/destinations/coxs-bazar/spots/marine`)
+      .expect(200);
+    expect(marine.body.data).toBeDefined();
   });
 
   it('answers 404 for hidden or unknown places and malformed slugs', async () => {

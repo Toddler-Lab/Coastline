@@ -52,11 +52,37 @@ export default async function SearchPage({
             retryHref={`/search?q=${encodeURIComponent(q)}`}
           />
         ) : !q ? (
-          <EmptyState
-            icon={Search}
-            title="Search stays, food, sunbeds and places"
-            body='Try "Kolatoli", "seafood" or "hotel Laboni".'
-          />
+          <div className="space-y-6">
+            <EmptyState
+              icon={Search}
+              title="Discover destinations, stays & experiences"
+              body="Search across Bangladesh — find hotels, dining venues, sunbeds, and scenic viewpoints."
+            />
+            <div className="rounded-2xl border border-line bg-surface p-5 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted">
+                Popular Searches
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {[
+                  "Cox's Bazar",
+                  'Laboni Beach',
+                  'Inani Coral Beach',
+                  'Ratargul Swamp Forest',
+                  'Kaptai Lake',
+                  'Seafood Dining',
+                  'Luxury Stays',
+                ].map((term) => (
+                  <Link
+                    key={term}
+                    href={`/search?q=${encodeURIComponent(term)}`}
+                    className="rounded-full bg-surface-alt px-3.5 py-1.5 text-xs font-semibold text-fg transition-colors hover:bg-primary hover:text-white"
+                  >
+                    {term}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
         ) : groups.length === 0 ? (
           <EmptyState
             icon={Search}
@@ -66,15 +92,16 @@ export default async function SearchPage({
           />
         ) : (
           <div className="space-y-8">
-            <p className="text-body-sm text-muted" role="status">
-              {results.length} {results.length === 1 ? 'result' : 'results'} for &ldquo;{q}&rdquo;
+            <p className="text-xs font-medium text-muted" role="status">
+              Found <span className="font-bold text-fg">{results.length}</span>{' '}
+              {results.length === 1 ? 'match' : 'matches'} for &ldquo;{q}&rdquo;
             </p>
             {groups.map((group) => (
               <section key={group.kind} aria-labelledby={`group-${group.kind}`}>
-                <h2 id={`group-${group.kind}`} className="mb-2 text-title-sm">
+                <h2 id={`group-${group.kind}`} className="mb-3 text-sm font-bold uppercase tracking-wider text-muted">
                   {KIND_LABEL[group.kind]}
                 </h2>
-                <ul className="divide-y divide-line rounded-md border border-line bg-surface">
+                <ul className="grid gap-2.5 sm:grid-cols-2">
                   {group.items.map((entry) => {
                     const Icon = entry.service
                       ? SERVICES[entry.service].icon
@@ -83,20 +110,22 @@ export default async function SearchPage({
                       <li key={entry.href + entry.label}>
                         <Link
                           href={entry.href}
-                          className="flex min-h-16 items-center gap-3 px-4 py-2 hover:bg-surface-alt"
+                          className="group flex min-h-16 items-center gap-3.5 rounded-2xl border border-line bg-surface p-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                         >
-                          <span className="grid size-10 flex-none place-items-center rounded-full bg-primary-soft text-primary">
+                          <span className="grid size-11 flex-none place-items-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-105">
                             <Icon aria-hidden className="size-5" />
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block text-title-sm">{entry.label}</span>
+                            <span className="block text-sm font-bold text-fg group-hover:text-primary transition-colors">
+                              {entry.label}
+                            </span>
                             {entry.sublabel ? (
-                              <span className="block truncate text-body-sm text-muted">
+                              <span className="block truncate text-xs text-muted">
                                 {entry.sublabel}
                               </span>
                             ) : null}
                           </span>
-                          <ChevronRight aria-hidden className="size-5 text-muted" />
+                          <ChevronRight aria-hidden className="size-4 text-muted transition-colors group-hover:text-primary" />
                         </Link>
                       </li>
                     );
