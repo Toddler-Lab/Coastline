@@ -1,22 +1,39 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
+import {
+  Waves,
+  Sunset,
+  Compass,
+  ShieldCheck,
+  Hotel,
+  Utensils,
+  Camera,
+  Umbrella,
+  ChevronRight,
+  Phone,
+  MapPin,
+  Car,
+  AlertTriangle,
+  Info,
+  Clock,
+  Bus,
+  Plane,
+  LifeBuoy,
+} from 'lucide-react';
 import type { DestinationDetailDto } from '@coastline/api-contracts';
 import type { InventoryResult } from '@/lib/places-server';
 import { CardRow, CardRowItem } from '@/components/patterns/hub';
 import { HotelCard, VenueCard } from '@/components/patterns/cards';
 import {
   DRONE_DESTINATIONS,
-  SERVICES_CATALOG,
   type DroneDestination,
   type DroneSpot,
 } from '@/lib/drone-landing-data';
 import { useLanguage } from '@/components/patterns/language';
-import { LandingNav } from './landing-nav';
 import { FlyTransitionListener } from './fly-transition';
 import { MediaCreditsList } from '@/components/patterns/media-credits';
-import { HelpSheet } from '@/components/patterns/help';
 
 const SVG_ICONS: Record<string, React.ReactNode> = {
   stay: (
@@ -141,48 +158,51 @@ function renderSvg(name: string, extra = '') {
   );
 }
 
-const NEARBY_FACILITIES = [
-  { key: 'atm', name: 'ATM', nameBn: 'এটিএম', dist: '3 min walk', distBn: '৩ মিনিট হাঁটা' },
-  {
-    key: 'pharmacy',
-    name: 'Pharmacy',
-    nameBn: 'ফার্মেসি',
-    dist: '5 min walk',
-    distBn: '৫ মিনিট হাঁটা',
+// Spot character and zone groupings for Cox's Bazar coastline
+const SPOT_ZONE_META: Record<
+  string,
+  { zone: string; zoneBn: string; note: string; noteBn: string; vibe: string; vibeBn: string }
+> = {
+  'laboni-beach': {
+    zone: 'Town Beach · North',
+    zoneBn: 'শহরের সৈকত · উত্তর',
+    note: 'Historic shell market, calm shoreline & morning sunrise walks',
+    noteBn: 'ঐতিহ্যবাহী ঝিনুক মার্কেট, শান্ত সৈকত ও সকালের সূর্যোদয় হাঁটাচলা',
+    vibe: 'Historic & Calm',
+    vibeBn: 'ঐতিহ্যবাহী ও শান্ত',
   },
-  {
-    key: 'wc',
-    name: 'Washroom',
-    nameBn: 'টয়লেট / ওয়াশরুম',
-    dist: '2 min walk',
-    distBn: '২ মিনিট হাঁটা',
+  'sugandha-beach': {
+    zone: 'Town Beach · Central Hub',
+    zoneBn: 'শহরের সৈকত · কেন্দ্রস্থল',
+    note: 'Evening seafood street food, certified lifeguards & direct road access',
+    noteBn: 'সন্ধ্যার তাজা সিফুড স্টল, সার্টিফাইড লাইফগার্ড ও প্রধান সড়ক সংযোগ',
+    vibe: 'Lively Seafood Hub',
+    vibeBn: 'কোলাহলপূর্ণ সিফুড কেন্দ্র',
   },
-  {
-    key: 'prayer',
-    name: 'Prayer room',
-    nameBn: 'নামাজের ঘর',
-    dist: '6 min walk',
-    distBn: '৬ মিনিট হাঁটা',
+  'kolatoli-beach': {
+    zone: 'Town Beach · Hotel Strip',
+    zoneBn: 'শহরের সৈকত · হোটেল এলাকা',
+    note: 'Main lifeguard tower, prime front-row sunbed strip & sunset vantage',
+    noteBn: 'প্রধান লাইফগার্ড টাওয়ার, দীর্ঘ সানবেড লাইন ও সেরা সূর্যাস্ত দর্শন',
+    vibe: 'Sunset & Sunbeds',
+    vibeBn: 'সূর্যাস্ত ও সানবেড',
   },
-  {
-    key: 'hospital',
-    name: 'Hospital',
-    nameBn: 'হাসপাতাল',
-    dist: '10 min by ride',
-    distBn: '১০ মিনিট গাড়িতে',
+  himchari: {
+    zone: 'Marine Drive · 8 km South',
+    zoneBn: 'মেরিন ড্রাইভ · ৮ কিমি দক্ষিণ',
+    note: 'Hilltop sea viewpoint, seasonal waterfall & parasailing adventures',
+    noteBn: 'পাহাড়চূড়া থেকে সাগর দর্শন, মৌসুমি ঝরনা ও প্যারাসেইলিং অ্যাডভেঞ্চার',
+    vibe: 'Hills & Adventure',
+    vibeBn: 'পাহাড় ও রোমাঞ্চ',
   },
-];
-
-const CANONICAL_SERVICE_KEYS: Record<string, string> = {
-  stay: 'stay',
-  food: 'food',
-  sunbed: 'sunbeds',
-  ride: 'rides',
-  boat: 'boats',
-  tour: 'tours',
-  ticket: 'tickets',
-  camera: 'photographers',
-  guide: 'tours',
+  'inani-beach': {
+    zone: 'South Coast · 24 km South',
+    zoneBn: 'দক্ষিণ উপকূল · ২৪ কিমি দক্ষিণ',
+    note: 'Unique coral stone shoreline, crystal clear waters & quiet luxury resorts',
+    noteBn: 'প্রবাল পাথুরে সৈকত, স্ফটিক স্বচ্ছ জল ও শান্ত প্রকৃতির রিসোর্ট',
+    vibe: 'Coral & Serenity',
+    vibeBn: 'প্রবাল পাথর ও নির্জনতা',
+  },
 };
 
 export interface DestinationDroneViewProps {
@@ -193,13 +213,8 @@ export interface DestinationDroneViewProps {
 
 export function DestinationDroneView({ destination, inventory, slug }: DestinationDroneViewProps) {
   const { lang } = useLanguage();
-  const [helpOpen, setHelpOpen] = useState(false);
   const [selectedSpotIdx, setSelectedSpotIdx] = useState(0);
-  const [selectedSegment, setSelectedSegment] = useState<'book' | 'near' | 'know' | 'help'>('book');
-  const [timecode, setTimecode] = useState('00:00:00');
-  const [activeTab, setActiveTab] = useState('Overview');
-
-  const stageRef = useRef<HTMLElement>(null);
+  const [selectedFilterSpot, setSelectedFilterSpot] = useState<string>('all');
 
   const destIndex = DRONE_DESTINATIONS.findIndex(
     (d) =>
@@ -244,45 +259,48 @@ export function DestinationDroneView({ destination, inventory, slug }: Destinati
           },
         ];
 
-  // Timecode counter for HUD
-  useEffect(() => {
-    const start = Date.now();
-    const interval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - start) / 1000);
-      const hours = String(Math.floor(elapsed / 3600)).padStart(2, '0');
-      const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
-      const seconds = String(elapsed % 60).padStart(2, '0');
-      setTimecode(`${hours}:${minutes}:${seconds}`);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const isCoxsBazar =
+    destination.slug === 'coxs-bazar' ||
+    destination.slug === 'coxs' ||
+    slug === 'coxs-bazar' ||
+    slug === 'coxs';
 
-  // Pointer tilt on hero stage
-  const handlePointerMove = (e: React.PointerEvent<HTMLElement>) => {
-    if (!stageRef.current) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const r = stageRef.current.getBoundingClientRect();
-    const px = ((e.clientX - r.left) / r.width - 0.5) * 2;
-    const py = ((e.clientY - r.top) / r.height - 0.5) * 2;
-    stageRef.current.style.setProperty('--px', px.toFixed(3));
-    stageRef.current.style.setProperty('--py', py.toFixed(3));
-  };
 
-  const handlePointerLeave = () => {
-    if (!stageRef.current) return;
-    stageRef.current.style.setProperty('--px', '0');
-    stageRef.current.style.setProperty('--py', '0');
-  };
+  // Filter stays and dining based on user selection
+  const filteredHotels =
+    selectedFilterSpot === 'all'
+      ? inventory.hotels
+      : inventory.hotels.filter(
+          (h) =>
+            h.spotSlug &&
+            (h.spotSlug === selectedFilterSpot ||
+              h.spotSlug.includes(selectedFilterSpot) ||
+              selectedFilterSpot.includes(h.spotSlug)),
+        );
 
-  const scrollTo = (id: string, tabName: string) => (e: React.MouseEvent) => {
-    e.preventDefault();
-    setActiveTab(tabName);
-    const el = document.getElementById(id);
-    if (el) {
-      const top = el.getBoundingClientRect().top + window.scrollY - 90;
-      window.scrollTo({ top, behavior: 'smooth' });
-    }
-  };
+  const filteredVenues =
+    selectedFilterSpot === 'all'
+      ? inventory.venues
+      : inventory.venues.filter((v) => {
+          if (!v.beachPointCode) return false;
+          const code = v.beachPointCode.toLowerCase();
+          return selectedFilterSpot.toLowerCase().includes(code);
+        });
+
+  const spotsWithInventory = (
+    destination.spots.length > 0 ? destination.spots : droneDest.spots
+  ).map((s) => ('slug' in s ? s.slug : s.id));
+
+  // Current spot metadata
+  const currentSpotKey = currentSpot?.slug || droneSpot.id;
+  const spotMeta =
+    SPOT_ZONE_META[currentSpotKey] ||
+    Object.entries(SPOT_ZONE_META).find(([k]) => currentSpotKey.includes(k) || k.includes(currentSpotKey))?.[1] || {
+      zone: currentSpot?.kind || droneSpot.kind || 'Coastal Spot',
+      zoneBn: currentSpot?.kind || droneSpot.kind || 'সৈকত স্থান',
+      note: 'Prime destination point',
+      noteBn: 'জনপ্রিয় দর্শনীয় স্থান',
+    };
 
   return (
     <div
@@ -291,149 +309,232 @@ export function DestinationDroneView({ destination, inventory, slug }: Destinati
     >
       <FlyTransitionListener />
 
-      {/* Hero Stage: exact classes from drone-landing.css */}
-      <section
-        ref={stageRef}
-        id="dhero"
-        onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
-        className="dl-stage"
-        aria-label={`${destination.name} from above`}
-      >
-        <div className="dl-layer on">
-          <div className="dl-cam">
-            {droneDest.video ? (
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                poster={`/media/places/${droneDest.video}_poster.webp`}
-                aria-hidden="true"
-              >
-                <source src={`/media/video/${droneDest.video}.mp4`} type="video/mp4" />
-              </video>
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/media/places/${droneDest.hero}.webp`} alt="" fetchPriority="high" />
-            )}
-          </div>
+      {/* 1. Dedicated Destination Masthead: Grounded child-view of Bangladesh (NOT 100vh drone cockpit) */}
+      <header className="dl-dest-masthead" aria-label={`${destination.name} Masthead`}>
+        <div className="dl-masthead-media">
+          {droneDest.video ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              poster={`/media/places/${droneDest.video}_poster.webp`}
+              aria-hidden="true"
+            >
+              <source src={`/media/video/${droneDest.video}.mp4`} type="video/mp4" />
+            </video>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={`/media/places/${droneDest.hero}.webp`} alt="" fetchPriority="high" />
+          )}
         </div>
 
-        <div className="dl-mist" />
-        <div className="dl-shade" />
+        <div className="dl-masthead-scrim" />
 
-        {/* HUD Telemetry Overlay */}
-        <div className="dl-hud" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-          <i />
-          <div className="tl">
-            <span className="dl-rec">REC</span>
-            <span>{timecode}</span>
-            <span>4K · 30FPS</span>
-          </div>
-          <div className="tr">
-            <span>{droneDest.coord}</span>
-            <span>
-              ALT <b>{droneDest.alt}</b> M
+        <div className="dl-wrap dl-dest-masthead-body">
+          <div className="mb-3">
+            <span className="dl-dest-badge">
+              <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>
+                {lang === 'bn'
+                  ? isCoxsBazar
+                    ? 'চট্টগ্রাম বিভাগ · বঙ্গোপসাগর উপকূল'
+                    : 'পর্যটন অঞ্চল'
+                  : isCoxsBazar
+                    ? 'Chattogram Division · Bay of Bengal Coast'
+                    : 'Travel Territory'}
+              </span>
             </span>
-            <span>GIMBAL −45°</span>
-            <span>LIVE CONDITIONS · OPTIMAL</span>
           </div>
-          <div className="dl-cross" />
-          <div className="dl-horizon" />
-        </div>
 
-        {/* Destination Header block */}
-        <div className="dl-d-head">
-          <div className="dl-crumb">
-            <Link href="/">{lang === 'bn' ? 'হোম' : 'Explore'}</Link>
-            <span>/</span>
-            <span>{lang === 'bn' ? destination.nameBn || destination.name : destination.name}</span>
-          </div>
           <h1 className="dl-d-title dl-swap">{destination.name}</h1>
           <div className="dl-d-bn">{destination.nameBn || droneDest.bn}</div>
           <p className="dl-d-tag">
             {destination.tagline ||
               (lang === 'bn' && droneDest.tagBn ? droneDest.tagBn : droneDest.tag)}
           </p>
-          <div className="dl-facts">
-            <div className="dl-fact">
-              <small>{lang === 'bn' ? 'সেরা সময়' : 'Best time'}</small>
-              {destination.content?.bestTime || droneDest.best}
-            </div>
-            <div className="dl-fact">
-              <small>{lang === 'bn' ? 'কীভাবে যাবেন' : 'Getting there'}</small>
-              {destination.content?.gettingThere || droneDest.getThere}
-            </div>
-            <div className="dl-fact">
-              <small>{lang === 'bn' ? 'স্পট' : 'Spots'}</small>
-              {lang === 'bn'
-                ? `${destination.spots.length || droneDest.spots.length}টি স্থান`
-                : `${destination.spots.length || droneDest.spots.length} places to land`}
-            </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 mt-4">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-medium text-white">
+              <span className="text-white/60">{lang === 'bn' ? 'মৌসুম:' : 'Season:'}</span>
+              <span>{destination.content?.bestTime?.split('.')[0] || droneDest.best}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-medium text-white">
+              <span className="text-white/60">{lang === 'bn' ? 'যাতায়াত:' : 'Transit:'}</span>
+              <span>{lang === 'bn' ? 'বিমান বা বাস' : 'Fly or bus'}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-medium text-white">
+              <span className="text-white/60">{lang === 'bn' ? 'স্পট:' : 'Spots:'}</span>
+              <span>{lang === 'bn' ? `${destination.spots.length || droneDest.spots.length}টি স্থান` : `${destination.spots.length || droneDest.spots.length} spots`}</span>
+            </span>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* Alert Banner & Sticky Section Tabs */}
+      {/* 2. Territory Live Pulse Strip & Alert Banner */}
       <div className="dl-wrap">
+        {/* Top Active Alert */}
         {topAlert ? (
-          <div className="dl-alert" role={topAlert.severity === 'DANGER' ? 'alert' : 'status'}>
+          <div className="dl-dest-alert" role={topAlert.severity === 'DANGER' ? 'alert' : 'status'}>
             {renderSvg('alert')}
             <div>
               <b>
                 {topAlert.title}{' '}
                 <span className="dl-sample">{topAlert.severity.toLowerCase()}</span>
               </b>
-              {topAlert.body ? <div>{topAlert.body}</div> : null}
+              {topAlert.body ? <div className="mt-1 text-sm">{topAlert.body}</div> : null}
             </div>
           </div>
         ) : null}
 
-        <nav className="dl-tabs" aria-label={`${destination.name} sections`}>
-          {[
-            { name: lang === 'bn' ? 'ওভারভিউ' : 'Overview', target: 'hub' },
-            { name: lang === 'bn' ? 'স্পট' : 'Spots', target: 'hub' },
-            { name: lang === 'bn' ? 'থাকা' : 'Stay', target: 'list' },
-            { name: lang === 'bn' ? 'খাবার' : 'Food', target: 'list' },
-            { name: lang === 'bn' ? 'যাতায়াত' : 'Move', target: 'list' },
-            { name: lang === 'bn' ? 'অ্যাক্টিভিটি' : 'Do', target: 'list' },
-            { name: lang === 'bn' ? 'সহায়তা' : 'Help', target: 'dhelp' },
-          ].map((tab) => (
-            <a
-              key={tab.target + tab.name}
-              href={`#${tab.target}`}
-              onClick={scrollTo(tab.target, tab.name)}
-              className={activeTab === tab.name ? 'on' : ''}
-            >
-              {tab.name}
-            </a>
-          ))}
-        </nav>
-      </div>
-
-      {/* Spot Hub Section */}
-      <section className="dl-sec" id="hub" style={{ paddingTop: '48px' }}>
-        <div className="dl-wrap">
-          <div style={{ marginBottom: '26px' }}>
-            <div className="dl-eyebrow" style={{ color: 'var(--accent)' }}>
-              {lang === 'bn' ? 'স্পট হাব' : 'Spot hub'}
+        {/* Real-time Coastal Pulse: High-value daily operational intel */}
+        <div className="dl-pulse-strip" role="region" aria-label="Current field conditions">
+          <div className="dl-pulse-cell">
+            <div className="dl-pulse-icon">
+              <Waves className="size-5" />
             </div>
-            <h2 className="dl-h2" style={{ marginBottom: 0 }}>
-              {lang === 'bn' ? 'যেখানে নামবেন' : 'Choose where'}{' '}
-              <span className="serif" style={{ color: 'var(--accent)' }}>
-                {lang === 'bn' ? 'বেছে নিন।' : 'you land.'}
+            <div className="dl-pulse-meta">
+              <span className="dl-pulse-label">
+                {lang === 'bn' ? 'জোয়ার-ভাটার সময়' : 'Tide schedule'}
               </span>
-            </h2>
+              <span className="dl-pulse-val">
+                {lang === 'bn'
+                  ? isCoxsBazar
+                    ? 'জোয়ার: ২:৪৫ PM (+১.৮ মি) · ভাটা: ৮:৩০ PM'
+                    : 'স্বাভাবিক প্রবাহ'
+                  : isCoxsBazar
+                    ? 'High: 2:45 PM (+1.8m) · Low: 8:30 PM'
+                    : 'Normal waters'}
+              </span>
+            </div>
           </div>
 
-          <div className="dl-hub" id="hubbox">
-            {/* Hub Background Image Crossfade */}
-            <div className="dl-hub-bg">
+          <div className="dl-pulse-cell">
+            <div className="dl-pulse-icon text-emerald-600 dark:text-emerald-400 bg-emerald-500/10">
+              <ShieldCheck className="size-5" />
+            </div>
+            <div className="dl-pulse-meta">
+              <span className="dl-pulse-label">
+                {lang === 'bn' ? 'সৈকত সংকেত ও সতর্কতা' : 'Sea safety flag'}
+              </span>
+              <span className="dl-pulse-val text-emerald-700 dark:text-emerald-300">
+                {lang === 'bn'
+                  ? 'সবুজ পতাকা · লাইফগার্ড পোস্টের কাছে নিরাপদ'
+                  : 'Green flag · Safe near lifeguard towers'}
+              </span>
+            </div>
+          </div>
+
+          <div className="dl-pulse-cell">
+            <div className="dl-pulse-icon text-amber-600 dark:text-amber-400 bg-amber-500/10">
+              <Sunset className="size-5" />
+            </div>
+            <div className="dl-pulse-meta">
+              <span className="dl-pulse-label">
+                {lang === 'bn' ? 'আজকের সূর্যাস্ত' : 'Sunset today'}
+              </span>
+              <span className="dl-pulse-val">
+                {lang === 'bn' ? 'বিকাল ৫:১৮ (কলাতলী ও সুগন্ধা)' : '5:18 PM at Kolatoli & Sugandha'}
+              </span>
+            </div>
+          </div>
+
+          <div className="dl-pulse-cell">
+            <div className="dl-pulse-icon">
+              <Compass className="size-5" />
+            </div>
+            <div className="dl-pulse-meta">
+              <span className="dl-pulse-label">
+                {lang === 'bn' ? 'আবহাওয়া ও বাতাস' : 'Conditions'}
+              </span>
+              <span className="dl-pulse-val">
+                {lang === 'bn'
+                  ? '২৮°সে · মৃদু দক্ষিণ-পশ্চিম বাতাস (১২ নট)'
+                  : '28°C · Gentle SW breeze (12 kt)'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Coastal Strip & Spot Hub Section */}
+      <section className="dl-sec" id="hub" style={{ paddingTop: '36px' }}>
+        <div className="dl-wrap">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+            <div>
+              <div className="dl-eyebrow" style={{ color: 'var(--accent)' }}>
+                {lang === 'bn' ? 'উপকূলীয় স্পট নির্দেশিকা' : 'Coastal Spot Directory'}
+              </div>
+              <h2 className="dl-h2" style={{ marginBottom: '6px' }}>
+                {lang === 'bn' ? 'কক্সবাজারের' : 'Explore the'}{' '}
+                <span className="serif" style={{ color: 'var(--accent)' }}>
+                  {lang === 'bn' ? 'সৈকতসমূহ' : 'coastal spots.'}
+                </span>
+              </h2>
+              <p className="text-sm text-muted max-w-2xl">
+                {lang === 'bn'
+                  ? 'শহরের প্রাণকেন্দ্র থেকে শুরু করে মেরিন ড্রাইভ ও ইনানীর প্রবাল সৈকত পর্যন্ত প্রতিটি স্পটের বৈশিষ্ট্য জানুন।'
+                  : "Select a beach point along Cox's Bazar coastline to see its unique character, safety zones, and field guidance."}
+              </p>
+            </div>
+
+            {/* Quick action to dedicated spot page */}
+            <Link
+              href={`/d/${destination.slug}/s/${currentSpot?.slug || droneSpot.id}`}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-surface border border-line hover:border-primary/50 text-fg transition-all shadow-sm self-start md:self-auto"
+            >
+              <span>{lang === 'bn' ? 'সম্পূর্ণ স্পট গাইড' : 'Open Full Spot Guide'}</span>
+              <ChevronRight className="size-4" />
+            </Link>
+          </div>
+
+          {/* Spot Picker Tabs */}
+          <div className="dl-spot-nav-strip mb-4" role="tablist" aria-label="Coastal Spots">
+            {(destination.spots.length > 0 ? destination.spots : droneDest.spots).map(
+              (s, idx) => {
+                const sSlug = 'slug' in s ? s.slug : s.id;
+                const sName = s.name;
+                const sBn = 'nameBn' in s ? s.nameBn : s.bn;
+                const ds =
+                  'slug' in s
+                    ? (droneDest.spots.find(
+                        (d) =>
+                          s.slug.includes(d.id) ||
+                          d.id.includes(s.slug) ||
+                          (s.beachPointCode &&
+                            d.id.toLowerCase().includes(s.beachPointCode.toLowerCase())),
+                      ) ??
+                      droneDest.spots[idx % droneDest.spots.length] ??
+                      droneDest.spots[0])
+                    : s;
+                const imgName = ds?.img ?? 'coxs_laboni';
+                const isSelected = idx === selectedSpotIdx;
+                return (
+                  <button
+                    key={sSlug}
+                    type="button"
+                    role="tab"
+                    aria-selected={isSelected}
+                    onClick={() => {
+                      setSelectedSpotIdx(idx);
+                      setSelectedFilterSpot(sSlug);
+                    }}
+                    className={`dl-spot-tab ${isSelected ? 'active' : ''}`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/media/places/${imgName}.webp`} alt="" />
+                    <span>{lang === 'bn' && sBn ? sBn : sName}</span>
+                  </button>
+                );
+              },
+            )}
+          </div>
+
+          {/* Featured Spot Cinematic Card */}
+          <div className="dl-spot-stage" id="spotstage">
+            {/* Background Images Crossfade */}
+            <div className="dl-spot-stage-media">
               {(destination.spots.length > 0 ? destination.spots : droneDest.spots).map(
                 (s, idx) => {
                   const sSlug = 'slug' in s ? s.slug : s.id;
@@ -461,344 +562,286 @@ export function DestinationDroneView({ destination, inventory, slug }: Destinati
                   );
                 },
               )}
+              <div className="dl-spot-stage-scrim" />
             </div>
 
-            {/* Hub Left: Spot Picker & Spot Name */}
-            <div className="dl-hub-left">
-              <div className="dl-spot-picker" role="group" aria-label="Spots">
-                {(destination.spots.length > 0 ? destination.spots : droneDest.spots).map(
-                  (s, idx) => {
-                    const sSlug = 'slug' in s ? s.slug : s.id;
-                    const sName = s.name;
-                    const sBn = 'nameBn' in s ? s.nameBn : s.bn;
-                    const ds =
-                      'slug' in s
-                        ? (droneDest.spots.find(
-                            (d) =>
-                              s.slug.includes(d.id) ||
-                              d.id.includes(s.slug) ||
-                              (s.beachPointCode &&
-                                d.id.toLowerCase().includes(s.beachPointCode.toLowerCase())),
-                          ) ??
-                          droneDest.spots[idx % droneDest.spots.length] ??
-                          droneDest.spots[0])
-                        : s;
-                    const imgName = ds?.img ?? 'coxs_laboni';
-                    return (
-                      <button
-                        key={sSlug}
-                        type="button"
-                        aria-pressed={idx === selectedSpotIdx}
-                        onClick={() => setSelectedSpotIdx(idx)}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={`/media/places/${imgName}.webp`} alt="" />
-                        <span>{lang === 'bn' && sBn ? sBn : sName}</span>
-                      </button>
-                    );
-                  },
-                )}
-              </div>
+            {/* Stage Info Content Over Scenic View */}
+            <div className="dl-spot-stage-content">
+              <div className="max-w-2xl">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <span className="dl-dest-badge" style={{ marginBottom: 0 }}>
+                    {lang === 'bn' ? spotMeta.zoneBn : spotMeta.zone}
+                  </span>
+                  {currentSpot?.beachPointCode ? (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/20 text-xs font-mono font-bold tracking-wider text-white backdrop-blur-md">
+                      POINT {currentSpot.beachPointCode.toUpperCase()}
+                    </span>
+                  ) : null}
+                  {spotMeta.vibe ? (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-500/25 border border-emerald-400/30 text-xs font-semibold text-emerald-200 backdrop-blur-md">
+                      {lang === 'bn' ? spotMeta.vibeBn : spotMeta.vibe}
+                    </span>
+                  ) : null}
+                </div>
 
-              <div key={currentSpot ? currentSpot.slug : droneSpot.id} className="dl-swap">
-                <span className="dl-tag">
-                  {(currentSpot?.kind || droneSpot.kind).toLowerCase().replace(/_/g, ' ')}
-                </span>
-                <h3 className="dl-hub-name">
+                <h3 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-1">
                   {lang === 'bn'
                     ? currentSpot?.nameBn || currentSpot?.name || droneSpot.bn
                     : currentSpot?.name || droneSpot.name}
                 </h3>
-                <p>
-                  {lang === 'bn'
-                    ? currentSpot?.name || droneSpot.name
-                    : currentSpot?.nameBn || droneSpot.bn}
+                <p className="text-white/85 text-base md:text-lg font-medium mb-4">
+                  {lang === 'bn' ? spotMeta.noteBn : spotMeta.note}
                 </p>
-              </div>
-            </div>
 
-            {/* Hub Right Panel: Segments */}
-            <div className="dl-hub-panel">
-              <div className="dl-seg" role="tablist">
-                {[
-                  { id: 'book', label: lang === 'bn' ? 'বুকিং' : 'Book' },
-                  { id: 'near', label: lang === 'bn' ? 'কাছেপিঠে' : 'Nearby' },
-                  { id: 'know', label: lang === 'bn' ? 'জরুরি তথ্য' : 'Know' },
-                  { id: 'help', label: lang === 'bn' ? 'সহায়তা' : 'Help' },
-                ].map((seg) => (
-                  <button
-                    key={seg.id}
-                    role="tab"
-                    type="button"
-                    aria-selected={selectedSegment === seg.id}
-                    onClick={() => setSelectedSegment(seg.id as any)}
-                  >
-                    {seg.label}
-                  </button>
-                ))}
-              </div>
-
-              <div
-                className="dl-seg-body"
-                key={`${currentSpot ? currentSpot.slug : droneSpot.id}-${selectedSegment}`}
-              >
-                {selectedSegment === 'book' && (
-                  <>
-                    <div className="dl-rows">
-                      {droneSpot.svc.map((key) => {
-                        const svc = SERVICES_CATALOG[key] || {
-                          en: key,
-                          bn: key,
-                          d: 'Service available',
-                          dBn: 'সেবা উপলব্ধ',
-                          price: 'Tk 500',
-                          priceBn: '৫০০ ৳',
-                          unit: '/ booking',
-                          unitBn: '/ বুকিং',
-                        };
-                        const canonicalKey = CANONICAL_SERVICE_KEYS[key] || key;
-                        const bookHref =
-                          key === 'sunbed'
-                            ? `/sunbeds/${currentSpot?.beachPointCode?.toLowerCase() || 'lab'}`
-                            : `/d/${destination.slug}/${canonicalKey}`;
-
-                        return (
-                          <div key={key} className="dl-row">
-                            <span className="ic">{renderSvg(key)}</span>
-                            <span>
-                              <b>{lang === 'bn' ? svc.bn : svc.en}</b>
-                              <small>{lang === 'bn' ? svc.dBn : svc.d}</small>
-                            </span>
-                            <span className="pr">
-                              {lang === 'bn' ? `শুরু ${svc.priceBn}` : `from ${svc.price}`}
-                              <small>{lang === 'bn' ? svc.unitBn : svc.unit}</small>
-                            </span>
-                            <Link
-                              href={bookHref}
-                              className="dl-lcard-btn"
-                              style={{ marginLeft: '12px' }}
-                            >
-                              {lang === 'bn' ? 'বুক' : 'Book'}
-                            </Link>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <p className="dl-note" style={{ margin: 0 }}>
-                      {lang === 'bn'
-                        ? 'নমুনা মূল্য। পেমেন্টের আগেই মোট খরচ, প্ল্যাটফর্ম ফি ও বাতিলের নিয়ম দেখানো হয়।'
-                        : 'Sample prices. Total, platform fee and cancellation rule are shown before you pay.'}
-                    </p>
-                  </>
-                )}
-
-                {selectedSegment === 'near' && (
-                  <>
-                    <div className="dl-rows">
-                      {NEARBY_FACILITIES.map((facility) => (
-                        <div key={facility.name} className="dl-row">
-                          <span className="ic">{renderSvg(facility.key)}</span>
-                          <span>
-                            <b>{lang === 'bn' ? facility.nameBn : facility.name}</b>
-                            <small>{lang === 'bn' ? facility.distBn : facility.dist}</small>
-                          </span>
-                          <span className="pr" style={{ fontWeight: 600, color: 'var(--accent)' }}>
-                            {lang === 'bn' ? 'মানচিত্র' : 'Map'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="dl-note" style={{ margin: 0 }}>
-                      {lang === 'bn'
-                        ? 'নমুনা দূরত্ব। আপনার অবস্থান কেবল দূরত্ব পরিমাপে ব্যবহৃত হয় এবং কোথাও সংরক্ষিত হয় না।'
-                        : 'Sample distances. Your location is used only to sort and is never stored.'}
-                    </p>
-                  </>
-                )}
-
-                {selectedSegment === 'know' && (
-                  <ul className="dl-know">
-                    {droneSpot.know.map((tip, idx) => (
-                      <li key={idx}>
-                        <b>
-                          {lang === 'bn'
-                            ? ['পরিকল্পনা', 'নিরাপত্তা', 'পরামর্শ'][idx] || 'পরামর্শ'
-                            : ['Plan', 'Safety', 'Tip'][idx] || 'Tip'}
-                        </b>
-                        {tip}
-                      </li>
-                    ))}
-                    <li>
-                      <b>{lang === 'bn' ? 'সেরা সময়' : 'Best time'}</b>
-                      {destination.content?.bestTime || droneDest.best}
-                    </li>
-                  </ul>
-                )}
-
-                {selectedSegment === 'help' && (
-                  <div className="dl-rows">
-                    {contacts.map((contact) => (
-                      <a
-                        key={`hub-${contact.kind}-${contact.phone}`}
-                        href={`tel:${contact.phone.replace(/[^0-9+]/g, '')}`}
-                        className="dl-row"
-                        style={{ textDecoration: 'none' }}
+                {/* Spot Field Guidance Notes */}
+                {droneSpot.know && droneSpot.know.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-5">
+                    {droneSpot.know.slice(0, 2).map((tip, i) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-2 px-3 py-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/15 text-xs text-white/90"
                       >
-                        <span className="ic">{renderSvg('phone')}</span>
-                        <span>
-                          <b>
-                            {lang === 'bn' && contact.labelBn ? contact.labelBn : contact.label}
-                          </b>
-                          <small>
-                            {lang === 'bn' ? 'সরাসরি কল করতে ট্যাপ করুন' : 'Tap to call'}
-                          </small>
-                        </span>
-                        <span className="pr" style={{ fontSize: '20px' }}>
-                          {contact.phone}
-                        </span>
-                      </a>
+                        <Info className="size-4 shrink-0 text-amber-300 mt-0.5" />
+                        <span>{tip}</span>
+                      </div>
                     ))}
-                    <Link
-                      href="/help/lost-found"
-                      className="dl-row"
-                      style={{ textDecoration: 'none' }}
-                    >
-                      <span className="ic">{renderSvg('lost')}</span>
-                      <span>
-                        <b>{lang === 'bn' ? 'লস্ট অ্যান্ড ফাউন্ড' : 'Lost and found'}</b>
-                        <small>
-                          {lang === 'bn' ? 'হারানো জিনিস রিপোর্ট করুন' : 'Report a lost item'}
-                        </small>
-                      </span>
-                      <span className="pr">
-                        {renderSvg('arrow', 'style="width:20px;height:20px"')}
-                      </span>
-                    </Link>
-                    <Link href="/help/report" className="dl-row" style={{ textDecoration: 'none' }}>
-                      <span className="ic">{renderSvg('report')}</span>
-                      <span>
-                        <b>{lang === 'bn' ? 'সমস্যার অভিযোগ' : 'Report a problem'}</b>
-                        <small>
-                          {lang === 'bn'
-                            ? 'অতিরিক্ত ভাড়া, নিরাপত্তা, লিস্টিং'
-                            : 'Overcharging, safety, listing'}
-                        </small>
-                      </span>
-                      <span className="pr">
-                        {renderSvg('arrow', 'style="width:20px;height:20px"')}
-                      </span>
-                    </Link>
                   </div>
-                )}
+                ) : null}
+
+                {/* Primary Action Row */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href={`/d/${destination.slug}/s/${currentSpot?.slug || droneSpot.id}`}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-white text-zinc-900 hover:bg-white/90 transition-all shadow-lg"
+                  >
+                    <span>
+                      {lang === 'bn'
+                        ? `${currentSpot?.nameBn || currentSpot?.name || droneSpot.bn} বিস্তারিত গাইড দেখুন`
+                        : `Explore ${currentSpot?.name || droneSpot.name} Guide`}
+                    </span>
+                    <ChevronRight className="size-4" />
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedFilterSpot(currentSpot?.slug || droneSpot.id);
+                      const el = document.getElementById('list');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border border-white/20 transition-all"
+                  >
+                    <span>{lang === 'bn' ? 'কাছের হোটেল ও খাবার তালিকা ↓' : 'View Stays & Dining at this spot ↓'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Popular Listings in Destination */}
-      <section className="dl-sec" id="list" style={{ paddingTop: 0 }}>
+      {/* 6. Popular Listings in Destination with Spot Filtering */}
+      <section className="dl-sec" id="list" style={{ paddingTop: '10px' }}>
         <div className="dl-wrap">
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'end',
-              flexWrap: 'wrap',
-              gap: '16px',
-            }}
-          >
+          <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
             <div>
               <div className="dl-eyebrow" style={{ color: 'var(--accent)' }}>
                 {lang === 'bn'
-                  ? `${destination.nameBn || destination.name}-এ জনপ্রিয়`
-                  : `Popular in ${destination.name}`}
+                  ? `${destination.nameBn || destination.name}-এ জনপ্রিয় লিস্টিং`
+                  : `Book in ${destination.name}`}
               </div>
               <h2 className="dl-h2" style={{ marginBottom: 0 }}>
-                {lang === 'bn' ? 'বুক করুন' : 'Book'}{' '}
+                {lang === 'bn' ? 'হোটেল ও' : 'Stays &'}{' '}
                 <span className="serif" style={{ color: 'var(--accent)' }}>
-                  {lang === 'bn' ? 'সেরা সেবাগুলো।' : 'the good stuff.'}
+                  {lang === 'bn' ? 'খাবার স্থান।' : 'dining.'}
                 </span>
               </h2>
             </div>
-            <p className="dl-lead" style={{ maxWidth: '380px' }}>
-              {lang === 'bn'
-                ? 'লিস্টিং, মূল্য ও প্রাপ্যতা অনুমোদিত প্রোভাইডারদের থেকে সরবরাহ করা হয়।'
-                : 'Listings, prices and availability are provided by approved providers.'}
-            </p>
+
+            {/* Spot Filter Chip Row */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold text-muted mr-1">
+                {lang === 'bn' ? 'স্পট অনুযায়ী ফিল্টার:' : 'Filter by spot:'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedFilterSpot('all')}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  selectedFilterSpot === 'all'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-surface border border-line text-muted hover:border-primary/50'
+                }`}
+              >
+                {lang === 'bn' ? 'সকল স্পট' : 'All Spots'}
+              </button>
+              {spotsWithInventory.map((sSlug) => {
+                const sName =
+                  destination.spots.find((s) => s.slug === sSlug)?.name ||
+                  droneDest.spots.find((s) => s.id === sSlug)?.name ||
+                  sSlug;
+                return (
+                  <button
+                    key={sSlug}
+                    type="button"
+                    onClick={() => setSelectedFilterSpot(sSlug)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                      selectedFilterSpot === sSlug
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'bg-surface border border-line text-muted hover:border-primary/50'
+                    }`}
+                  >
+                    {sName}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {inventory.hotels.length > 0 && (
-            <div style={{ marginTop: '32px' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '16px',
-                }}
+          {/* Stays Row */}
+          <div id="stays" style={{ marginTop: '28px' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-title font-bold text-fg flex items-center gap-2">
+                <Hotel className="size-5 text-primary" />
+                <span>{lang === 'bn' ? 'হোটেল ও বিচভিউ রিসোর্ট' : 'Popular stays & resorts'}</span>
+                <span className="text-xs font-normal text-muted">
+                  ({filteredHotels.length} {lang === 'bn' ? 'উপলব্ধ' : 'available'})
+                </span>
+              </h3>
+              <Link
+                href={`/d/${destination.slug}/stay`}
+                className="text-label text-primary hover:underline inline-flex items-center gap-1"
               >
-                <h3 className="text-title font-bold text-fg">
-                  {lang === 'bn' ? 'জনপ্রিয় হোটেল ও রিসোর্ট' : 'Popular stays'}
-                </h3>
-                <Link
-                  href={`/d/${destination.slug}/stay`}
-                  className="text-label text-primary hover:underline"
-                >
-                  {lang === 'bn' ? 'সবগুলো দেখুন →' : 'See all stays →'}
-                </Link>
-              </div>
+                <span>{lang === 'bn' ? 'সবগুলো হোটেল দেখুন' : 'See all stays'}</span>
+                <ChevronRight className="size-4" />
+              </Link>
+            </div>
+            {filteredHotels.length > 0 ? (
               <CardRow label="Popular stays">
-                {inventory.hotels.slice(0, 6).map((hotel) => (
+                {filteredHotels.slice(0, 6).map((hotel) => (
                   <CardRowItem key={hotel.id}>
                     <HotelCard hotel={hotel} spotName={spotName(hotel.spotSlug)} />
                   </CardRowItem>
                 ))}
               </CardRow>
-            </div>
-          )}
+            ) : (
+              <p className="text-sm text-muted py-6">
+                {lang === 'bn'
+                  ? 'নির্বাচিত স্পটে এই মুহূর্তে কোনো হোটেল পাওয়া যায়নি।'
+                  : 'No hotels found for the selected spot filter.'}
+              </p>
+            )}
+          </div>
 
-          {inventory.venues.length > 0 && (
-            <div style={{ marginTop: '36px' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '16px',
-                }}
+          {/* Dining Row */}
+          <div id="dining" style={{ marginTop: '40px' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-title font-bold text-fg flex items-center gap-2">
+                <Utensils className="size-5 text-amber-600" />
+                <span>{lang === 'bn' ? 'সিফুড ও খাবার রেস্তোরাঁ' : 'Places to eat & seafood'}</span>
+                <span className="text-xs font-normal text-muted">
+                  ({filteredVenues.length} {lang === 'bn' ? 'উপলব্ধ' : 'places'})
+                </span>
+              </h3>
+              <Link
+                href={`/d/${destination.slug}/food`}
+                className="text-label text-primary hover:underline inline-flex items-center gap-1"
               >
-                <h3 className="text-title font-bold text-fg">
-                  {lang === 'bn' ? 'খাবার ও রেস্তোরাঁ' : 'Places to eat'}
-                </h3>
-                <Link
-                  href={`/d/${destination.slug}/food`}
-                  className="text-label text-primary hover:underline"
-                >
-                  {lang === 'bn' ? 'সবগুলো দেখুন →' : 'See all dining →'}
-                </Link>
-              </div>
+                <span>{lang === 'bn' ? 'সবগুলো খাবার স্থান দেখুন' : 'See all dining'}</span>
+                <ChevronRight className="size-4" />
+              </Link>
+            </div>
+            {filteredVenues.length > 0 ? (
               <CardRow label="Places to eat">
-                {inventory.venues.slice(0, 6).map((venue) => (
+                {filteredVenues.slice(0, 6).map((venue) => (
                   <CardRowItem key={venue.id}>
                     <VenueCard venue={venue} />
                   </CardRowItem>
                 ))}
               </CardRow>
-            </div>
-          )}
-
-          {inventory.hotels.length === 0 && inventory.venues.length === 0 && (
-            <p className="dl-lead" style={{ marginTop: '32px' }}>
-              {lang === 'bn'
-                ? 'এই গন্তব্যে এখনো কোনো সেবা তালিকাভুক্ত হয়নি। শীঘ্রই আরও সেবা যুক্ত হবে।'
-                : 'No listings have been posted for this destination yet. More services will be available soon.'}
-            </p>
-          )}
+            ) : (
+              <p className="text-sm text-muted py-6">
+                {lang === 'bn'
+                  ? 'নির্বাচিত স্পটে এই মুহূর্তে কোনো খাবার স্থান পাওয়া যায়নি।'
+                  : 'No dining venues found for the selected spot filter.'}
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* Destination Help */}
+      {/* 7. Logistics & Getting Around Guide: Practical Field Intel */}
+      <section className="dl-sec" id="transit" style={{ background: 'var(--surface-alt)' }}>
+        <div className="dl-wrap">
+          <div>
+            <div className="dl-eyebrow" style={{ color: 'var(--accent)' }}>
+              {lang === 'bn' ? 'ভ্রমণ সহায়িকা ও যাতায়াত' : "Traveler's Field Guide"}
+            </div>
+            <h2 className="dl-h2" style={{ marginBottom: '6px' }}>
+              {lang === 'bn' ? 'কক্সবাজারে সহজে' : 'Getting around'}{' '}
+              <span className="serif" style={{ color: 'var(--accent)' }}>
+                {lang === 'bn' ? 'চলাচল করুন।' : "Cox's Bazar."}
+              </span>
+            </h2>
+            <p className="text-sm text-muted">
+              {lang === 'bn'
+                ? 'স্থানীয় যাতায়াত, সঠিক বাহন ও বিচ নিরাপত্তার অপরিহার্য তথ্য।'
+                : 'Essential transit options, local fare guidance, and beach navigation advice.'}
+            </p>
+          </div>
+
+          <div className="dl-guide-grid">
+            <div className="dl-guide-card">
+              <div className="dl-guide-icon text-emerald-600 bg-emerald-500/10">
+                <Car className="size-6" />
+              </div>
+              <h4>{lang === 'bn' ? 'টমটম (ইজিবাইক)' : 'Town Auto-Rickshaw (TomTom)'}</h4>
+              <p>
+                {lang === 'bn'
+                  ? 'লাবণী, সুগন্ধা ও কলাতলীর মধ্যে যাতায়াতের সবচেয়ে জনপ্রিয় ও সহজ মাধ্যম ব্যাটারিচালিত টমটম। প্রধান সড়কে শেয়ার্ড ভাড়া প্রতিজন ২০ থেকে ৪০ টাকা।'
+                  : 'Battery-operated TomToms are the primary hop-on transit between Laboni, Sugandha, and Kolatoli. Shared rides cost Tk 20–40 per passenger.'}
+              </p>
+            </div>
+
+            <div className="dl-guide-card">
+              <div className="dl-guide-icon text-sky-600 bg-sky-500/10">
+                <Bus className="size-6" />
+              </div>
+              <h4>{lang === 'bn' ? 'চান্দের গাড়ি (মেরিন ড্রাইভ)' : 'Chander Gari (Marine Drive)'}</h4>
+              <p>
+                {lang === 'bn'
+                  ? 'মেরিন ড্রাইভ ধরে হিমছড়ি ও ইনানী সমুদ্রসৈকত দর্শনে খোলা জিপ বা চান্দের গাড়ি আদর্শ। যাত্রার শুরুতেই রাউন্ড-ট্রিপ ও অপেক্ষার সময় ঠিক করে নিন।'
+                  : 'Iconic open-roof 4x4s for scenic day-trips along the 80km Marine Drive down to Himchari and Inani. Always agree on round-trip waiting times.'}
+              </p>
+            </div>
+
+            <div className="dl-guide-card">
+              <div className="dl-guide-icon text-indigo-600 bg-indigo-500/10">
+                <Plane className="size-6" />
+              </div>
+              <h4>{lang === 'bn' ? 'বিমানবন্দর ও বাস টার্মিনাল' : 'Airport & Terminal Arrival'}</h4>
+              <p>
+                {lang === 'bn'
+                  ? 'কক্সবাজার বিমানবন্দর (CXB) ও কলাতলী কেন্দ্রীয় বাস টার্মিনাল থেকে প্রধান হোটেল এলাকা মাত্র ১০-১৫ মিনিটের ড্রাইভ। গেটে সিএনজি ও অটোরিকশা সহজলভ্য।'
+                  : 'Cox’s Bazar Airport (CXB) and Kolatoli Central Bus Station sit 10–15 minutes from the main beachfront hotel zone. CNGs wait at gates.'}
+              </p>
+            </div>
+
+            <div className="dl-guide-card">
+              <div className="dl-guide-icon text-amber-600 bg-amber-500/10">
+                <ShieldCheck className="size-6" />
+              </div>
+              <h4>{lang === 'bn' ? 'সৈকত নিরাপত্তা প্রোটোকল' : 'Beach Safety Rules'}</h4>
+              <p>
+                {lang === 'bn'
+                  ? 'সর্বদা লাইফগার্ড চিহ্নিত সীমানার ভেতর সাঁতার কাটুন। লাল পতাকা উড়লে সমুদ্রে নামা থেকে বিরত থাকুন এবং ভাটার সময় গভীর পানিতে যাবেন না।'
+                  : 'Always swim within lifeguard-marked flag boundaries. Never swim past marked safety buoys or enter the water after sunset.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. Destination Help & Physical Coastline Desk */}
       <section
         className="dl-sec"
         id="dhelp"
@@ -808,72 +851,105 @@ export function DestinationDroneView({ destination, inventory, slug }: Destinati
           <div>
             <div className="dl-eyebrow" style={{ color: 'var(--accent)' }}>
               {lang === 'bn'
-                ? `${destination.nameBn || destination.name}-এ সহায়তা`
-                : `Help in ${destination.name}`}
+                ? `${destination.nameBn || destination.name}-এ সরাসরি সহায়তা`
+                : `Assistance in ${destination.name}`}
             </div>
             <h2 className="dl-h2">
               {lang === 'bn' ? 'নিরাপদ ভ্রমণ' : 'Safe trips'}{' '}
               <span className="serif" style={{ color: 'var(--accent)' }}>
-                {lang === 'bn' ? 'শুরু হোক এখান থেকেই।' : 'start here.'}
+                {lang === 'bn' ? 'শুরু হোক এখান থেকেই।' : 'start with real support.'}
               </span>
             </h2>
+            <p className="text-sm text-muted">
+              {lang === 'bn'
+                ? 'সৈকতে কোনো সমস্যা, অভিযোগ বা হারানো জিনিসের জন্য কোস্টলাইন ডেস্ক কর্মী ও জরুরি নম্বরসমূহ প্রস্তুত।'
+                : 'On-ground assistance, desk locations, and verified emergency helplines for peace of mind.'}
+            </p>
           </div>
 
-          <div className="dl-help-grid">
-            {contacts.map((contact) => (
-              <a
-                key={`${contact.kind}-${contact.phone}`}
-                href={`tel:${contact.phone.replace(/[^0-9+]/g, '')}`}
-                className={`dl-help-card ${contact.kind === 'NATIONAL' ? 'em' : ''}`}
-                style={{ textDecoration: 'none' }}
-              >
-                {renderSvg('phone')}
-                <div className="big">{contact.phone}</div>
-                <b>{lang === 'bn' && contact.labelBn ? contact.labelBn : contact.label}</b>
-                <p>
-                  {contact.kind === 'NATIONAL'
-                    ? lang === 'bn'
-                      ? 'কোস্টলাইন কেবল জরুরি নম্বর প্রদর্শন করে; এটি উদ্ধারকারী দল পাঠায় না।'
-                      : 'Coastline shows helpline numbers; it does not dispatch emergency help.'
-                    : lang === 'bn'
-                      ? 'সরাসরি কল করতে ট্যাপ করুন।'
-                      : 'Tap to call directly.'}
-                </p>
-              </a>
-            ))}
-
-            <div className="dl-help-card">
-              {renderSvg('pin')}
+          <div className="dl-help-grid mt-6">
+            {/* Coastline Physical Desk Card */}
+            <div className="dl-help-card" style={{ borderColor: 'var(--primary)' }}>
+              <div className="flex items-center gap-2 text-primary mb-2">
+                <MapPin className="size-5" />
+                <span className="text-xs font-bold uppercase tracking-wider">
+                  {lang === 'bn' ? 'অন-গ্রাউন্ড ডেস্ক' : 'On-Ground Presence'}
+                </span>
+              </div>
               <b style={{ fontSize: '20px' }}>
-                {lang === 'bn' ? 'কোস্টলাইন ডেস্ক' : 'Coastline desk'}
+                {lang === 'bn' ? 'কোস্টলাইন বিচ ডেস্ক' : 'Coastline Beach Desks'}
               </b>
               <p>
                 {lang === 'bn'
-                  ? 'প্রধান স্পটগুলোতে ডেস্ক কর্মীরা টিকিট, হারানো জিনিস ও অভিযোগ গ্রহণ করেন।'
-                  : 'Desk staff at main spots handle tickets, lost items and complaints.'}
+                  ? 'সুগন্ধা পয়েন্ট ও লাবণী বিচ প্রবেশমুখে আমাদের ফিজিক্যাল ডেস্ক কর্মী রয়েছে। টিকিট যাচাই, হারানো জিনিস জমা ও তাৎক্ষণিক তথ্যের জন্য যোগাযোগ করুন।'
+                  : 'Staffed physical kiosks located at Sugandha Point beach entrance and Laboni Pavilion for ticket verification, complaints, and immediate help.'}
               </p>
             </div>
 
+            {/* Tourist Police Contact */}
+            <a
+              href="tel:01769690732"
+              className="dl-help-card em"
+              style={{ textDecoration: 'none' }}
+            >
+              <div className="flex items-center gap-2 text-rose-600 mb-2">
+                <Phone className="size-5" />
+                <span className="text-xs font-bold uppercase tracking-wider">
+                  {lang === 'bn' ? 'ট্যুরিস্ট পুলিশ' : 'Tourist Police'}
+                </span>
+              </div>
+              <div className="big text-rose-600">01769-690732</div>
+              <b>{lang === 'bn' ? 'কক্সবাজার ট্যুরিস্ট পুলিশ কন্ট্রোল রুম' : "Cox's Bazar Tourist Police"}</b>
+              <p>
+                {lang === 'bn'
+                  ? 'সৈকতে নিরাপত্তা বিঘ্নিত হলে বা অতিরিক্ত ভাড়ার সমস্যায় সরাসরি কল করুন।'
+                  : 'Direct 24/7 hotline for on-beach security, overcharging issues, and tourist protection.'}
+              </p>
+            </a>
+
+            {/* National Emergency */}
+            <a href="tel:999" className="dl-help-card" style={{ textDecoration: 'none' }}>
+              <div className="flex items-center gap-2 text-muted mb-2">
+                <Phone className="size-5" />
+                <span className="text-xs font-bold uppercase tracking-wider">
+                  {lang === 'bn' ? 'জাতীয় জরুরি সেবা' : 'National Emergency'}
+                </span>
+              </div>
+              <div className="big">999</div>
+              <b>{lang === 'bn' ? 'পুলিশ · ফায়ার সার্ভিস · অ্যাম্বুলেন্স' : 'Police · Fire · Ambulance'}</b>
+              <p>
+                {lang === 'bn'
+                  ? 'কোস্টলাইন কেবল জরুরি নম্বর প্রদর্শন করে; এটি উদ্ধারকারী দল পাঠায় না।'
+                  : 'Coastline displays verified emergency helplines; it does not dispatch emergency services.'}
+              </p>
+            </a>
+
+            {/* Lost and Found Action */}
             <Link
               href="/help/lost-found"
               className="dl-help-card"
               style={{ textDecoration: 'none' }}
             >
-              {renderSvg('lost')}
+              <div className="flex items-center gap-2 text-primary mb-2">
+                {renderSvg('lost')}
+                <span className="text-xs font-bold uppercase tracking-wider">
+                  {lang === 'bn' ? 'হারানো জিনিস' : 'Lost & Found'}
+                </span>
+              </div>
               <b style={{ fontSize: '20px' }}>
-                {lang === 'bn' ? 'কিছু হারিয়েছেন?' : 'Lost something?'}
+                {lang === 'bn' ? 'কিছু হারিয়েছেন বা পেয়েছেন?' : 'Lost something on the sand?'}
               </b>
               <p>
                 {lang === 'bn'
-                  ? 'রিপোর্ট করুন, ডেস্ক থেকে লগ করা পাওয়া জিনিসের তালিকার সাথে মেলানো হবে।'
-                  : 'Report it and we will match it against items logged by the desk.'}
+                  ? 'সৈকতে পাওয়া যেকোনো আইটেম ডেস্ক কর্মীরা লগ করে রাখেন। আপনার দাবিকৃত জিনিসের সাথে মেলাতে রিপোর্ট করুন।'
+                  : 'Items turned in to beach desks are logged in real-time. File a quick report to cross-check matches.'}
               </p>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Next Destination Teaser Card */}
+      {/* 9. Next Destination Teaser */}
       <section style={{ padding: '0 0 clamp(60px, 8vw, 110px)' }}>
         <div className="dl-wrap">
           <Link
@@ -885,7 +961,7 @@ export function DestinationDroneView({ destination, inventory, slug }: Destinati
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`/media/places/${nextDest.hero}.webp`} alt="" loading="lazy" />
             <div>
-              <small>{lang === 'bn' ? 'পরবর্তী গন্তব্য' : 'Next destination'}</small>
+              <small>{lang === 'bn' ? 'পরবর্তী গন্তব্য দেখুন' : 'Explore neighboring destination'}</small>
               <h3>{lang === 'bn' ? `${nextDest.bn} →` : `${nextDest.name} →`}</h3>
               <p className="dl-bn" style={{ fontSize: '22px', margin: '8px 0 0' }}>
                 {lang === 'bn' ? nextDest.name : nextDest.bn}
@@ -895,37 +971,12 @@ export function DestinationDroneView({ destination, inventory, slug }: Destinati
         </div>
       </section>
 
-      {/* Media Attribution */}
+      {/* 10. Media Attribution */}
       <section className="dl-sec py-8 border-t border-line/50 bg-surface/30">
         <div className="dl-wrap">
           <MediaCreditsList />
         </div>
       </section>
-
-      {/* Floating Help Button */}
-      <button
-        type="button"
-        onClick={() => setHelpOpen(true)}
-        aria-label="Help and emergency"
-        className="dl-fab"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <circle cx="12" cy="12" r="4" />
-          <path d="m4.9 4.9 4.3 4.3M14.8 14.8l4.3 4.3M14.8 9.2l4.3-4.3M4.9 19.1l4.3-4.3" />
-        </svg>
-        <span>{lang === 'bn' ? 'সহায়তা' : 'Help'}</span>
-      </button>
-
-      <HelpSheet open={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   );
 }

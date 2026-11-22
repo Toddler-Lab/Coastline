@@ -69,13 +69,18 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/d/coxs-bazar/stay" className="transition-colors hover:text-primary">
+                <Link href="/stays" className="transition-colors hover:text-primary">
                   Hotels & Resorts
                 </Link>
               </li>
               <li>
-                <Link href="/d/coxs-bazar/food" className="transition-colors hover:text-primary">
+                <Link href="/dining" className="transition-colors hover:text-primary">
                   Dining & Sunbed Delivery
+                </Link>
+              </li>
+              <li>
+                <Link href="/photographers" className="transition-colors hover:text-primary">
+                  Beach Photographers
                 </Link>
               </li>
               <li>

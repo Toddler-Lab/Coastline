@@ -95,16 +95,32 @@ export default async function DiningPage({
         })}
       </nav>
 
-      {/* Contextual link to destination dining directory */}
-      <div className="mt-4 flex items-center justify-between rounded-2xl border border-line bg-surface p-4 text-xs">
-        <span className="text-muted">
-          Looking for beach delivery menus and spot-by-spot dining in Cox&apos;s Bazar?
-        </span>
+      {/* Spot quick links */}
+      <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
+        <span className="font-medium text-muted">Spots in Cox&apos;s Bazar:</span>
         <Link
           href="/d/coxs-bazar/food"
-          className="inline-flex items-center gap-1 font-bold text-primary hover:underline"
+          className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-primary hover:text-white"
         >
-          Open Cox&apos;s Bazar Food Directory <ArrowRight className="size-3.5" />
+          All spots
+        </Link>
+        <Link
+          href="/d/coxs-bazar/food?spot=laboni"
+          className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-primary hover:text-white"
+        >
+          Laboni Beach
+        </Link>
+        <Link
+          href="/d/coxs-bazar/food?spot=kolatoli"
+          className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-primary hover:text-white"
+        >
+          Kolatoli
+        </Link>
+        <Link
+          href="/d/coxs-bazar/food?spot=sugandha"
+          className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-primary hover:text-white"
+        >
+          Sugandha Beach
         </Link>
       </div>
 

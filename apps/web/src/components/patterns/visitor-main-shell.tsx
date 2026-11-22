@@ -6,8 +6,11 @@ import { cn } from '@/lib/cn';
 
 export function VisitorMainShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  // Hero pages that have a full-screen hero stage at the very top
-  const hasHero = pathname === '/' || (/^\/d\/[^/]+$/.test(pathname) && !pathname.includes('/s/'));
+  // Hero pages that have a full-screen hero stage at the very top (home, destination drone view, and spot hero)
+  const hasHero =
+    pathname === '/' ||
+    /^\/d\/[^/]+$/.test(pathname) ||
+    /^\/d\/[^/]+\/s\/[^/]+$/.test(pathname);
 
   return (
     <main

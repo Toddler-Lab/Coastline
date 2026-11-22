@@ -81,17 +81,33 @@ export default async function StaysPage({
         })}
       </nav>
 
-      {/* Contextual link to destination stay directory */}
+      {/* Spot quick links when Cox's Bazar is selected */}
       {selectedDest === 'coxs-bazar' && (
-        <div className="mt-4 flex items-center justify-between rounded-2xl border border-line bg-surface p-4 text-xs">
-          <span className="text-muted">
-            Looking for spot-level filters (Laboni, Kolatoli, Inani) and map view?
-          </span>
+        <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
+          <span className="font-medium text-muted">Spots in Cox&apos;s Bazar:</span>
           <Link
             href="/d/coxs-bazar/stay"
-            className="inline-flex items-center gap-1 font-bold text-primary hover:underline"
+            className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-primary hover:text-white"
           >
-            Open Cox&apos;s Bazar Stays Directory <ArrowRight className="size-3.5" />
+            All spots
+          </Link>
+          <Link
+            href="/d/coxs-bazar/stay?spot=laboni"
+            className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-primary hover:text-white"
+          >
+            Laboni Beach
+          </Link>
+          <Link
+            href="/d/coxs-bazar/stay?spot=kolatoli"
+            className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-primary hover:text-white"
+          >
+            Kolatoli
+          </Link>
+          <Link
+            href="/d/coxs-bazar/stay?spot=inani"
+            className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-primary hover:text-white"
+          >
+            Inani Coral Beach
           </Link>
         </div>
       )}

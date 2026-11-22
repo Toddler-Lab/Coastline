@@ -1,5 +1,14 @@
 import Link from 'next/link';
-import { ArrowUpDown, Sparkles, Umbrella } from 'lucide-react';
+import {
+  ArrowRight,
+  ArrowUpDown,
+  Camera,
+  CheckCircle2,
+  ShieldCheck,
+  Sparkles,
+  Umbrella,
+  Video,
+} from 'lucide-react';
 import type { BeachPointSummary, DestinationDetailDto, SpotSummaryDto } from '@coastline/api-contracts';
 import type { PlaceInventory } from '@/lib/places';
 import { sunbedPickerHref } from '@/lib/places';
@@ -203,6 +212,115 @@ export function ServiceListView({
           </li>
         ))}
       </ul>
+    );
+  } else if (service === 'photographers') {
+    const packages = [
+      {
+        id: 'portraits',
+        title: 'Beach Walk & Sunset Portraits',
+        price: 'Tk 5',
+        unit: '/ keeper photo',
+        desc: `Verified on-beach portrait photographers at ${placeName}. Pay only for the shots you select and keep.`,
+        features: [
+          'Direct wireless phone transfer (AirDrop / WhatsApp)',
+          'No minimum order quantity',
+          'Instant review on camera display',
+        ],
+        icon: Camera,
+        badge: 'Pay Per Photo',
+        cta: 'Request On Beach',
+        href: `/inbox?new=photographer&type=portrait&dest=${destination.slug}`,
+      },
+      {
+        id: 'drone',
+        title: '4K Drone Cinematography',
+        price: 'Tk 1,500',
+        unit: '/ 20-min flight',
+        desc: `Dramatic overhead 4K aerial reels of your group along ${placeName}.`,
+        features: [
+          'Licensed CAAB drone operator',
+          'Color-graded 4K 60FPS video reels',
+          'Delivery within 2 hours',
+        ],
+        icon: Video,
+        badge: 'Popular',
+        cta: 'Book Drone Operator',
+        href: `/inbox?new=photographer&type=drone&dest=${destination.slug}`,
+      },
+      {
+        id: 'story',
+        title: 'Half-Day Coastal Story',
+        price: 'Tk 3,500',
+        unit: '/ 4 hours',
+        desc: `Dedicated personal photographer traveling with your party across ${destination.name} viewpoints.`,
+        features: [
+          '4 hours comprehensive coverage',
+          'Unlimited edited high-res digital photos',
+          'Permanent cloud gallery link',
+        ],
+        icon: Sparkles,
+        badge: 'Full Story',
+        cta: 'Request Coverage',
+        href: `/inbox?new=photographer&type=story&dest=${destination.slug}`,
+      },
+    ];
+    count = packages.length;
+    body = (
+      <div className="space-y-6">
+        <ul className="grid gap-6 md:grid-cols-3">
+          {packages.map((pkg) => {
+            const Icon = pkg.icon;
+            return (
+              <li
+                key={pkg.id}
+                className="group flex flex-col justify-between rounded-3xl border border-line bg-surface p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+                      <Icon className="size-6" />
+                    </span>
+                    <span className="rounded-full bg-surface-alt px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-muted">
+                      {pkg.badge}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 text-base font-bold text-fg group-hover:text-primary transition-colors">
+                    {pkg.title}
+                  </h3>
+                  <p className="mt-1 text-xs text-muted leading-relaxed">{pkg.desc}</p>
+                  <ul className="mt-4 space-y-2 text-xs text-muted">
+                    {pkg.features.map((f) => (
+                      <li key={f} className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 flex-none text-primary" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-6 border-t border-line/60 pt-4">
+                  <p className="text-base font-extrabold text-fg">
+                    {pkg.price}{' '}
+                    <span className="text-xs font-normal text-muted">{pkg.unit}</span>
+                  </p>
+                  <Link
+                    href={pkg.href}
+                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-md transition-all hover:bg-primary/90"
+                  >
+                    {pkg.cta} <ArrowRight className="size-3.5" />
+                  </Link>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="flex items-start gap-3 rounded-2xl border border-line bg-surface p-4 text-xs text-muted">
+          <ShieldCheck className="size-4 flex-none text-primary mt-0.5" />
+          <div>
+            <span className="font-bold text-fg">Sealed Bids & Identity Verified:</span>{' '}
+            Photographers in Coastline&apos;s network carry active tourist police registration badges. All custom requests receive sealed private bids so you get the fairest beach market rates.
+          </div>
+        </div>
+      </div>
     );
   }
 

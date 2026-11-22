@@ -8,10 +8,11 @@ import { inventoryCounts, servicesPresent } from '@/lib/places';
 import { useLanguage } from '@/components/patterns/language';
 import { MediaCreditsList } from '@/components/patterns/media-credits';
 import { DroneStage } from './drone-stage';
+import { DestinationsSection } from './destinations-section';
 import { PlatformMetricsBar } from './platform-metrics-bar';
 import { BangladeshMapSection } from './bangladesh-map';
 import { SpotsRailSection } from './spots-rail';
-import { ServicesBandSection } from './services-band';
+import { AboutProjectSection } from './about-project-section';
 import { PhotographerPromoSection } from './photographer-promo';
 import { LandingHelpSection } from './landing-help';
 import { FlyTransitionListener } from './fly-transition';
@@ -43,8 +44,8 @@ export function DroneLandingView({
       {/* 1. National hero stage: drone video / stills presenting Bangladesh */}
       <DroneStage lang={lang} destinations={destinations} searchIndex={searchIndex} />
 
-      {/* 2. Platform metrics and environmental standards ribbon */}
-      <PlatformMetricsBar lang={lang} />
+      {/* 2. Destinations of Bangladesh: select regional territory */}
+      <DestinationsSection lang={lang} />
 
       {/* 3. Fly the map: interactive territorial zones and pins */}
       <BangladeshMapSection lang={lang} />
@@ -52,17 +53,16 @@ export function DroneLandingView({
       {/* 4. Spots rail: filterable, with nested destination backgrounds */}
       <SpotsRailSection lang={lang} />
 
-      {/* 5. Services band: only types with active listings in the destination */}
-      <ServicesBandSection
-        lang={lang}
-        destinationSlug={destination?.slug ?? 'coxs-bazar'}
-        services={services}
-      />
+      {/* 5. Platform metrics and environmental standards ribbon */}
+      <PlatformMetricsBar lang={lang} />
 
-      {/* 6. Photographers: the signature service */}
+      {/* 6. About Coastline project: mission, independence, and verified standards */}
+      <AboutProjectSection lang={lang} />
+
+      {/* 7. Photographers: the signature service */}
       <PhotographerPromoSection lang={lang} />
 
-      {/* 7. Help: emergency, lost and found, reports, nearby facilities */}
+      {/* 8. Help: emergency, lost and found, reports, nearby facilities */}
       <LandingHelpSection lang={lang} />
 
       {/* 8. Media attribution */}

@@ -3241,3 +3241,388 @@
     ) !important;
   }
 }
+
+/* ==========================================================================
+   Destination Territory Hub Redesign
+   Presents destination as an active, child operations hub of Bangladesh
+   ========================================================================== */
+
+.dl-dest-masthead {
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--on-media);
+  padding-top: clamp(120px, 15vh, 150px);
+  padding-bottom: clamp(40px, 6vw, 64px);
+}
+
+.dl-dest-masthead .dl-masthead-media {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.dl-dest-masthead .dl-masthead-media img,
+.dl-dest-masthead .dl-masthead-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 38%;
+}
+
+.dl-dest-masthead .dl-masthead-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 24, 23, 0.65) 0%,
+    rgba(10, 24, 23, 0.35) 30%,
+    rgba(10, 24, 23, 0.8) 75%,
+    rgba(10, 24, 23, 0.98) 100%
+  );
+}
+
+.dl-dest-masthead-body {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+}
+
+.dl-dest-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+.dl-dest-alert {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 24px;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 8;
+  padding: 16px 20px;
+  border-radius: 18px;
+  background: var(--sun-soft-bg);
+  border: 1px solid var(--sun-soft-border);
+  color: var(--sun-soft-fg);
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.15);
+}
+
+.dl-dest-alert svg {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  stroke: var(--sun-ink);
+  margin-top: 1px;
+}
+
+.dl-dest-alert b {
+  display: block;
+}
+
+/* Territory Pulse Floating Bar */
+.dl-pulse-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 16px 36px -16px rgba(18, 26, 28, 0.12);
+  margin-top: 24px;
+  position: relative;
+  z-index: 10;
+}
+
+.dl-pulse-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--surface-alt);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.dl-pulse-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-soft);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.dl-pulse-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dl-pulse-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.dl-pulse-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Service Launchpad */
+.dl-launchpad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.dl-launchpad-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dl-launchpad-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary);
+  box-shadow: 0 12px 28px -10px rgba(14, 110, 106, 0.18);
+}
+
+.dl-launchpad-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.dl-launchpad-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fg);
+  margin: 0;
+}
+
+.dl-launchpad-sub {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.dl-launchpad-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Guide Grid */
+.dl-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.dl-guide-card {
+  padding: 22px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dl-guide-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-alt);
+  color: var(--primary);
+}
+
+.dl-guide-card h4 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--fg);
+}
+
+.dl-guide-card p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Coastal Spot Stage & Directory */
+.dl-spot-nav-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.dl-spot-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px 6px 6px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.dl-spot-tab img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dl-spot-tab:hover {
+  border-color: var(--primary);
+  background: var(--surface-alt);
+}
+
+.dl-spot-tab.active {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.25);
+}
+
+:root[data-theme='dark'] .dl-spot-tab.active {
+  background: var(--surface-alt);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dl-spot-stage {
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  min-height: clamp(420px, 50vh, 520px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border: 1px solid var(--line);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.2);
+}
+
+.dl-spot-stage-media {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.dl-spot-stage-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out), transform 6s ease-out;
+  transform: scale(1.08);
+}
+
+.dl-spot-stage-media img.on {
+  opacity: 1;
+  transform: scale(1.01);
+}
+
+.dl-spot-stage-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 15, 14, 0.15) 0%,
+    rgba(5, 15, 14, 0.45) 45%,
+    rgba(5, 15, 14, 0.88) 100%
+  );
+}
+
+.dl-spot-stage-content {
+  position: relative;
+  z-index: 5;
+  padding: clamp(24px, 4vw, 40px);
+}
+
+@media (max-width: 640px) {
+  .dl-dest-masthead {
+    padding-top: 104px;
+    padding-bottom: 28px;
+  }
+  .dl-spot-stage {
+    min-height: 380px;
+    border-radius: 20px;
+  }
+  .dl-spot-stage-content {
+    padding: 20px 16px;
+  }
+  .dl-pulse-strip {
+    grid-template-columns: 1fr;
+    margin-top: 14px;
+    padding: 12px;
+  }
+  .dl-launchpad-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .dl-launchpad-card {
+    padding: 12px;
+  }
+  .dl-guide-grid {
+    grid-template-columns: 1fr;
+  }
+}

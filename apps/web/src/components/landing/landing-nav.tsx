@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search } from 'lucide-react';
+import { Menu, Search, X } from 'lucide-react';
+import { cn } from '@/lib/cn';
 import { AccountMenuButton } from '@/components/patterns/workspace-switcher';
 import { HelpTopButton } from '@/components/patterns/help';
 import { useLanguage } from '@/components/patterns/language';
@@ -20,9 +21,29 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
 
   const pathname = usePathname();
   const isHome = pathname === '/';
-  const hasFullHero = isHome || (/^\/d\/[^/]+$/.test(pathname) && !pathname.includes('/s/'));
+  const hasFullHero =
+    isHome ||
+    /^\/d\/[^/]+$/.test(pathname) ||
+    /^\/d\/[^/]+\/s\/[^/]+$/.test(pathname);
+
+  const destMatch = pathname.match(/^\/d\/([^/]+)/);
+  const currentDest = destMatch && destMatch[1] !== 'undefined' ? destMatch[1] : null;
+
+  const staysHref = currentDest ? `/d/${currentDest}/stay` : '/stays';
+  const diningHref = currentDest ? `/d/${currentDest}/food` : '/dining';
+  const sunbedsHref = currentDest ? `/d/${currentDest}/sunbeds` : '/sunbeds';
+
+  const isDestActive = pathname.startsWith('/destinations') || /^\/d\/[^/]+/.test(pathname);
+  const isSunbedsActive = pathname.startsWith('/sunbeds') || pathname.includes('/sunbeds');
+  const isStaysActive = pathname.startsWith('/stays') || pathname.includes('/stay');
+  const isDiningActive = pathname.startsWith('/dining') || pathname.includes('/food');
 
   const [isSolid, setIsSolid] = useState(!hasFullHero);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     if (!hasFullHero) {
@@ -30,22 +51,12 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
       return;
     }
     function handleScroll() {
-      setIsSolid(window.scrollY > window.innerHeight * 0.6);
+      setIsSolid(window.scrollY > window.innerHeight * 0.4);
     }
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasFullHero]);
-
-  const scrollTo = (id: string) => (e: React.MouseEvent) => {
-    if (!isHome) return; // on other routes, let href link to /#id
-    const el = document.getElementById(id);
-    if (el) {
-      e.preventDefault();
-      const top = el.getBoundingClientRect().top + window.scrollY - 90;
-      window.scrollTo({ top, behavior: 'smooth' });
-    }
-  };
 
   return (
     <header className={`dl-nav ${isSolid ? 'solid' : ''}`} id="nav">
@@ -72,26 +83,23 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
       </Link>
 
       <nav className="dl-nav-links" aria-label="Main">
-        <Link href="/" className={isHome ? 'active' : ''}>
-          {lang === 'bn' ? 'হোম' : 'Explore'}
-        </Link>
-        <Link href="/destinations" className={pathname.startsWith('/destinations') ? 'active' : ''}>
+        <Link href="/destinations" className={isDestActive ? 'active' : ''}>
           {lang === 'bn' ? 'গন্তব্য' : 'Destinations'}
         </Link>
-        <Link href="/sunbeds" className={pathname.startsWith('/sunbeds') ? 'active' : ''}>
-          {lang === 'bn' ? 'সানবেড' : 'Sunbeds'}
-        </Link>
-        <Link href="/stays" className={pathname.startsWith('/stays') ? 'active' : ''}>
+        <Link href={staysHref} className={isStaysActive ? 'active' : ''}>
           {lang === 'bn' ? 'হোটেল' : 'Stays'}
         </Link>
-        <Link href="/dining" className={pathname.startsWith('/dining') ? 'active' : ''}>
+        <Link href={diningHref} className={isDiningActive ? 'active' : ''}>
           {lang === 'bn' ? 'খাবার' : 'Dining'}
         </Link>
-        <Link href="/trips" className={pathname.startsWith('/trips') ? 'active' : ''}>
-          {lang === 'bn' ? 'ট্রিপ ও টিকিট' : 'Trips'}
+        <Link href={sunbedsHref} className={isSunbedsActive ? 'active' : ''}>
+          {lang === 'bn' ? 'সানবেড' : 'Sunbeds'}
         </Link>
-        <Link href="/inbox" className={pathname.startsWith('/inbox') ? 'active' : ''}>
-          {lang === 'bn' ? 'ইনবক্স' : 'Inbox'}
+        <Link href="/photographers" className={pathname.startsWith('/photographers') ? 'active' : ''}>
+          {lang === 'bn' ? 'ফটোগ্রাফার' : 'Photographers'}
+        </Link>
+        <Link href="/trips" className={pathname.startsWith('/trips') ? 'active' : ''}>
+          {lang === 'bn' ? 'ট্রিপ' : 'Trips'}
         </Link>
         <Link href="/saved" className={pathname.startsWith('/saved') ? 'active' : ''}>
           {lang === 'bn' ? 'সংরক্ষিত' : 'Saved'}
@@ -115,6 +123,17 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
         <Search className="size-3.5" />
       </Link>
 
+      {/* Mobile Menu Toggle Button */}
+      <button
+        type="button"
+        aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+        aria-expanded={mobileOpen}
+        onClick={() => setMobileOpen((prev) => !prev)}
+        className="grid size-8 place-items-center rounded-full bg-white/10 text-white md:hidden hover:bg-white/20 transition-colors"
+      >
+        {mobileOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+      </button>
+
       <HelpTopButton className="dl-help-btn" />
 
       <div className="dl-lang" role="group" aria-label="Language">
@@ -127,6 +146,94 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
       </div>
 
       <AccountMenuButton current="visitor" />
+
+      {/* Mobile Glass Menu Drawer */}
+      {mobileOpen && (
+        <div className="absolute inset-x-0 top-full mt-2 rounded-3xl border border-white/20 bg-black/95 p-4 text-white shadow-2xl backdrop-blur-2xl md:hidden">
+          <nav className="grid grid-cols-2 gap-2 text-xs" aria-label="Mobile Navigation">
+            <Link
+              href="/destinations"
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'rounded-xl px-3 py-2.5 font-semibold transition-colors',
+                isDestActive ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+              )}
+            >
+              {lang === 'bn' ? 'গন্তব্য' : 'Destinations'}
+            </Link>
+            <Link
+              href={staysHref}
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'rounded-xl px-3 py-2.5 font-semibold transition-colors',
+                isStaysActive ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+              )}
+            >
+              {lang === 'bn' ? 'হোটেল' : 'Stays'}
+            </Link>
+            <Link
+              href={diningHref}
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'rounded-xl px-3 py-2.5 font-semibold transition-colors',
+                isDiningActive ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+              )}
+            >
+              {lang === 'bn' ? 'খাবার' : 'Dining'}
+            </Link>
+            <Link
+              href={sunbedsHref}
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'rounded-xl px-3 py-2.5 font-semibold transition-colors',
+                isSunbedsActive ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+              )}
+            >
+              {lang === 'bn' ? 'সানবেড' : 'Sunbeds'}
+            </Link>
+            <Link
+              href="/photographers"
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'rounded-xl px-3 py-2.5 font-semibold transition-colors',
+                pathname.startsWith('/photographers') ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+              )}
+            >
+              {lang === 'bn' ? 'ফটোগ্রাফার' : 'Photographers'}
+            </Link>
+            <Link
+              href="/trips"
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'rounded-xl px-3 py-2.5 font-semibold transition-colors',
+                pathname.startsWith('/trips') ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+              )}
+            >
+              {lang === 'bn' ? 'ট্রিপ' : 'Trips'}
+            </Link>
+            <Link
+              href="/saved"
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'rounded-xl px-3 py-2.5 font-semibold transition-colors',
+                pathname.startsWith('/saved') ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+              )}
+            >
+              {lang === 'bn' ? 'সংরক্ষিত' : 'Saved'}
+            </Link>
+            <Link
+              href="/search"
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'rounded-xl px-3 py-2.5 font-semibold transition-colors',
+                pathname.startsWith('/search') ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+              )}
+            >
+              {lang === 'bn' ? 'অনুসন্ধান' : 'Search'}
+            </Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
