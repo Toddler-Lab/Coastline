@@ -92,7 +92,7 @@
   z-index: 50;
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
   padding: 10px 14px 10px 18px;
   border-radius: 999px;
   background: rgba(10, 24, 23, 0.45);
@@ -100,11 +100,17 @@
   -webkit-backdrop-filter: blur(18px) saturate(140%);
   border: 1px solid rgba(255, 255, 255, 0.22);
   color: var(--on-media);
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .dl-logo {
   display: flex;
+  flex-shrink: 0;
+  white-space: nowrap;
   align-items: center;
   gap: 10px;
   font-weight: 800;
@@ -124,17 +130,21 @@
 .dl-nav-links {
   display: flex;
   gap: 4px;
-  margin-left: 12px;
+  margin-inline-start: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .dl-nav-links a {
   text-decoration: none;
   font-size: 14px;
   font-weight: 600;
-  padding: 10px 14px;
+  padding: 10px;
   border-radius: 999px;
   color: rgba(255, 255, 255, 0.92);
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .dl-nav-links a:hover {
@@ -142,17 +152,44 @@
   color: var(--on-media);
 }
 
-.dl-nav-sp {
-  flex: 1;
+.dl-nav-icon {
+  color: inherit;
+  background: var(--glass);
+}
+
+.dl-nav-icon:hover {
+  background: var(--glass-strong);
+}
+
+.dl-nav.solid .dl-nav-icon:hover {
+  background: var(--surface-alt);
+}
+
+.dl-nav .dl-nav-drawer {
+  color: var(--fg);
+}
+
+.dl-nav-drawer a[aria-current='page'],
+.dl-nav-drawer button[aria-pressed='true'] {
+  color: var(--on-primary);
+}
+
+.dl-nav-drawer a:focus-visible,
+.dl-nav button:focus-visible,
+.dl-nav a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 
 .dl-lang {
-  display: flex;
+  flex-shrink: 0;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 999px;
   padding: 3px;
   color: var(--on-media);
-  transition: border-color 0.3s ease, color 0.3s ease;
+  transition:
+    border-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .dl-lang button {
@@ -164,7 +201,9 @@
   font-weight: 600;
   min-height: 32px;
   color: rgba(255, 255, 255, 0.88);
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .dl-lang button:hover {
@@ -185,7 +224,10 @@
   font-weight: 600 !important;
   height: 38px !important;
   padding: 0 14px !important;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
 }
 
 .dl-nav .dl-help-btn:hover {
@@ -198,7 +240,9 @@
   background: rgba(255, 255, 255, 0.95);
   color: var(--ink);
   border: 1px solid rgba(12, 26, 25, 0.12);
-  box-shadow: 0 10px 30px -10px rgba(12, 26, 25, 0.12), 0 2px 6px rgba(12, 26, 25, 0.04);
+  box-shadow:
+    0 10px 30px -10px rgba(12, 26, 25, 0.12),
+    0 2px 6px rgba(12, 26, 25, 0.04);
 }
 
 .dl-nav.solid .dl-logo {
@@ -409,7 +453,10 @@
   font-size: 15px;
   text-decoration: none;
   min-height: 44px;
-  transition: transform 0.25s var(--ease-out), background 0.25s, color 0.25s;
+  transition:
+    transform 0.25s var(--ease-out),
+    background 0.25s,
+    color 0.25s;
 }
 
 .dl-btn:hover {
@@ -478,7 +525,7 @@
   height: 18px;
 }
 
-@media (max-width: 860px) {
+@media (width < 1280px) {
   .dl-nav-links {
     display: none;
   }

@@ -22,9 +22,7 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
   const pathname = usePathname();
   const isHome = pathname === '/';
   const hasFullHero =
-    isHome ||
-    /^\/d\/[^/]+$/.test(pathname) ||
-    /^\/d\/[^/]+\/s\/[^/]+$/.test(pathname);
+    isHome || /^\/d\/[^/]+$/.test(pathname) || /^\/d\/[^/]+\/s\/[^/]+$/.test(pathname);
 
   const destMatch = pathname.match(/^\/d\/([^/]+)/);
   const currentDest = destMatch && destMatch[1] !== 'undefined' ? destMatch[1] : null;
@@ -95,7 +93,10 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
         <Link href={sunbedsHref} className={isSunbedsActive ? 'active' : ''}>
           {lang === 'bn' ? 'সানবেড' : 'Sunbeds'}
         </Link>
-        <Link href="/photographers" className={pathname.startsWith('/photographers') ? 'active' : ''}>
+        <Link
+          href="/photographers"
+          className={pathname.startsWith('/photographers') ? 'active' : ''}
+        >
           {lang === 'bn' ? 'ফটোগ্রাফার' : 'Photographers'}
         </Link>
         <Link href="/trips" className={pathname.startsWith('/trips') ? 'active' : ''}>
@@ -112,126 +113,195 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
         </Link>
       </nav>
 
-      <div className="dl-nav-sp" />
+      <div className="ms-auto flex shrink-0 items-center gap-1 sm:gap-2">
+        {/* Mobile Search Button */}
+        <Link
+          href="/search"
+          aria-label={lang === 'bn' ? 'অনুসন্ধান' : 'Search'}
+          className="dl-nav-icon grid size-11 shrink-0 place-items-center rounded-full transition-colors xl:hidden"
+        >
+          <Search className="size-3.5" />
+        </Link>
 
-      {/* Mobile Search Button */}
-      <Link
-        href="/search"
-        aria-label={lang === 'bn' ? 'অনুসন্ধান' : 'Search'}
-        className="grid size-8 place-items-center rounded-full bg-white/10 text-white md:hidden hover:bg-white/20 transition-colors"
-      >
-        <Search className="size-3.5" />
-      </Link>
-
-      {/* Mobile Menu Toggle Button */}
-      <button
-        type="button"
-        aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-        aria-expanded={mobileOpen}
-        onClick={() => setMobileOpen((prev) => !prev)}
-        className="grid size-8 place-items-center rounded-full bg-white/10 text-white md:hidden hover:bg-white/20 transition-colors"
-      >
-        {mobileOpen ? <X className="size-4" /> : <Menu className="size-4" />}
-      </button>
-
-      <HelpTopButton className="dl-help-btn" />
-
-      <div className="dl-lang" role="group" aria-label="Language">
-        <button type="button" aria-pressed={lang === 'bn'} onClick={() => setLang('bn')}>
-          বাং
+        {/* Mobile Menu Toggle Button */}
+        <button
+          type="button"
+          aria-label={
+            mobileOpen
+              ? lang === 'bn'
+                ? 'মেনু বন্ধ করুন'
+                : 'Close menu'
+              : lang === 'bn'
+                ? 'মেনু খুলুন'
+                : 'Open menu'
+          }
+          aria-controls="landing-mobile-nav"
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen((prev) => !prev)}
+          className="dl-nav-icon grid size-11 shrink-0 place-items-center rounded-full transition-colors xl:hidden"
+        >
+          {mobileOpen ? <X className="size-4" /> : <Menu className="size-4" />}
         </button>
-        <button type="button" aria-pressed={lang === 'en'} onClick={() => setLang('en')}>
-          EN
-        </button>
+
+        <HelpTopButton className="dl-help-btn hidden sm:inline-flex" />
+
+        <div className="dl-lang hidden sm:flex" role="group" aria-label="Language">
+          <button type="button" aria-pressed={lang === 'bn'} onClick={() => setLang('bn')}>
+            বাং
+          </button>
+          <button type="button" aria-pressed={lang === 'en'} onClick={() => setLang('en')}>
+            EN
+          </button>
+        </div>
+
+        <AccountMenuButton current="visitor" />
       </div>
-
-      <AccountMenuButton current="visitor" />
 
       {/* Mobile Glass Menu Drawer */}
       {mobileOpen && (
-        <div className="absolute inset-x-0 top-full mt-2 rounded-3xl border border-white/20 bg-black/95 p-4 text-white shadow-2xl backdrop-blur-2xl md:hidden">
+        <div
+          id="landing-mobile-nav"
+          className="dl-nav-drawer absolute inset-x-0 top-full mt-2 max-h-[calc(100dvh-100px)] overflow-y-auto rounded-3xl border border-line bg-surface p-4 text-fg shadow-soft xl:hidden"
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              setMobileOpen(false);
+              document
+                .querySelector<HTMLButtonElement>('[aria-controls="landing-mobile-nav"]')
+                ?.focus();
+            }
+          }}
+        >
           <nav className="grid grid-cols-2 gap-2 text-xs" aria-label="Mobile Navigation">
             <Link
               href="/destinations"
+              aria-current={isDestActive ? 'page' : undefined}
               onClick={() => setMobileOpen(false)}
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
-                isDestActive ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+                isDestActive
+                  ? 'bg-primary text-on-primary'
+                  : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
               {lang === 'bn' ? 'গন্তব্য' : 'Destinations'}
             </Link>
             <Link
               href={staysHref}
+              aria-current={isStaysActive ? 'page' : undefined}
               onClick={() => setMobileOpen(false)}
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
-                isStaysActive ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+                isStaysActive
+                  ? 'bg-primary text-on-primary'
+                  : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
               {lang === 'bn' ? 'হোটেল' : 'Stays'}
             </Link>
             <Link
               href={diningHref}
+              aria-current={isDiningActive ? 'page' : undefined}
               onClick={() => setMobileOpen(false)}
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
-                isDiningActive ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+                isDiningActive
+                  ? 'bg-primary text-on-primary'
+                  : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
               {lang === 'bn' ? 'খাবার' : 'Dining'}
             </Link>
             <Link
               href={sunbedsHref}
+              aria-current={isSunbedsActive ? 'page' : undefined}
               onClick={() => setMobileOpen(false)}
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
-                isSunbedsActive ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+                isSunbedsActive
+                  ? 'bg-primary text-on-primary'
+                  : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
               {lang === 'bn' ? 'সানবেড' : 'Sunbeds'}
             </Link>
             <Link
               href="/photographers"
+              aria-current={pathname.startsWith('/photographers') ? 'page' : undefined}
               onClick={() => setMobileOpen(false)}
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
-                pathname.startsWith('/photographers') ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+                pathname.startsWith('/photographers')
+                  ? 'bg-primary text-on-primary'
+                  : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
               {lang === 'bn' ? 'ফটোগ্রাফার' : 'Photographers'}
             </Link>
             <Link
               href="/trips"
+              aria-current={pathname.startsWith('/trips') ? 'page' : undefined}
               onClick={() => setMobileOpen(false)}
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
-                pathname.startsWith('/trips') ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+                pathname.startsWith('/trips')
+                  ? 'bg-primary text-on-primary'
+                  : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
               {lang === 'bn' ? 'ট্রিপ' : 'Trips'}
             </Link>
             <Link
               href="/saved"
+              aria-current={pathname.startsWith('/saved') ? 'page' : undefined}
               onClick={() => setMobileOpen(false)}
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
-                pathname.startsWith('/saved') ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+                pathname.startsWith('/saved')
+                  ? 'bg-primary text-on-primary'
+                  : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
               {lang === 'bn' ? 'সংরক্ষিত' : 'Saved'}
             </Link>
             <Link
               href="/search"
+              aria-current={pathname.startsWith('/search') ? 'page' : undefined}
               onClick={() => setMobileOpen(false)}
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
-                pathname.startsWith('/search') ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+                pathname.startsWith('/search')
+                  ? 'bg-primary text-on-primary'
+                  : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
               {lang === 'bn' ? 'অনুসন্ধান' : 'Search'}
             </Link>
           </nav>
+          <div className="mt-3 flex items-center justify-between gap-3 border-t border-line pt-3 sm:hidden">
+            <HelpTopButton />
+            <div
+              className="flex items-center gap-1 rounded-full border border-line p-1"
+              role="group"
+              aria-label="Language"
+            >
+              {(['bn', 'en'] as const).map((language) => (
+                <button
+                  key={language}
+                  type="button"
+                  aria-pressed={lang === language}
+                  onClick={() => setLang(language)}
+                  className={cn(
+                    'min-h-11 min-w-11 rounded-full px-3 text-label',
+                    lang === language
+                      ? 'bg-primary text-on-primary'
+                      : 'text-muted hover:bg-surface-alt',
+                  )}
+                >
+                  {language === 'bn' ? 'বাং' : 'EN'}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </header>
