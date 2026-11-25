@@ -169,7 +169,7 @@ Coastline/
 ## Prerequisites
 
 Before running the application, ensure you have the following installed:
-- **Node.js**: `v22.0.0` or higher (Node 22 LTS recommended)
+- **Node.js**: `v24.11.1` for this project (see `.nvmrc`; Node 22–24 is supported)
 - **pnpm**: `v9.0.0` or higher (`corepack enable pnpm` or `npm i -g pnpm`)
 - **Docker & Docker Compose**: (Recommended for running PostgreSQL locally) or an existing PostgreSQL 16+ instance.
 
@@ -182,10 +182,15 @@ Before running the application, ensure you have the following installed:
 ```bash
 git clone https://github.com/Toddler-Lab/Coastline.git
 cd Coastline
+nvm use  # reads .nvmrc; run nvm install first if the version is not installed
 
 # Install all workspace dependencies
 pnpm install
 ```
+
+If you use `nvm`, run `nvm use` from the repository root before `pnpm dev` too. This selects
+the version in `.nvmrc` for the current shell only; your global Node default stays as-is.
+The API uses port 3001 and the web dev script uses port 3000 even when your shell exports `PORT=3001`.
 
 ### 2. Configure Environment Variables
 
