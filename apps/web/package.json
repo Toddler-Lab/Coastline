@@ -7,7 +7,7 @@
     "predev": "node scripts/sync-maplibre-worker.mjs",
     "dev": "next dev",
     "prebuild": "node scripts/sync-maplibre-worker.mjs",
-    "build": "next build --webpack",
+    "build": "next build",
     "start": "next start",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"

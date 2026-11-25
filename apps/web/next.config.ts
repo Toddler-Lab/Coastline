@@ -1,12 +1,18 @@
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { NextConfig } from 'next';
 
 const apiUrl = process.env.API_INTERNAL_URL ?? 'http://127.0.0.1:3001';
+const monorepoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
 /** The destination the pre-v2 routes belonged to. */
 const LEGACY_DESTINATION = 'coxs-bazar';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  turbopack: {
+    root: monorepoRoot,
+  },
   // The dev server only allows its own hostname by default. This demo is opened through
   // both `localhost` and `127.0.0.1`, so allow the loopback alias too. Without it the
   // browser blocks the dev client runtime and the page never hydrates.

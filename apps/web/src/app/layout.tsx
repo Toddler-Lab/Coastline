@@ -70,7 +70,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${inter.variable} ${hind.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-dvh">
+      <body className="min-h-dvh" suppressHydrationWarning>
         <a
           href="#main"
           className="fixed left-4 top-4 z-[400] -translate-y-24 rounded-md bg-primary px-4 py-3 text-label text-on-primary focus:translate-y-0"
