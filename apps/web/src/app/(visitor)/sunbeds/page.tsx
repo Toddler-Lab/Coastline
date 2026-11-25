@@ -135,7 +135,7 @@ export default async function SunbedsHubPage() {
                     </div>
                     <Link
                       href={sunbedPickerHref(point)}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-md transition-all hover:bg-primary/90 hover:scale-105"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-action-bg px-4 py-2 text-xs font-bold text-action-fg shadow-md transition-all hover:bg-action-bg/90 hover:scale-105"
                     >
                       Pick Beds <ArrowRight className="size-3.5" />
                     </Link>

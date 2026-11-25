@@ -75,7 +75,7 @@ export default async function SearchPage({
                   <Link
                     key={term}
                     href={`/search?q=${encodeURIComponent(term)}`}
-                    className="rounded-full bg-surface-alt px-3.5 py-1.5 text-xs font-semibold text-fg transition-colors hover:bg-primary hover:text-white"
+                    className="rounded-full bg-surface-alt px-3.5 py-1.5 text-xs font-semibold text-fg transition-colors hover:bg-action-bg hover:text-action-fg"
                   >
                     {term}
                   </Link>

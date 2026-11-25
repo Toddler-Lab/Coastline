@@ -43,7 +43,7 @@ export default function AboutPage() {
           <div className="mt-4">
             <Link
               href="/provider"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-action-bg px-4 py-2 text-xs font-bold text-action-fg shadow-md hover:bg-action-bg/90 transition-colors"
             >
               Open Provider Portal →
             </Link>

@@ -138,7 +138,7 @@ export function AboutProjectSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
             </Link>
             <Link
               href="/destinations"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-action-bg px-5 py-2.5 text-xs font-bold text-action-fg shadow-md hover:bg-action-bg/90 transition-colors"
             >
               {lang === 'bn' ? 'গন্তব্যগুলো দেখুন' : 'Explore Territories'} <ArrowRight className="size-3.5" />
             </Link>

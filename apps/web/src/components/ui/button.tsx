@@ -9,7 +9,8 @@ const BASE =
   'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-label transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50';
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-primary text-on-primary hover:brightness-110 active:brightness-95',
+  primary:
+    'rounded-xl bg-action-bg text-action-fg shadow-sm hover:bg-action-bg/90 hover:scale-105 active:scale-100',
   secondary: 'border border-line bg-surface text-fg hover:bg-surface-alt',
   text: 'text-primary hover:bg-primary-soft',
   ghost: 'text-fg hover:bg-surface-alt',
@@ -88,7 +89,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
         variant === 'ghost' && 'text-fg hover:bg-surface-alt',
         variant === 'secondary' &&
           'border border-line bg-surface text-fg shadow-soft hover:bg-surface-alt',
-        variant === 'primary' && 'bg-primary text-on-primary hover:brightness-110',
+        variant === 'primary' && 'bg-action-bg text-action-fg hover:bg-action-bg/90',
         className,
       )}
       {...rest}

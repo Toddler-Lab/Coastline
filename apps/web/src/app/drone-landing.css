@@ -40,13 +40,7 @@
   max-width: 100%;
 }
 
-.drone-landing-scope a {
-  color: inherit;
-}
-
-.drone-landing-scope button {
-  font: inherit;
-  color: inherit;
+:where(.drone-landing-scope button) {
   cursor: pointer;
 }
 
@@ -273,7 +267,7 @@
 }
 
 .dl-nav.solid .dl-lang button[aria-pressed='true'] {
-  background: var(--primary) !important;
+  background: var(--action-bg) !important;
   color: var(--on-media) !important;
   font-weight: 700;
 }
@@ -291,7 +285,7 @@
 
 .dl-nav.solid .dl-btn-light,
 .dl-nav.solid .dl-nav-cta {
-  background: var(--primary) !important;
+  background: var(--action-bg) !important;
   color: var(--on-media) !important;
   font-weight: 700;
   box-shadow: 0 4px 14px rgba(14, 110, 106, 0.25);
@@ -340,8 +334,8 @@
 }
 
 :root[data-theme='dark'] .dl-nav.solid .dl-lang button[aria-pressed='true'] {
-  background: var(--primary) !important;
-  color: var(--on-primary-dark) !important;
+  background: var(--action-bg) !important;
+  color: var(--action-fg) !important;
   font-weight: 700;
 }
 
@@ -358,8 +352,8 @@
 
 :root[data-theme='dark'] .dl-nav.solid .dl-btn-light,
 :root[data-theme='dark'] .dl-nav.solid .dl-nav-cta {
-  background: var(--primary) !important;
-  color: var(--on-primary-dark) !important;
+  background: var(--action-bg) !important;
+  color: var(--action-fg) !important;
   font-weight: 700;
   box-shadow: 0 4px 14px rgba(95, 208, 198, 0.25);
   border: 1px solid transparent;
@@ -367,8 +361,8 @@
 
 :root[data-theme='dark'] .dl-nav.solid .dl-btn-light:hover,
 :root[data-theme='dark'] .dl-nav.solid .dl-nav-cta:hover {
-  background: var(--primary-hover) !important;
-  color: var(--on-primary-dark) !important;
+  background: var(--action-bg) !important;
+  color: var(--action-fg) !important;
 }
 
 /* System Dark Mode support for Scrolled Nav */
@@ -408,8 +402,8 @@
   }
 
   :root:not([data-theme='light']) .dl-nav.solid .dl-lang button[aria-pressed='true'] {
-    background: var(--primary) !important;
-    color: var(--on-primary-dark) !important;
+    background: var(--action-bg) !important;
+    color: var(--action-fg) !important;
     font-weight: 700;
   }
 
@@ -426,8 +420,8 @@
 
   :root:not([data-theme='light']) .dl-nav.solid .dl-btn-light,
   :root:not([data-theme='light']) .dl-nav.solid .dl-nav-cta {
-    background: var(--primary) !important;
-    color: var(--on-primary-dark) !important;
+    background: var(--action-bg) !important;
+    color: var(--action-fg) !important;
     font-weight: 700;
     box-shadow: 0 4px 14px rgba(95, 208, 198, 0.25);
     border: 1px solid transparent;
@@ -435,8 +429,8 @@
 
   :root:not([data-theme='light']) .dl-nav.solid .dl-btn-light:hover,
   :root:not([data-theme='light']) .dl-nav.solid .dl-nav-cta:hover {
-    background: var(--primary-hover) !important;
-    color: var(--on-primary-dark) !important;
+    background: var(--action-bg) !important;
+    color: var(--action-fg) !important;
   }
 }
 
@@ -464,7 +458,7 @@
 }
 
 .dl-btn-primary {
-  background: var(--primary);
+  background: var(--action-bg);
   color: var(--on-media) !important;
   font-weight: 700;
 }
@@ -475,23 +469,23 @@
 }
 
 :root[data-theme='dark'] .dl-btn-primary {
-  background: var(--primary);
-  color: var(--on-primary-dark) !important;
+  background: var(--action-bg);
+  color: var(--action-fg) !important;
 }
 
 :root[data-theme='dark'] .dl-btn-primary:hover {
-  background: var(--primary-hover);
-  color: var(--on-primary-dark) !important;
+  background: var(--action-bg);
+  color: var(--action-fg) !important;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .dl-btn-primary {
-    background: var(--primary);
-    color: var(--on-primary-dark) !important;
+    background: var(--action-bg);
+    color: var(--action-fg) !important;
   }
   :root:not([data-theme='light']) .dl-btn-primary:hover {
-    background: var(--primary-hover);
-    color: var(--on-primary-dark) !important;
+    background: var(--action-bg);
+    color: var(--action-fg) !important;
   }
 }
 
@@ -2954,7 +2948,7 @@
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
-  background: var(--primary);
+  background: var(--action-bg);
   color: var(--on-media) !important;
   transition: transform 0.2s, background 0.2s;
 }
@@ -3002,23 +2996,23 @@
 }
 
 :root[data-theme='dark'] .dl-lcard-btn {
-  background: var(--primary);
-  color: var(--on-primary-dark) !important;
+  background: var(--action-bg);
+  color: var(--action-fg) !important;
 }
 
 :root[data-theme='dark'] .dl-lcard-btn:hover {
-  background: var(--primary-hover);
-  color: var(--on-primary-dark) !important;
+  background: var(--action-bg);
+  color: var(--action-fg) !important;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .dl-lcard-btn {
-    background: var(--primary);
-    color: var(--on-primary-dark) !important;
+    background: var(--action-bg);
+    color: var(--action-fg) !important;
   }
   :root:not([data-theme='light']) .dl-lcard-btn:hover {
-    background: var(--primary-hover);
-    color: var(--on-primary-dark) !important;
+    background: var(--action-bg);
+    color: var(--action-fg) !important;
   }
 }
 
@@ -3037,8 +3031,8 @@
 }
 
 :root[data-theme='dark'] .dl-tabs a.on {
-  background: var(--primary);
-  color: var(--on-primary-dark) !important;
+  background: var(--action-bg);
+  color: var(--action-fg) !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -3057,8 +3051,8 @@
   }
 
   :root:not([data-theme='light']) .dl-tabs a.on {
-    background: var(--primary);
-    color: var(--on-primary-dark) !important;
+    background: var(--action-bg);
+    color: var(--action-fg) !important;
   }
 }
 

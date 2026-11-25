@@ -668,7 +668,7 @@ export function DestinationDroneView({ destination, inventory, slug }: Destinati
                 onClick={() => setSelectedFilterSpot('all')}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   selectedFilterSpot === 'all'
-                    ? 'bg-primary text-white shadow-sm'
+                    ? 'bg-action-bg text-action-fg shadow-sm'
                     : 'bg-surface border border-line text-muted hover:border-primary/50'
                 }`}
               >
@@ -686,7 +686,7 @@ export function DestinationDroneView({ destination, inventory, slug }: Destinati
                     onClick={() => setSelectedFilterSpot(sSlug)}
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                       selectedFilterSpot === sSlug
-                        ? 'bg-primary text-white shadow-sm'
+                        ? 'bg-action-bg text-action-fg shadow-sm'
                         : 'bg-surface border border-line text-muted hover:border-primary/50'
                     }`}
                   >

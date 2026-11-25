@@ -69,7 +69,7 @@ export default async function TripsPage({
                 className={cn(
                   'inline-flex h-10 items-center gap-2 rounded-full px-4 text-xs font-semibold transition-all',
                   tab === item.id
-                    ? 'bg-primary text-white shadow-md shadow-primary/20'
+                    ? 'bg-action-bg text-action-fg shadow-md shadow-primary/20'
                     : 'bg-surface-alt/70 text-muted hover:bg-surface-alt hover:text-fg',
                 )}
               >

@@ -71,7 +71,7 @@ export default async function StaysPage({
               aria-current={active ? 'page' : undefined}
               className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
                 active
-                  ? 'bg-primary text-white shadow-md'
+                  ? 'bg-action-bg text-action-fg shadow-md'
                   : 'bg-surface border border-line text-muted hover:border-primary/40 hover:text-fg'
               }`}
             >
@@ -87,25 +87,25 @@ export default async function StaysPage({
           <span className="font-medium text-muted">Spots in Cox&apos;s Bazar:</span>
           <Link
             href="/d/coxs-bazar/stay"
-            className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-primary hover:text-white"
+            className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-action-bg hover:text-action-fg"
           >
             All spots
           </Link>
           <Link
             href="/d/coxs-bazar/stay?spot=laboni"
-            className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-primary hover:text-white"
+            className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-action-bg hover:text-action-fg"
           >
             Laboni Beach
           </Link>
           <Link
             href="/d/coxs-bazar/stay?spot=kolatoli"
-            className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-primary hover:text-white"
+            className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-action-bg hover:text-action-fg"
           >
             Kolatoli
           </Link>
           <Link
             href="/d/coxs-bazar/stay?spot=inani"
-            className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-primary hover:text-white"
+            className="rounded-full bg-surface-alt px-3 py-1 font-medium text-fg transition-colors hover:bg-action-bg hover:text-action-fg"
           >
             Inani Coral Beach
           </Link>
@@ -184,7 +184,7 @@ export default async function StaysPage({
                       <span className="text-xs font-normal text-muted"> / night</span>
                     </p>
                   </div>
-                  <span className="inline-flex items-center rounded-xl bg-primary/10 px-4 py-2 text-xs font-bold text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                  <span className="inline-flex items-center rounded-xl bg-primary/10 px-4 py-2 text-xs font-bold text-primary group-hover:bg-action-bg group-hover:text-action-fg transition-colors">
                     View Rooms →
                   </span>
                 </div>

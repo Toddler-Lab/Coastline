@@ -21,7 +21,7 @@ export default function InboxPage() {
             type="button"
             className={`rounded-full px-4 py-2 text-xs font-semibold transition-all ${
               idx === 0
-                ? 'bg-primary text-white shadow-md shadow-primary/20'
+                ? 'bg-action-bg text-action-fg shadow-md shadow-primary/20'
                 : 'bg-surface-alt/70 text-muted hover:bg-surface-alt hover:text-fg'
             }`}
           >
@@ -48,7 +48,7 @@ export default function InboxPage() {
               <div className="mt-3 flex gap-2">
                 <Link
                   href="/trips"
-                  className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary hover:bg-primary hover:text-white transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary hover:bg-action-bg hover:text-action-fg transition-colors"
                 >
                   <CalendarDays className="size-3.5" /> View Active Trips →
                 </Link>

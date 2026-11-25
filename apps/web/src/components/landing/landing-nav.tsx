@@ -179,7 +179,7 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
                 isDestActive
-                  ? 'bg-primary text-on-primary'
+                  ? 'bg-action-bg text-action-fg'
                   : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
@@ -192,7 +192,7 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
                 isStaysActive
-                  ? 'bg-primary text-on-primary'
+                  ? 'bg-action-bg text-action-fg'
                   : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
@@ -205,7 +205,7 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
                 isDiningActive
-                  ? 'bg-primary text-on-primary'
+                  ? 'bg-action-bg text-action-fg'
                   : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
@@ -218,7 +218,7 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
                 isSunbedsActive
-                  ? 'bg-primary text-on-primary'
+                  ? 'bg-action-bg text-action-fg'
                   : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
@@ -231,7 +231,7 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
                 pathname.startsWith('/photographers')
-                  ? 'bg-primary text-on-primary'
+                  ? 'bg-action-bg text-action-fg'
                   : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
@@ -244,7 +244,7 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
                 pathname.startsWith('/trips')
-                  ? 'bg-primary text-on-primary'
+                  ? 'bg-action-bg text-action-fg'
                   : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
@@ -257,7 +257,7 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
                 pathname.startsWith('/saved')
-                  ? 'bg-primary text-on-primary'
+                  ? 'bg-action-bg text-action-fg'
                   : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
@@ -270,7 +270,7 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
               className={cn(
                 'rounded-xl px-3 py-2.5 font-semibold transition-colors',
                 pathname.startsWith('/search')
-                  ? 'bg-primary text-on-primary'
+                  ? 'bg-action-bg text-action-fg'
                   : 'text-muted hover:bg-surface-alt hover:text-fg',
               )}
             >
@@ -293,7 +293,7 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
                   className={cn(
                     'min-h-11 min-w-11 rounded-full px-3 text-label',
                     lang === language
-                      ? 'bg-primary text-on-primary'
+                      ? 'bg-action-bg text-action-fg'
                       : 'text-muted hover:bg-surface-alt',
                   )}
                 >

@@ -127,7 +127,7 @@ export function DestinationsSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                         <Link
                           key={spot.id}
                           href={`/d/${dest.id}/s/${spot.id}`}
-                          className="inline-flex items-center gap-1 rounded-full bg-surface-alt px-3 py-1 text-xs font-medium text-fg transition-colors hover:bg-primary hover:text-white"
+                          className="inline-flex items-center gap-1 rounded-full bg-surface-alt px-3 py-1 text-xs font-medium text-fg transition-colors hover:bg-action-bg hover:text-action-fg"
                         >
                           <MapPin className="size-3 text-muted group-hover:text-white" />
                           {lang === 'bn' ? spot.bn : spot.name}
@@ -143,7 +143,7 @@ export function DestinationsSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                     </span>
                     <Link
                       href={`/d/${dest.id}`}
-                      className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:bg-primary/90 hover:scale-105"
+                      className="inline-flex items-center gap-2 rounded-xl bg-action-bg px-5 py-2.5 text-xs font-bold text-action-fg shadow-md transition-all hover:bg-action-bg/90 hover:scale-105"
                     >
                       Explore {dest.name} <ArrowRight className="size-3.5" />
                     </Link>

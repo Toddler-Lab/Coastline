@@ -93,7 +93,7 @@ function SunbedPointCard({ point }: { point: BeachPointSummary }) {
               <span className="text-xs font-normal text-muted"> / hr</span>
             </p>
           </div>
-          <span className="inline-flex items-center rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+          <span className="inline-flex items-center rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors group-hover:bg-action-bg group-hover:text-action-fg">
             Select Beds →
           </span>
         </div>
@@ -304,7 +304,7 @@ export function ServiceListView({
                   </p>
                   <Link
                     href={pkg.href}
-                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-md transition-all hover:bg-primary/90"
+                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-action-bg px-4 py-2 text-xs font-bold text-action-fg shadow-md transition-all hover:bg-action-bg/90"
                   >
                     {pkg.cta} <ArrowRight className="size-3.5" />
                   </Link>

@@ -64,7 +64,7 @@ export default function SavedPage() {
               onClick={() => setFilter(tab.id)}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
                 isSelected
-                  ? 'bg-primary text-white shadow-md'
+                  ? 'bg-action-bg text-action-fg shadow-md'
                   : 'border border-line bg-surface text-muted hover:bg-surface-alt hover:text-fg'
               }`}
             >
@@ -127,7 +127,7 @@ export default function SavedPage() {
               <div className="mt-4 pt-3 border-t border-line/60">
                 <Link
                   href={item.href || '/'}
-                  className="inline-flex w-full items-center justify-center rounded-xl bg-surface-alt py-2 text-sm font-semibold text-fg transition-colors hover:bg-primary hover:text-white"
+                  className="inline-flex w-full items-center justify-center rounded-xl bg-surface-alt py-2 text-sm font-semibold text-fg transition-colors hover:bg-action-bg hover:text-action-fg"
                 >
                   View & Book →
                 </Link>

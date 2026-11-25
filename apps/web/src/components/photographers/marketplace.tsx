@@ -826,7 +826,7 @@ export function PhotographerMarketplace() {
                               className={cn(
                                 'absolute right-2 top-2 grid size-7 place-items-center rounded-full',
                                 selectedPhotos.includes(i)
-                                  ? 'bg-primary text-on-primary'
+                                  ? 'bg-action-bg text-action-fg'
                                   : 'border border-line bg-surface',
                               )}
                             >

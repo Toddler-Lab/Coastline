@@ -147,7 +147,7 @@ export function CheckoutFlow({ draftId }: { draftId: string }) {
         <div className="mt-6 grid gap-3">
           <Link
             href={`/trips/${encodeURIComponent(placed.ref)}`}
-            className="flex items-center justify-center rounded-2xl bg-primary px-6 py-4 font-bold text-white shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all"
+            className="flex items-center justify-center rounded-2xl bg-action-bg px-6 py-4 font-bold text-action-fg shadow-lg shadow-primary/25 hover:bg-action-bg/90 transition-all"
           >
             Open Digital Ticket & QR Pass →
           </Link>

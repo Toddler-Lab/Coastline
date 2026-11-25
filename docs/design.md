@@ -73,6 +73,8 @@ Components use role tokens only, never raw values.
 | `border` | `#DDE3E4` | `#2C3638` | Dividers, outlines |
 | `primary` | `#0E6E6A` | `#5FD0C6` | Brand, primary buttons, links, selection |
 | `on-primary` | `#FFFFFF` | `#00302D` | Text on primary |
+| `action-bg` | `#0E6E6A` | `#08403D` | Filled actions and selected controls |
+| `action-fg` | `#FFFFFF` | `#E8EEEE` | Text and icons on filled actions |
 | `primary-soft` | `#DDF2EF` | `#123B39` | Selected chip, active tab background |
 | `accent` | per destination | per destination | Hero tint, destination badge |
 | `success` | `#1E7B3A` | `#7BD88F` | Confirmed, available |

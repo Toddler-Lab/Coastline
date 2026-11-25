@@ -64,7 +64,7 @@ export function LanguageSwitch({ overMedia = false }: { overMedia?: boolean }) {
             (lang === code
               ? overMedia
                 ? 'bg-white text-ink'
-                : 'bg-primary text-on-primary'
+                : 'bg-action-bg text-action-fg'
               : overMedia
                 ? 'text-white/80 hover:text-white'
                 : 'text-muted hover:text-fg')

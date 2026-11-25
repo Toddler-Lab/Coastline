@@ -432,7 +432,7 @@ export function SunbedPicker({
                       key={bed.id}
                       className={cn(
                         'relative flex min-h-14 cursor-pointer flex-col items-center justify-center rounded-xl border text-center transition-all duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary',
-                        state === 'selected' && 'border-primary bg-primary text-white shadow-md scale-105',
+                        state === 'selected' && 'border-primary bg-action-bg text-action-fg shadow-md scale-105',
                         state === 'free' && 'border-emerald-500/30 bg-surface hover:bg-emerald-500/5 hover:border-emerald-500',
                         state === 'mine' && 'border-dashed border-primary bg-primary/10',
                         (state === 'booked' || state === 'off') &&
