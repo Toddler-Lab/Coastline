@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ComingSoon } from '@/components/workspace/parts';
+import { ComingSoon } from '@/components/workspace/staff-page-shell';
 
 export const metadata: Metadata = { title: 'Lost and found' };
 

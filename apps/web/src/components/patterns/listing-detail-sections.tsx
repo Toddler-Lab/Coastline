@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { Photo } from './hub';
+import { Photo } from './spot-hub-sections';
 
 /** Swipe gallery on phones, a grid of up to five on expanded screens. */
 export function Gallery({ images, alt }: { images: string[]; alt: string }) {

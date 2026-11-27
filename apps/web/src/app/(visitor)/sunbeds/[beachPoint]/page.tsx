@@ -5,7 +5,7 @@ import { serverApi } from '@/lib/api';
 import { getViewer } from '@/lib/session';
 import { apiErrorMessage } from '@/lib/places-server';
 import { addDays, dhakaDateKey, isDateKey } from '@/lib/format';
-import { ErrorState } from '@/components/ui/states';
+import { ErrorState } from '@/components/ui/feedback-states';
 import { SunbedPicker } from '@/components/flows/sunbed-picker';
 
 export const metadata: Metadata = { title: 'Sunbeds' };

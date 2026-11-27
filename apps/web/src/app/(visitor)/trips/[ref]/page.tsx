@@ -35,15 +35,15 @@ import { formatDateTime, formatIsoTime, formatMoney } from '@/lib/format';
 import { StatusBadge } from '@/components/ui/badge';
 import { buttonClass } from '@/components/ui/button';
 import { Card, DetailRows } from '@/components/ui/display';
-import { ErrorState } from '@/components/ui/states';
-import { PageHeader } from '@/components/patterns/hub';
+import { ErrorState } from '@/components/ui/feedback-states';
+import { PageHeader } from '@/components/patterns/spot-hub-sections';
 import {
   AutoRefresh,
   CancelBooking,
   PrintButton,
   ProgressSteps,
   TicketQr,
-} from '@/components/trips/trip-parts';
+} from '@/components/trips/trip-sections';
 
 type Params = { ref: string };
 

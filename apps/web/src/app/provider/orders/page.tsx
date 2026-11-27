@@ -5,7 +5,7 @@ import { getViewer } from '@/lib/session';
 import { apiErrorMessage } from '@/lib/places-server';
 import { ChipLink, ChipRow } from '@/components/ui/chip';
 import { KitchenBoard } from '@/components/workspace/kitchen-board';
-import { StaffPage } from '@/components/workspace/parts';
+import { StaffPage } from '@/components/workspace/staff-page-shell';
 
 export const metadata: Metadata = { title: 'Kitchen' };
 

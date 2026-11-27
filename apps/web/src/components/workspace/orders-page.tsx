@@ -5,10 +5,10 @@ import { apiErrorMessage } from '@/lib/places-server';
 import { dhakaDateKey, isDateKey } from '@/lib/format';
 import { shortPointName } from '@/lib/booking';
 import { ChipLink, ChipRow } from '@/components/ui/chip';
-import { ErrorState } from '@/components/ui/states';
+import { ErrorState } from '@/components/ui/feedback-states';
 import { DateNav } from './date-nav';
 import { OrderList } from './order-list';
-import { StaffPage } from './parts';
+import { StaffPage } from './staff-page-shell';
 
 /** Shared by Desk arrivals and Admin bookings; the mode decides the actions. */
 export async function OrdersPage({

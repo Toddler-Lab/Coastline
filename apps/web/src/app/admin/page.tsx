@@ -7,9 +7,9 @@ import { apiErrorMessage } from '@/lib/places-server';
 import { dhakaDateKey, formatMoney, isDateKey } from '@/lib/format';
 import { shortPointName } from '@/lib/booking';
 import { Card } from '@/components/ui/display';
-import { ErrorState } from '@/components/ui/states';
+import { ErrorState } from '@/components/ui/feedback-states';
 import { DateNav } from '@/components/workspace/date-nav';
-import { MetricCard, StaffPage } from '@/components/workspace/parts';
+import { MetricCard, StaffPage } from '@/components/workspace/staff-page-shell';
 
 export const metadata: Metadata = { title: 'Overview' };
 

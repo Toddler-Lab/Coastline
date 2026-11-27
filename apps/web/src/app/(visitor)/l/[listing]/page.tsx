@@ -27,8 +27,8 @@ import { VENUE_KIND_LABELS } from '@/lib/dining/admin';
 import { buttonClass } from '@/components/ui/button';
 import { Card, PriceUnit, Section } from '@/components/ui/display';
 import { Badge } from '@/components/ui/badge';
-import { ErrorState } from '@/components/ui/states';
-import { DetailLayout, FactChips, Gallery } from '@/components/patterns/detail';
+import { ErrorState } from '@/components/ui/feedback-states';
+import { DetailLayout, FactChips, Gallery } from '@/components/patterns/listing-detail-sections';
 
 type Params = { listing: string };
 

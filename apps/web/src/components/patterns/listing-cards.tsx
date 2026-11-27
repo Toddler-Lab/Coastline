@@ -20,7 +20,7 @@ import { SERVICES } from '@/lib/services';
 import { findDroneSpot } from '@/lib/drone-landing-data';
 import { Badge } from '@/components/ui/badge';
 import { PriceUnit } from '@/components/ui/display';
-import { AerialImage, Photo } from './hub';
+import { AerialImage, Photo } from './spot-hub-sections';
 
 function CardShell({
   href,

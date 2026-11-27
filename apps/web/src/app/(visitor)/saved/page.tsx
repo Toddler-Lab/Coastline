@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { BedDouble, Heart, MapPin, Trash2, UtensilsCrossed } from 'lucide-react';
 import type { SavedItemType } from '@coastline/api-contracts';
 import { useSaved } from '@/components/patterns/save-button';
-import { PageHeader } from '@/components/patterns/hub';
-import { EmptyState, Skeleton } from '@/components/ui/states';
+import { PageHeader } from '@/components/patterns/spot-hub-sections';
+import { EmptyState, Skeleton } from '@/components/ui/feedback-states';
 import { clientApi } from '@/lib/api';
 
 type FilterType = 'ALL' | SavedItemType;

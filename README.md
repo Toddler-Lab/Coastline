@@ -442,6 +442,7 @@ As codified in [AGENTS.md](AGENTS.md):
 | Database and migrations | [docs/data-model.md](docs/data-model.md) |
 | Endpoints | [docs/api.md](docs/api.md) |
 | Booking, photographers, payments, lost and found, complaints | [docs/workflows.md](docs/workflows.md) |
+| Photographers & rides marketplaces | [docs/photographers.md](docs/photographers.md), [docs/rides.md](docs/rides.md) |
 | Roles, scopes, uploads, privacy | [docs/security.md](docs/security.md) |
 | Modules and structure | [docs/architecture.md](docs/architecture.md), [ADR-001](docs/ADR-001-stack.md), [ADR-002](docs/ADR-002-multi-destination-platform.md) |
 | Tests | [docs/testing.md](docs/testing.md) |

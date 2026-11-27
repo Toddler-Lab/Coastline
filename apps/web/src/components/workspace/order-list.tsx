@@ -11,7 +11,7 @@ import { SERVICES } from '@/lib/services';
 import { StatusBadge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/display';
-import { EmptyState, Notice } from '@/components/ui/states';
+import { EmptyState, Notice } from '@/components/ui/feedback-states';
 import { useToast } from '@/components/ui/toast';
 import { ConfirmCancel } from './confirm-cancel';
 

@@ -11,9 +11,9 @@ import { cn } from '@/lib/cn';
 import { addDays, formatDateKey, formatMoney, slotLabel } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Stepper } from '@/components/ui/display';
-import { ErrorState, Notice, Skeleton } from '@/components/ui/states';
+import { ErrorState, Notice, Skeleton } from '@/components/ui/feedback-states';
 import { useSession } from '@/components/patterns/session';
-import { DateStrip, FlowShell } from '@/components/patterns/flow';
+import { DateStrip, FlowShell } from '@/components/patterns/booking-flow-shell';
 import { OrderSummary } from '@/components/patterns/order-summary';
 
 const STEPS = ['Dates and guests', 'Choose a room'];

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getViewer } from '@/lib/session';
 import { WorkspaceShell } from '@/components/workspace/workspace-shell';
-import { WorkspaceDenied } from '@/components/workspace/parts';
+import { WorkspaceDenied } from '@/components/workspace/staff-page-shell';
 
 export const metadata: Metadata = {
   title: { default: 'Admin', template: '%s · Admin · Coastline' },

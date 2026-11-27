@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Lock, ShieldCheck } from 'lucide-react';
-import { PageHeader } from '@/components/patterns/hub';
+import { PageHeader } from '@/components/patterns/spot-hub-sections';
 
 export const metadata: Metadata = { title: 'Privacy Policy | Coastline' };
 

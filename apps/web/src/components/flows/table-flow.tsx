@@ -20,9 +20,9 @@ import { formatDateKey, formatIsoTime, formatMoney, formatTimeRange } from '@/li
 import { Button } from '@/components/ui/button';
 import { ChoiceGroup, Stepper } from '@/components/ui/display';
 import { Field, TextArea } from '@/components/ui/field';
-import { EmptyState, ErrorState, Notice, Skeleton } from '@/components/ui/states';
+import { EmptyState, ErrorState, Notice, Skeleton } from '@/components/ui/feedback-states';
 import { useSession } from '@/components/patterns/session';
-import { DateStrip, FlowShell } from '@/components/patterns/flow';
+import { DateStrip, FlowShell } from '@/components/patterns/booking-flow-shell';
 import { OrderSummary } from '@/components/patterns/order-summary';
 
 const STEPS = ['Date and party', 'Pick a time'];

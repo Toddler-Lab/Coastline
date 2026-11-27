@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { buttonClass } from '@/components/ui/button';
-import { ErrorState } from '@/components/ui/states';
+import { ErrorState } from '@/components/ui/feedback-states';
 
 export default function GlobalError({
   reset,

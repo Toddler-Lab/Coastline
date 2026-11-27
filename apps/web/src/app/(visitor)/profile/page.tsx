@@ -15,7 +15,7 @@ import {
 import { getViewer } from '@/lib/session';
 import { THEME_COOKIE, parseTheme } from '@/lib/theme';
 import { Avatar, Card } from '@/components/ui/display';
-import { PageHeader, RowLink } from '@/components/patterns/hub';
+import { PageHeader, RowLink } from '@/components/patterns/spot-hub-sections';
 import { ThemeChoice } from '@/components/patterns/theme-choice';
 import { WorkspaceSwitcher } from '@/components/patterns/workspace-switcher';
 

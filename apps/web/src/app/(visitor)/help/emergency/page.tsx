@@ -3,9 +3,9 @@ import { HeartPulse } from 'lucide-react';
 import { getViewer } from '@/lib/session';
 import { currentDestinationSlug, loadDestination, loadDestinations } from '@/lib/places-server';
 import { Card } from '@/components/ui/display';
-import { EmptyState } from '@/components/ui/states';
-import { EmergencyContacts, NoDispatchNote } from '@/components/patterns/help-blocks';
-import { PageHeader } from '@/components/patterns/hub';
+import { EmptyState } from '@/components/ui/feedback-states';
+import { EmergencyContacts, NoDispatchNote } from '@/components/patterns/help-sections';
+import { PageHeader } from '@/components/patterns/spot-hub-sections';
 
 export const metadata: Metadata = { title: 'Emergency' };
 

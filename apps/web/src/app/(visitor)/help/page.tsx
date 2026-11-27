@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { CANCEL_CUTOFF_MINUTES } from '@coastline/api-contracts';
 import { ChevronDown, LifeBuoy, Phone, ShieldCheck } from 'lucide-react';
-import { HelpMenu } from '@/components/patterns/help';
-import { PageHeader } from '@/components/patterns/hub';
+import { HelpMenu } from '@/components/patterns/help-drawer';
+import { PageHeader } from '@/components/patterns/spot-hub-sections';
 
 export const metadata: Metadata = { title: 'Help & Support | Coastline' };
 

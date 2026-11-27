@@ -39,11 +39,11 @@ import { Button } from '@/components/ui/button';
 import { Chip, ChipRow } from '@/components/ui/chip';
 import { ChoiceGroup } from '@/components/ui/display';
 import { Field, Select } from '@/components/ui/field';
-import { ErrorState, Notice, Skeleton } from '@/components/ui/states';
+import { ErrorState, Notice, Skeleton } from '@/components/ui/feedback-states';
 import { useToast } from '@/components/ui/toast';
 import { useSession } from '@/components/patterns/session';
-import { DateStrip } from '@/components/patterns/flow';
-import { HelpSheet } from '@/components/patterns/help';
+import { DateStrip } from '@/components/patterns/booking-flow-shell';
+import { HelpSheet } from '@/components/patterns/help-drawer';
 
 const STATE_LABEL: Record<BedWindowState | 'selected', string> = {
   free: 'Free',

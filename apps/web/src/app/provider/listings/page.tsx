@@ -9,9 +9,9 @@ import { VENUE_KIND_LABELS } from '@/lib/dining/admin';
 import { hoursRange } from '@/lib/format';
 import { StatusBadge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/display';
-import { EmptyState, ErrorState, Notice } from '@/components/ui/states';
-import { Photo } from '@/components/patterns/hub';
-import { StaffPage } from '@/components/workspace/parts';
+import { EmptyState, ErrorState, Notice } from '@/components/ui/feedback-states';
+import { Photo } from '@/components/patterns/spot-hub-sections';
+import { StaffPage } from '@/components/workspace/staff-page-shell';
 
 export const metadata: Metadata = { title: 'Listings' };
 

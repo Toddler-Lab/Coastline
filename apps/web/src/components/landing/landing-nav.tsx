@@ -6,8 +6,9 @@ import { usePathname } from 'next/navigation';
 import { Menu, Search, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { AccountMenuButton } from '@/components/patterns/workspace-switcher';
-import { HelpTopButton } from '@/components/patterns/help';
+import { HelpTopButton } from '@/components/patterns/help-drawer';
 import { useLanguage } from '@/components/patterns/language';
+import { LogoMark } from '@/components/patterns/logo';
 
 interface LandingNavProps {
   lang?: 'en' | 'bn';
@@ -59,24 +60,7 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
   return (
     <header className={`dl-nav ${isSolid ? 'solid' : ''}`} id="nav">
       <Link className="dl-logo" href="/" aria-label="Coastline home">
-        <svg viewBox="0 0 32 32" aria-hidden="true">
-          <circle cx="16" cy="16" r="15" fill="#0E6E6A" />
-          <path
-            d="M5 18c3.5-3 7-3 11 0s7.5 3 11 0"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-          />
-          <path
-            d="M7 23c3-2.4 6-2.4 9 0s6 2.4 9 0"
-            fill="none"
-            stroke="#E8A93A"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-          />
-          <circle cx="21" cy="10" r="3" fill="#E8A93A" />
-        </svg>
+        <LogoMark />
         <span className="font-extrabold tracking-tight">Coastline</span>
       </Link>
 

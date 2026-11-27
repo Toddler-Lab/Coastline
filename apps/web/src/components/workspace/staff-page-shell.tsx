@@ -3,7 +3,7 @@ import { Construction, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { buttonClass } from '@/components/ui/button';
 import { Card } from '@/components/ui/display';
-import { EmptyState } from '@/components/ui/states';
+import { EmptyState } from '@/components/ui/feedback-states';
 import { WorkspaceSwitcher } from '@/components/patterns/workspace-switcher';
 import type { Workspace } from '@/components/patterns/session';
 

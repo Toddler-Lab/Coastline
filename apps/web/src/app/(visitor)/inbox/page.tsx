@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Bell, CalendarDays, Inbox, MessageSquare, ShieldAlert, Sparkles } from 'lucide-react';
-import { PageHeader } from '@/components/patterns/hub';
+import { PageHeader } from '@/components/patterns/spot-hub-sections';
 
 export const metadata: Metadata = { title: 'Inbox & Notifications | Coastline' };
 

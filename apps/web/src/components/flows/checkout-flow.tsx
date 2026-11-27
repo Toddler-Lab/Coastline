@@ -26,9 +26,9 @@ import { cn } from '@/lib/cn';
 import { formatMoney } from '@/lib/format';
 import { Button, buttonClass } from '@/components/ui/button';
 import { Card, DetailRows } from '@/components/ui/display';
-import { EmptyState, Notice, Skeleton } from '@/components/ui/states';
+import { EmptyState, Notice, Skeleton } from '@/components/ui/feedback-states';
 import { useSession } from '@/components/patterns/session';
-import { FlowShell } from '@/components/patterns/flow';
+import { FlowShell } from '@/components/patterns/booking-flow-shell';
 import { OrderSummary } from '@/components/patterns/order-summary';
 import { useOnline } from '@/components/patterns/visitor-nav';
 

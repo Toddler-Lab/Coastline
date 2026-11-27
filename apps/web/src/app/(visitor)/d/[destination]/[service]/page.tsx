@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { getViewer } from '@/lib/session';
 import { apiErrorMessage, loadDestination, loadInventory } from '@/lib/places-server';
 import { SERVICES, isServiceKey } from '@/lib/services';
-import { ErrorState } from '@/components/ui/states';
+import { ErrorState } from '@/components/ui/feedback-states';
 import { ServiceListView, type ListParams } from '@/components/patterns/service-list';
 
 type Params = { destination: string; service: string };

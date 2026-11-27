@@ -21,7 +21,7 @@ import { formatMoney, hourLabel } from '@/lib/format';
 import { Button, IconButton } from '@/components/ui/button';
 import { Card } from '@/components/ui/display';
 import { Checkbox, Field, Input, Select, TextArea } from '@/components/ui/field';
-import { Notice } from '@/components/ui/states';
+import { Notice } from '@/components/ui/feedback-states';
 import { Sheet } from '@/components/ui/sheet';
 import { useToast } from '@/components/ui/toast';
 

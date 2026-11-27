@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { PackageOpen, PackageSearch } from 'lucide-react';
 import { Card } from '@/components/ui/display';
-import { EmptyState, Notice } from '@/components/ui/states';
-import { PageHeader } from '@/components/patterns/hub';
+import { EmptyState, Notice } from '@/components/ui/feedback-states';
+import { PageHeader } from '@/components/patterns/spot-hub-sections';
 
 export const metadata: Metadata = { title: 'Lost and found' };
 

@@ -8,7 +8,7 @@
 import process from 'node:process';
 import { PrismaClient, type PaymentMethod } from '../src/index';
 import { beachPointImageFor } from './beach-point-images';
-import { HOTELS } from './hotels-seed';
+import { HOTELS } from './seed-hotels';
 import { seedDining } from './seed-dining';
 import { BEACH_SPOT_CONTENT, COXS_BAZAR_ID, seedPlaces, seedWorkspaces } from './seed-places';
 

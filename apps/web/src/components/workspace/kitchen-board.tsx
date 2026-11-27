@@ -22,7 +22,7 @@ import { formatIsoTime, formatMoney } from '@/lib/format';
 import { StatusBadge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/display';
-import { ErrorState, Notice } from '@/components/ui/states';
+import { ErrorState, Notice } from '@/components/ui/feedback-states';
 import { useToast } from '@/components/ui/toast';
 import { ConfirmCancel } from './confirm-cancel';
 

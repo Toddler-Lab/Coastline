@@ -11,9 +11,9 @@ import { formatMoney, hoursRange } from '@/lib/format';
 import { StatusBadge } from '@/components/ui/badge';
 import { buttonClass } from '@/components/ui/button';
 import { Card } from '@/components/ui/display';
-import { ErrorState } from '@/components/ui/states';
+import { ErrorState } from '@/components/ui/feedback-states';
 import { AlertList } from '@/components/patterns/alerts';
-import { StaffPage } from '@/components/workspace/parts';
+import { StaffPage } from '@/components/workspace/staff-page-shell';
 
 export const metadata: Metadata = { title: 'Destination' };
 

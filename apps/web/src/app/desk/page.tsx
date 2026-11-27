@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { StaffPage } from '@/components/workspace/parts';
+import { StaffPage } from '@/components/workspace/staff-page-shell';
 import { TicketScanner } from '@/components/workspace/ticket-scanner';
 
 export const metadata: Metadata = { title: 'Scan' };

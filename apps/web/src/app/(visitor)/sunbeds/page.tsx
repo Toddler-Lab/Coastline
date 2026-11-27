@@ -8,8 +8,8 @@ import { apiErrorMessage } from '@/lib/places-server';
 import { formatMoney, hoursRange, slotLabel } from '@/lib/format';
 import { findDroneSpot } from '@/lib/drone-landing-data';
 import { sunbedPickerHref } from '@/lib/places';
-import { PageHeader } from '@/components/patterns/hub';
-import { ErrorState } from '@/components/ui/states';
+import { PageHeader } from '@/components/patterns/spot-hub-sections';
+import { ErrorState } from '@/components/ui/feedback-states';
 
 export const metadata: Metadata = {
   title: 'Beach Sunbeds Booking | Coastline',

@@ -4,9 +4,9 @@ import { ChevronRight, Info } from 'lucide-react';
 import { getViewer } from '@/lib/session';
 import { loadDestinations } from '@/lib/places-server';
 import { Card } from '@/components/ui/display';
-import { ErrorState, Notice } from '@/components/ui/states';
-import { AerialImage } from '@/components/patterns/hub';
-import { StaffPage } from '@/components/workspace/parts';
+import { ErrorState, Notice } from '@/components/ui/feedback-states';
+import { AerialImage } from '@/components/patterns/spot-hub-sections';
+import { StaffPage } from '@/components/workspace/staff-page-shell';
 
 export const metadata: Metadata = { title: 'Destinations' };
 

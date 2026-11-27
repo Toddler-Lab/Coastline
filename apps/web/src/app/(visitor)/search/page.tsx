@@ -10,8 +10,8 @@ import {
 } from '@/lib/places-server';
 import { buildSearchIndex, rankSuggestions } from '@/lib/search';
 import { SERVICES } from '@/lib/services';
-import { EmptyState, ErrorState } from '@/components/ui/states';
-import { PageHeader } from '@/components/patterns/hub';
+import { EmptyState, ErrorState } from '@/components/ui/feedback-states';
+import { PageHeader } from '@/components/patterns/spot-hub-sections';
 import { SearchField } from '@/components/patterns/search-field';
 
 export const metadata: Metadata = { title: 'Search' };

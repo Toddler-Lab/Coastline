@@ -34,15 +34,15 @@ import { findDroneDestination, findDroneSpot } from '@/lib/drone-landing-data';
 import { SpotHero, type SpotHeroSpot } from '@/components/landing/spot-hero';
 import { buttonClass } from '@/components/ui/button';
 import { Card, Section } from '@/components/ui/display';
-import { EmptyState, ErrorState } from '@/components/ui/states';
+import { EmptyState, ErrorState } from '@/components/ui/feedback-states';
 import { AlertList } from '@/components/patterns/alerts';
-import { HotelCard, VenueCard } from '@/components/patterns/cards';
+import { HotelCard, VenueCard } from '@/components/patterns/listing-cards';
 import {
   EmergencyContacts,
   HelpShortcuts,
   NATIONAL_EMERGENCY,
   NoDispatchNote,
-} from '@/components/patterns/help-blocks';
+} from '@/components/patterns/help-sections';
 import {
   BackLink,
   CardRow,
@@ -50,7 +50,7 @@ import {
   ImageCredit,
   ServiceTile,
   ServiceTileGrid,
-} from '@/components/patterns/hub';
+} from '@/components/patterns/spot-hub-sections';
 import { SaveButton } from '@/components/patterns/save-button';
 import { SectionTabs } from '@/components/patterns/section-tabs';
 

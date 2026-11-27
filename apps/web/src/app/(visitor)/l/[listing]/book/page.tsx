@@ -6,7 +6,7 @@ import { getViewer } from '@/lib/session';
 import { apiErrorMessage, isNotFound } from '@/lib/places-server';
 import { listingHref, parseListingId } from '@/lib/places';
 import { dhakaDateKey } from '@/lib/format';
-import { ErrorState } from '@/components/ui/states';
+import { ErrorState } from '@/components/ui/feedback-states';
 import { StayFlow } from '@/components/flows/stay-flow';
 import { TableFlow } from '@/components/flows/table-flow';
 import { FoodOrderFlow } from '@/components/flows/food-order-flow';

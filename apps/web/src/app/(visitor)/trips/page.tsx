@@ -6,8 +6,8 @@ import { loadTrips } from '@/lib/trips-server';
 import { isUpcoming, type TripItem } from '@/lib/trips';
 import { cn } from '@/lib/cn';
 import { dhakaDateKey, relativeDateLabel } from '@/lib/format';
-import { EmptyState, Notice } from '@/components/ui/states';
-import { PageHeader } from '@/components/patterns/hub';
+import { EmptyState, Notice } from '@/components/ui/feedback-states';
+import { PageHeader } from '@/components/patterns/spot-hub-sections';
 import { TripCard } from '@/components/patterns/trip-card';
 
 export const metadata: Metadata = { title: 'Trips' };

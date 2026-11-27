@@ -1,7 +1,7 @@
 import { Flag, PackageSearch, Phone, Siren } from 'lucide-react';
 import type { EmergencyContactDto } from '@coastline/api-contracts';
 import { cn } from '@/lib/cn';
-import { RowLink } from './hub';
+import { RowLink } from './spot-hub-sections';
 
 /** Used when a destination has no numbers entered yet. */
 export const NATIONAL_EMERGENCY: EmergencyContactDto = {

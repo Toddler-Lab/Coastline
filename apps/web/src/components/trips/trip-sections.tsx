@@ -8,7 +8,7 @@ import { ApiError, clientApi } from '@/lib/api';
 import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui/button';
 import { Field, TextArea } from '@/components/ui/field';
-import { Notice } from '@/components/ui/states';
+import { Notice } from '@/components/ui/feedback-states';
 import { Sheet } from '@/components/ui/sheet';
 import { useToast } from '@/components/ui/toast';
 

@@ -8,8 +8,8 @@ import { getViewer } from '@/lib/session';
 import { apiErrorMessage } from '@/lib/places-server';
 import { listingHref, venueListingId } from '@/lib/places';
 import { buttonClass } from '@/components/ui/button';
-import { ErrorState } from '@/components/ui/states';
-import { StaffPage } from '@/components/workspace/parts';
+import { ErrorState } from '@/components/ui/feedback-states';
+import { StaffPage } from '@/components/workspace/staff-page-shell';
 import { MenuEditor, VenueSettingsForm } from '@/components/workspace/venue-editor';
 
 export const metadata: Metadata = { title: 'Edit listing' };

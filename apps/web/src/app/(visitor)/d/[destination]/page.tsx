@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getViewer } from '@/lib/session';
 import { apiErrorMessage, loadDestination, loadInventory } from '@/lib/places-server';
-import { ErrorState } from '@/components/ui/states';
+import { ErrorState } from '@/components/ui/feedback-states';
 import { DestinationDroneView } from '@/components/landing/destination-drone-view';
 
 type Params = { destination: string };

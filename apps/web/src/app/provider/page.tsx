@@ -18,8 +18,8 @@ import {
 } from '@/lib/dining/admin';
 import { StatusBadge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/display';
-import { EmptyState, ErrorState } from '@/components/ui/states';
-import { MetricCard, StaffPage } from '@/components/workspace/parts';
+import { EmptyState, ErrorState } from '@/components/ui/feedback-states';
+import { MetricCard, StaffPage } from '@/components/workspace/staff-page-shell';
 
 export const metadata: Metadata = { title: 'Today' };
 

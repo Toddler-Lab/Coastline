@@ -15,7 +15,7 @@ import { StatusBadge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, DetailRows } from '@/components/ui/display';
 import { Field, Input } from '@/components/ui/field';
-import { Notice } from '@/components/ui/states';
+import { Notice } from '@/components/ui/feedback-states';
 import { useToast } from '@/components/ui/toast';
 
 type Found =

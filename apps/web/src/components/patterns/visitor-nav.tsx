@@ -96,34 +96,6 @@ export function BottomBar() {
   );
 }
 
-export function TopNavLinks() {
-  const pathname = usePathname();
-  return (
-    <ul className="flex items-center gap-1">
-      {VISITOR_NAV.map((item) => {
-        const active = item.match(pathname);
-        return (
-          <li key={item.href}>
-            <Link
-              href={item.href}
-              aria-current={active ? 'page' : undefined}
-              className={cn(
-                'inline-flex h-11 items-center gap-2 rounded-full px-3 text-label transition-colors',
-                active
-                  ? 'bg-primary-soft text-primary'
-                  : 'text-muted hover:bg-surface-alt hover:text-fg',
-              )}
-            >
-              <item.icon aria-hidden className="size-5" />
-              {item.label}
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
 /** Bar at the top while offline; tickets keep working, booking is disabled. */
 export function OfflineBar() {
   const [offline, setOffline] = useState(false);

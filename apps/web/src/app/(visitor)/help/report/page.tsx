@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { Flag, Siren } from 'lucide-react';
 import { buttonClass } from '@/components/ui/button';
 import { Card } from '@/components/ui/display';
-import { Notice } from '@/components/ui/states';
-import { PageHeader } from '@/components/patterns/hub';
+import { Notice } from '@/components/ui/feedback-states';
+import { PageHeader } from '@/components/patterns/spot-hub-sections';
 
 export const metadata: Metadata = { title: 'Report a problem' };
 

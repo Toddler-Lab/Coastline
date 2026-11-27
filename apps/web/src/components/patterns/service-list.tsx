@@ -16,9 +16,9 @@ import { SERVICES, type ServiceKey } from '@/lib/services';
 import { formatMoney, hoursRange, slotLabel } from '@/lib/format';
 import { findDroneSpot } from '@/lib/drone-landing-data';
 import { ChipLink, ChipRow } from '@/components/ui/chip';
-import { EmptyState, ErrorState } from '@/components/ui/states';
-import { HotelCard, VenueCard } from './cards';
-import { AerialImage, PageHeader } from './hub';
+import { EmptyState, ErrorState } from '@/components/ui/feedback-states';
+import { HotelCard, VenueCard } from './listing-cards';
+import { AerialImage, PageHeader } from './spot-hub-sections';
 
 export type ListParams = Record<string, string | string[] | undefined>;
 
