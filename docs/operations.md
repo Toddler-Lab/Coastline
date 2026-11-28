@@ -10,11 +10,12 @@
 | `DATABASE_URL`, `TEST_DATABASE_URL`, `POSTGRES_PORT` | PostgreSQL |
 | `WEB_ORIGIN`, `API_INTERNAL_URL`, `CORS_ORIGINS` | Web and API wiring |
 | `DEMO_AUTH_ENABLED` | Seeded-account switcher; refused in production |
-| `PAYMENT_PROVIDER` (`SANDBOX`) | Payment adapter; any other value needs a reviewed adapter |
-| `STORAGE_DRIVER` (`local`, `s3`), `STORAGE_LOCAL_DIR`, `STORAGE_BUCKET`, `STORAGE_ENDPOINT`, credentials | Uploads |
-| `TICKET_SIGNING_SECRET` | QR ticket signatures (32+ random bytes) |
+| `PAYMENT_PROVIDER` (`sandbox`) | Payment adapter; any other value fails start-up until a live adapter exists |
+| `ALLOW_SANDBOX_PAYMENTS` (`true`/`false`) | Deliberate opt-in required to run `PAYMENT_PROVIDER=sandbox` in production |
+| `TICKET_SECRET` | QR ticket HMAC signing secret (optional in local dev) |
 | `DINING_IGNORE_TIME_RULES` | Local testing aid; refused in production |
 | `LOG_LEVEL` | Logging |
+| *(Planned WP-07)* `STORAGE_DRIVER` (`local`, `s3`), `STORAGE_LOCAL_DIR`, `STORAGE_BUCKET`, `STORAGE_ENDPOINT`, credentials | Uploads (not yet wired in `env.validation.ts`) |
 
 Business settings (commission, deposit percent, hold minutes, lost-and-found holding days) live in
 the `settings` table and are edited in the admin console. Never commit secrets.
@@ -27,9 +28,9 @@ pnpm db:setup        # Docker PostgreSQL, migrations, seeds
 pnpm dev             # API on 3001, web on 3000
 ```
 
-Run `pnpm install` and `pnpm db:migrate` after every pull. Uploads go to `var/uploads` (ignored by
-git). Seeds create Cox's Bazar, Sylhet and Rangamati with spots, providers of every type, and the
-seeded accounts listed in the README.
+Run `pnpm install` and `pnpm db:migrate` after every pull. Seeds create Cox's Bazar (with
+beach points, sunbeds, hotels, and dining venues), Sylhet and Rangamati (with spots and emergency
+contacts), one seeded provider (`Sea Breeze Dining`), and the seeded accounts listed in the README.
 
 ## 3. Background jobs
 

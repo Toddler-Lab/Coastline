@@ -41,7 +41,7 @@ emergency dispatch; real-time GPS tracking of rides.
 | Persona | Role |
 |---|---|
 | Tourist | `TOURIST` |
-| Provider owner or staff (hotel, restaurant, sunbed operator, transport, boat, tour, guide, photographer, ticketed site, shop) | `PROVIDER_OWNER`, `PROVIDER_STAFF` |
+| Provider owner or staff (hotel, restaurant, sunbed operator, transport, boat, tour, guide, photographer, ticketed site, shop) | `PROVIDER` (`ProviderMemberRole`: `OWNER`, `STAFF`) |
 | Spot desk staff | `DESK` |
 | Platform operator | `ADMIN` |
 

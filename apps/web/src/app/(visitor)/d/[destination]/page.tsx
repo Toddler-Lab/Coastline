@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { getViewer } from '@/lib/session';
 import { apiErrorMessage, loadDestination, loadInventory } from '@/lib/places-server';
 import { ErrorState } from '@/components/ui/feedback-states';
-import { DestinationDroneView } from '@/components/landing/destination-drone-view';
+import { DestinationDroneView } from '@/components/landing/destination-scenic-view';
 
 type Params = { destination: string };
 

@@ -1,23 +1,23 @@
 # ADR-003: Immersive "from above" visual direction for visitor discovery pages
 
-- **Status:** Accepted (product owner approved 2026-11-21; amendments applied to `docs/design.md`)
+- **Status:** Accepted (product owner approved 2026-11-21; amendments applied to `docs/design.md`; merged into `dev`)
 - **Date:** 2026-11-18
-- **Branch:** `design/drone-landing`
+- **Historical branch:** `design/drone-landing` (merged into `dev`)
 - **Affects:** `docs/design.md` 3.1, 3.2, 3.3, 3.6, 7.1, 7.2, 7.3; visitor Hub pages only
 
 ## Context
 
 `docs/design.md` defines a calm, quiet, photo-led UI and explicitly rules out glass blur, gradient
 washes, tiny uppercase technical labels, parallax and autoplaying carousels (3.1, 3.6). The team
-has asked for a landing experience that feels like flying over Bangladesh: real drone footage,
+asked for a landing experience that feels like flying over Bangladesh: real drone footage,
 3D camera movement, animated transitions between places and nested photo backgrounds per spot.
-A working prototype of that direction is in `design/drone-landing/` with screenshots in
-`design/drone-landing/screens/`.
+An initial static prototype was built on branch `design/drone-landing` (preserved in git history at
+commit `cd4b9a1`) and ported into `apps/web`.
 
-The two directions conflict. This ADR records the proposed change so the conflict is resolved
-deliberately rather than by whichever agent touches the code next.
+The two directions conflict. This ADR records the resolution so the boundary stays explicit
+rather than drifting by whichever agent touches the code next.
 
-## Decision (proposed)
+## Decision
 
 Adopt the immersive direction **only on the three Hub-shape discovery pages** (Explore `/`,
 Destination `/d/[destination]`, Spot hub `/d/[destination]/s/[spot]`). List, Detail and Flow pages

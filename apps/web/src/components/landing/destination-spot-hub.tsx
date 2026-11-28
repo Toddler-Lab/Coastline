@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ChevronRight, Info } from 'lucide-react';
 import type { DestinationDetailDto } from '@coastline/api-contracts';
-import type { DroneDestination, DroneSpot } from '@/lib/drone-landing-data';
+import type { DroneDestination, DroneSpot } from '@/lib/scenic-places-data';
 
 const SPOT_ZONE_META: Record<
   string,

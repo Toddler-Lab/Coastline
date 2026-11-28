@@ -1,9 +1,9 @@
 # Drone-landing design: specification and implementation plan
 
-**Status:** Implemented in `apps/web` on the immersive Hub pages (ADR-003 Accepted 2026-11-21);
-remaining work is listed in section 7 and the open decisions in section 9.
-**Branch:** `design/drone-landing` (cut from `redesign/v2` at `3ecca8d`)
-**Prototype:** `design/drone-landing/` · **Screens:** `design/drone-landing/screens/`
+**Status:** Implemented in `apps/web` on branch `dev` (ADR-003 Accepted 2026-11-21; merged from
+`design/drone-landing`); remaining work is listed in section 7 and the open decisions in section 9.
+**Historical prototype:** originally prototyped in `design/drone-landing/` (archived in git history
+at `cd4b9a1` / `1296ad3` and removed from `dev` on 2026-11-28).
 **Media:** `apps/web/public/media/` · **Credits:** `apps/web/public/media/CREDITS.md`
 
 This document is written for whoever continues the work, human or agent. Read it together with
@@ -141,7 +141,7 @@ version has breaking changes).
 | `.stage`, `.layer`, `.cam`, HUD, mist, scrim | `DroneStage` (client) with `DroneLayer`, `DroneHud` | Shared by `/`, `/d/[destination]` |
 | Hero sequencer, rail, pause | `HeroSequencer` (client) | `/`: destinations list API (active, ordered) |
 | Search inside hero | existing `SearchField` | `/search` |
-| Map | `BangladeshMap` (SVG outline from `tools/bd-outline.mjs`, pins projected from destination lat/lng) | destinations API. Keep MapLibre for list/map toggles; the outline map is decorative navigation |
+| Map | `BangladeshMap` (SVG outline `BANGLADESH_PATH` in `apps/web/src/lib/drone-landing-data.ts`) | Keep MapLibre for `/sunbeds/[beachPoint]`; replace static `DRONE_DESTINATIONS` with destinations API |
 | Map card, spot cards | `TiltCard`, `SpotCard`, `CardRow` | destinations + spots APIs |
 | Services band | `ServiceTile` (existing) on `PhotoBand` | service types with active listings (design.md 7.1 rule) |
 | Photographers | `PhotographerPromo` | static copy + link to `/requests/new` |
@@ -161,7 +161,7 @@ version has breaking changes).
 
 ## 7. Implementation plan (work packages)
 
-Each package is one reviewable pull request into `redesign/v2`, following the repository gate
+Each package is one reviewable pull request into `dev`, following the repository gate
 (`pnpm format:check`, `pnpm typecheck`, `pnpm test`, `pnpm build`, Playwright where relevant).
 Do not start before ADR-003 is accepted, except DL-01.
 
@@ -180,13 +180,18 @@ Do not start before ADR-003 is accepted, except DL-01.
 
 Suggested order: DL-01 → DL-02 → DL-03 → DL-04 → DL-07 → DL-05 → DL-06 → DL-08 → DL-10 → DL-09.
 
-**Implemented in the app (2026-11-21):** DL-01 media and credits, DL-02 tokens and type, DL-03
-`DroneStage`, DL-04 Explore hero with rail and search, DL-05 map and spots rail, DL-06 services band,
-photographers and help, DL-07 destination and spot heroes with nested backgrounds, and DL-08
-fly-through. The EN/BN switch now writes a cookie and is shared by all Hub components. Still open:
-DL-09 measured quality (axe, Lighthouse, 320 px pass), DL-10 data-model fields for operator media,
-full Bangla copy across the whole site (WP-29), and the web test runner's wider Playwright journeys
-(WP-01). Prices, distances, tips and desk numbers remain samples.
+**Implemented in `apps/web` on `dev` (synced 2026-11-28):** DL-01 media and credits, DL-02 tokens and
+type (`globals.css` + `drone-landing.css`), DL-03 `DroneStage`, DL-04 Explore hero with rail and
+search, DL-05 map and spots rail, DL-06 photographer promo and help, DL-07 destination and spot
+heroes with nested backgrounds, DL-08 fly-through, plus top-level directories (`/destinations`,
+`/stays`, `/dining`, `/sunbeds`) and the `/photographers` UI preview. The EN/BN switch writes a
+cookie and is shared across Hub and nav components.
+
+**Still open:** DL-09 measured quality (axe, Lighthouse, 320 px pass), DL-10 data-model fields for
+operator media (`hero_video` / spot `hero_photo`), replacing static `apps/web/src/lib/drone-landing-data.ts`
+with API-driven destinations/spots (Bandarban and Sundarbans are unseeded and return 404 on
+`/d/bandarban` and `/d/sundarbans`), full Bangla copy across the whole site (WP-29), and Playwright
+journeys (WP-01). Prices, distances, tips and desk numbers remain samples.
 
 ## 8. Acceptance criteria
 
@@ -214,11 +219,16 @@ full Bangla copy across the whole site (WP-29), and the web test runner's wider 
 | 5 | Bandarban and Sundarbans | Operator | Add as destinations / remove from the hero |
 | 6 | Content accuracy of "Know" tips and best times | Operator | Review and replace before launch |
 
-## 10. Known gaps in the prototype
+## 10. Known gaps in the current implementation
 
-- Prices, distances, alert text and desk numbers are samples.
-- No bottom tab bar on phones (see section 8).
-- No dark theme pass yet (design.md requires light, dark and system).
-- Bangla toggle translates the main headings and nav only; full copy belongs to the i18n work (WP-05).
+- Hub sections (`DroneStage`, `DestinationsSection`, `BangladeshMapSection`, `SpotsRailSection`,
+  `/destinations`, `DestinationDroneView`, `SpotPage`) still read place metadata, tips and media
+  keys from static `apps/web/src/lib/drone-landing-data.ts` rather than purely from
+  `/api/v1/destinations`.
+- Bandarban and Sundarbans are shown in static showcase data (`DRONE_DESTINATIONS`) and footer
+  links, but are not seeded in `packages/db/prisma/seed-places.ts` and currently 404 at
+  `/d/bandarban` and `/d/sundarbans`.
+- Prices, distances, alert text and desk numbers in Hub tips remain samples.
+- Bangla toggle translates Hub headings and nav; full copy belongs to WP-29.
 - Map projection is Mercator from Natural Earth 50m; fine for a decorative outline, not for
   distances.

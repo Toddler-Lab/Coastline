@@ -2,11 +2,14 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import type { DestinationSummaryDto } from '@coastline/api-contracts';
 import {
   DRONE_DESTINATIONS,
   type DroneSpot,
   type DroneDestination,
-} from '@/lib/drone-landing-data';
+} from '@/lib/scenic-places-data';
+
+const DEFAULT_SEEDED = new Set(['coxs-bazar', 'sylhet', 'rangamati']);
 
 const SPOT_KINDS: Record<string, { en: string; bn: string }> = {
   BEACH: { en: 'Beach', bn: 'সৈকত' },
@@ -24,8 +27,16 @@ interface SpotItem {
   index: number;
 }
 
-export function SpotsRailSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
+export function SpotsRailSection({
+  lang = 'en',
+  destinations = [],
+}: {
+  lang?: 'en' | 'bn';
+  destinations?: DestinationSummaryDto[];
+}) {
   const [activeDestination, setActiveDestination] = useState<string>('all');
+  const seededSlugs =
+    destinations.length > 0 ? new Set(destinations.map((d) => d.slug)) : DEFAULT_SEEDED;
 
   const filteredDestinations =
     activeDestination === 'all'
@@ -121,6 +132,7 @@ export function SpotsRailSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
             spot={spot}
             index={index}
             lang={lang}
+            isSeeded={seededSlugs.has(destination.id)}
           />
         ))}
       </div>
@@ -133,15 +145,17 @@ function SpotRailCard({
   spot,
   index,
   lang,
+  isSeeded,
 }: {
   destination: DroneDestination;
   spot: DroneSpot;
   index: number;
   lang: 'en' | 'bn';
+  isSeeded: boolean;
 }) {
   const [tilt, setTilt] = useState({ tx: 0, ty: 0 });
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const r = e.currentTarget.getBoundingClientRect();
     const tx = ((e.clientX - r.left) / r.width - 0.5) * 10;
@@ -154,6 +168,37 @@ function SpotRailCard({
   };
 
   const kindLabel = SPOT_KINDS[spot.kind]?.[lang] || spot.kind.replace('_', ' ');
+  const cardStyle = {
+    '--tag': destination.accent,
+    '--tx': tilt.tx,
+    '--ty': tilt.ty,
+  } as React.CSSProperties;
+
+  const content = (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/media/places/${spot.img}.webp`} alt="" loading="lazy" />
+      <span className="num">{String(index + 1).padStart(2, '0')}</span>
+      <div className="in">
+        <span className="dl-tag">
+          {isSeeded ? kindLabel : lang === 'bn' ? 'শীঘ্রই আসছে' : 'Coming soon'}
+        </span>
+        <h3>{lang === 'bn' ? spot.bn : spot.name}</h3>
+        <p>
+          <span className="bn">{lang === 'bn' ? spot.name : spot.bn}</span> ·{' '}
+          {lang === 'bn' ? destination.bn : destination.name}
+        </p>
+      </div>
+    </>
+  );
+
+  if (!isSeeded) {
+    return (
+      <div className="dl-spot cursor-default opacity-90" style={cardStyle}>
+        {content}
+      </div>
+    );
+  }
 
   return (
     <Link
@@ -164,24 +209,9 @@ function SpotRailCard({
       data-spot={spot.id}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={
-        {
-          '--tag': destination.accent,
-          '--tx': tilt.tx,
-          '--ty': tilt.ty,
-        } as React.CSSProperties
-      }
+      style={cardStyle}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/media/places/${spot.img}.webp`} alt="" loading="lazy" />
-      <span className="num">{String(index + 1).padStart(2, '0')}</span>
-      <div className="in">
-        <span className="dl-tag">{kindLabel}</span>
-        <h3>{lang === 'bn' ? spot.bn : spot.name}</h3>
-        <p>
-          <span className="bn">{lang === 'bn' ? spot.name : spot.bn}</span> · {lang === 'bn' ? destination.bn : destination.name}
-        </p>
-      </div>
+      {content}
     </Link>
   );
 }

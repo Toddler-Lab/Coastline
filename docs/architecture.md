@@ -19,9 +19,9 @@ local adapter so the system runs fully offline in development:
 
 ## 2. Technology
 
-- **Web:** Next.js App Router, React, TypeScript, Tailwind CSS v4 with role tokens, Radix
-  primitives, MapLibre GL for maps, SWR for client data.
-- **API:** Node.js 22, NestJS on Express, `class-validator` DTOs, `@nestjs/swagger` OpenAPI.
+- **Web:** Next.js App Router, React, TypeScript, Tailwind CSS v4 with role tokens, native `<dialog>`
+  for sheets/dialogs, MapLibre GL 6 for maps, SWR for client data.
+- **API:** Node.js 22–24, NestJS on Express, `class-validator` DTOs, `@nestjs/swagger` OpenAPI.
 - **Data:** PostgreSQL 16+, Prisma for schema, migrations and ordinary queries; reviewed SQL for
   `SELECT ... FOR UPDATE` and ledger checks.
 - **Images:** `sharp` for validation, resizing and stripping metadata.
@@ -64,26 +64,34 @@ example `checkout` asks each engine to confirm or release a booking through a sm
 `BookableEngine` interface (`price`, `confirm`, `release`, `refundable`). Modules never write
 another module's tables directly. No microservices, broker or Kubernetes.
 
-The placeholder module folders from the original proposal (`procurement`, `tariffs`, `contracts`,
-`moderation`, `reporting`, `providers`, `inventory`, `finance`) are removed or reused by the
-modules above.
+The current `apps/api/src/modules/` layout on `dev` holds `audit`, `bookings` (sunbed orders and
+admin orders), `catalogue` (beach points), `checkout` (quote engine), `dining`, `hotels`, `identity`,
+`payments` (`SANDBOX` port), `places`, `saved`, and `workspaces` (plus an empty `contracts/.gitkeep`
+to remove in WP-01). Remaining target modules (`providers`, `listings`, `inventory`, `quotes`,
+`finance`, `help`, `engagement`, `media`, `admin`) land as their WPs are implemented.
 
 ## 4. Web app structure
+
+Target v2 layout (current `apps/web/src/components/` uses `ui/`, `patterns/`, `landing/`, `flows/`,
+`trips/`, `photographers/`, `workspace/`, `map/`):
 
 ```text
 apps/web/src/
   app/
-    (visitor)/        Explore, destination, spot, lists, listing, sunbeds, photographers,
-                      requests, checkout, trips, inbox, saved, help, profile
+    (visitor)/        Explore, /destinations, /stays, /dining, /sunbeds, /photographers,
+                      destination, spot, lists, listing, sunbeds/[beachPoint],
+                      checkout/[draft], trips, inbox, saved, help, profile, search
     provider/         provider workspace
     desk/             desk workspace
     admin/            admin console
   components/
     ui/               foundations (button, chip, sheet, dialog, tabs, field, ...)
-    patterns/         bars, hero, cards, filter bar, gallery, booking card, ticket, ...
-    features/         per feature: places, listings, sunbeds, stays, dining, quotes,
-                      checkout, trips, inbox, help, provider, desk, admin
-  lib/                api client, session, format, i18n, theme, features flags
+    patterns/         bars, cards, search, help, order summary, ticket, alerts, ...
+    landing/          drone stage hero, Bangladesh map, spots rail, spot hero, fly transition
+    flows/            sunbed, stay, table, food-order, checkout flows
+    workspace/        provider, desk and admin shared workspace UI
+    ...               (target feature folders as remaining WPs land)
+  lib/                api client, session, places, checkout, format, i18n, theme, imagery
 ```
 
 Server components fetch public data; client components handle interaction. Each workspace has its

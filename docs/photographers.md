@@ -16,7 +16,9 @@ Request ─► Bids ─► Accept┘
 
 ## Current Scope
 
-- Implemented for photographers only.
+- **UI preview only today (`/photographers`):** an interactive client-side preview using sample
+  data in `apps/web/src/components/photographers/demo-data.ts` (no API endpoints or database tables
+  yet; scheduled for `WP-26` to `WP-28`).
 - Pricing models: per photo, per package, per hour.
 - Package fields: included photo count, extra-photo price, delivery time, format.
 - Planned: the same request-and-bid flow for private guides and boat charters,
@@ -126,8 +128,8 @@ this user do next?*
 
 ## 7. Communication and Payments
 
-- In-app chat tied to the booking, plus WhatsApp and SMS notifications.
-- Local payment methods: bKash, Nagad, and cards.
+- In-app inbox and notifications tied to the booking or request (in-app only per `AGENTS.md`).
+- Sandbox payment methods today (`SANDBOX` adapter): bKash, Nagad, and cards (no real credentials or money movement).
 
 ## 8. Roadmap
 

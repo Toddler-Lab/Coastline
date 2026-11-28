@@ -3,13 +3,16 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import type { DestinationSummaryDto } from '@coastline/api-contracts';
 import {
   BANGLADESH_PATH,
   DRONE_DESTINATIONS,
   REGION_MAP_ZONES,
   type DroneDestination,
   type RegionMapZone,
-} from '@/lib/drone-landing-data';
+} from '@/lib/scenic-places-data';
+
+const DEFAULT_SEEDED = new Set(['coxs-bazar', 'sylhet', 'rangamati']);
 
 const KIND_LABELS: Record<string, { en: string; bn: string }> = {
   SEA: { en: 'Coast & Sea', bn: 'সমুদ্র ও উপকূল' },
@@ -19,20 +22,31 @@ const KIND_LABELS: Record<string, { en: string; bn: string }> = {
   MANGROVE: { en: 'Mangrove & Delta', bn: 'ম্যানগ্রোভ ও ব-দ্বীপ' },
 };
 
-export function BangladeshMapSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
+export function BangladeshMapSection({
+  lang = 'en',
+  destinations = [],
+}: {
+  lang?: 'en' | 'bn';
+  destinations?: DestinationSummaryDto[];
+}) {
   const [selectedId, setSelectedId] = useState('coxs-bazar');
   const [hoveredSpotId, setHoveredSpotId] = useState<string | null>(null);
   const [tilt, setTilt] = useState({ tx: 0, ty: 0 });
   const router = useRouter();
 
+  const seededSlugs =
+    destinations.length > 0 ? new Set(destinations.map((x) => x.slug)) : DEFAULT_SEEDED;
+
   const d: DroneDestination =
     DRONE_DESTINATIONS.find((x) => x.id === selectedId || x.aliases?.includes(selectedId)) ||
     DRONE_DESTINATIONS[0];
 
+  const isSeeded = seededSlugs.has(d.id);
+
   const currentZone: RegionMapZone =
     REGION_MAP_ZONES[selectedId] || REGION_MAP_ZONES[d.id] || REGION_MAP_ZONES['coxs-bazar'];
 
-  const handleCardMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const r = e.currentTarget.getBoundingClientRect();
     const tx = ((e.clientX - r.left) / r.width - 0.5) * 12;
@@ -128,8 +142,8 @@ export function BangladeshMapSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
               >
                 <defs>
                   <linearGradient id="bdfill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stopColor="#E6EFEA" />
-                    <stop offset="1" stopColor="#D2E4DC" />
+                    <stop offset="0" stopColor="#EAE6DA" />
+                    <stop offset="1" stopColor="#DFDACB" />
                   </linearGradient>
 
                   {/* Regional territory gradient definitions */}
@@ -139,11 +153,6 @@ export function BangladeshMapSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                       <stop offset="100%" stopColor={z.gradient[1]} />
                     </linearGradient>
                   ))}
-
-                  <filter id="regionGlow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="6" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
                 </defs>
 
                 {/* Base Bangladesh landmass path */}
@@ -151,23 +160,22 @@ export function BangladeshMapSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                   className="dl-bd transition-colors duration-500"
                   d={BANGLADESH_PATH}
                   fill="url(#bdfill)"
-                  stroke="#A7C4B8"
+                  stroke="#CEC8B6"
                   strokeWidth="1.2"
                 />
 
-                {/* Colored Regional Coverage Zones (Territories) */}
+                {/* Highlighted Regional Coverage Zones (Territories) */}
                 {Object.values(REGION_MAP_ZONES).map((zone) => {
                   const isSelected = zone.id === selectedId;
                   return (
                     <g key={zone.id} className="cursor-pointer">
                       <path
                         d={zone.path}
-                        fill={`url(#grad-${zone.id})`}
-                        fillOpacity={isSelected ? 0.88 : 0.28}
-                        stroke={zone.color}
-                        strokeWidth={isSelected ? 2.8 : 1.2}
-                        filter={isSelected ? 'url(#regionGlow)' : undefined}
-                        className="transition-all duration-300 ease-out hover:fill-opacity-80"
+                        fill={isSelected ? '#3A7D5C' : '#6A9E84'}
+                        fillOpacity={isSelected ? 0.94 : 0.45}
+                        stroke="#F6F4EC"
+                        strokeWidth={isSelected ? 1.8 : 1}
+                        className="transition-all duration-300 ease-out hover:fill-opacity-85"
                         onClick={() => setSelectedId(zone.id)}
                         onMouseEnter={() => setSelectedId(zone.id)}
                       >
@@ -187,18 +195,19 @@ export function BangladeshMapSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                       s.id.includes(spot.id.split('-')[0]),
                   );
                   const openSpot = () => {
-                    if (matchedSpot) router.push(`/d/${d.id}/s/${matchedSpot.id}`);
+                    if (isSeeded && matchedSpot) router.push(`/d/${d.id}/s/${matchedSpot.id}`);
                   };
+                  const canOpen = isSeeded && Boolean(matchedSpot);
                   return (
                     <g
                       key={spot.id}
                       className="cursor-pointer transition-all duration-300"
-                      role={matchedSpot ? 'link' : undefined}
-                      tabIndex={matchedSpot ? 0 : undefined}
-                      aria-label={matchedSpot ? `${spot.name} — open spot` : undefined}
+                      role={canOpen ? 'link' : undefined}
+                      tabIndex={canOpen ? 0 : undefined}
+                      aria-label={canOpen && matchedSpot ? `${spot.name} — open spot` : undefined}
                       onClick={openSpot}
                       onKeyDown={(e) => {
-                        if (matchedSpot && (e.key === 'Enter' || e.key === ' ')) {
+                        if (canOpen && (e.key === 'Enter' || e.key === ' ')) {
                           e.preventDefault();
                           openSpot();
                         }
@@ -207,29 +216,27 @@ export function BangladeshMapSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                       onMouseLeave={() => setHoveredSpotId(null)}
                       style={{ transformOrigin: `${spot.x}px ${spot.y}px` }}
                     >
-                      {/* Pulse halo */}
+                      {/* Red/Coral spot marker with crisp white ring */}
                       <circle
                         cx={spot.x}
                         cy={spot.y}
-                        r={isHovered ? 12 : 7}
-                        fill={currentZone.color}
-                        fillOpacity={isHovered ? 0.35 : 0.2}
-                        className="animate-pulse"
+                        r={isHovered ? 10 : 6}
+                        fill="#D94A4A"
+                        fillOpacity={isHovered ? 0.3 : 0.18}
                       />
-                      {/* Pin core */}
                       <circle
                         cx={spot.x}
                         cy={spot.y}
                         r={isHovered ? 4.5 : 3.5}
-                        fill="#ffffff"
-                        stroke={currentZone.color}
-                        strokeWidth={2}
+                        fill="#D94A4A"
+                        stroke="#FFFFFF"
+                        strokeWidth={1.6}
                       />
-                      {/* Spot text badge */}
+                      {/* Clean spot label */}
                       <g
-                        transform={`translate(${spot.x + 8}, ${spot.y - 4})`}
+                        transform={`translate(${spot.x + 7}, ${spot.y - 4})`}
                         className={`transition-opacity duration-200 ${
-                          isHovered ? 'opacity-100' : 'opacity-85'
+                          isHovered ? 'opacity-100' : 'opacity-95'
                         }`}
                       >
                         <rect
@@ -238,11 +245,11 @@ export function BangladeshMapSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                           width={(lang === 'bn' ? spot.nameBn.length : spot.name.length) * 6.5 + 10}
                           height={16}
                           rx={8}
-                          fill="#ffffff"
-                          fillOpacity={0.94}
-                          stroke={currentZone.color}
+                          fill="#FFFFFF"
+                          fillOpacity={0.95}
+                          stroke="#D5D0C0"
                           strokeWidth={0.8}
-                          filter="drop-shadow(0 2px 4px rgba(0,0,0,0.12))"
+                          filter="drop-shadow(0 2px 4px rgba(0,0,0,0.14))"
                         />
                         <text
                           x={3}
@@ -263,83 +270,119 @@ export function BangladeshMapSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
           </div>
         </div>
 
-        {/* 3D Tilt Card with 2026 Fluid Interaction */}
-        <Link
-          className="dl-tiltcard"
-          id="mapcard"
-          href={`/d/${d.id}`}
-          data-fly
-          data-flyimg={`/media/places/${d.card || d.hero}.webp`}
-          onMouseMove={handleCardMouseMove}
-          onMouseLeave={handleCardMouseLeave}
-          style={
-            {
-              '--tx': tilt.tx,
-              '--ty': tilt.ty,
-              boxShadow: `0 30px 60px -20px ${currentZone.color}66`,
-            } as React.CSSProperties
-          }
-        >
-          <div className="ph">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              key={d.id}
-              className="swap-in"
-              alt={d.name}
-              src={`/media/places/${d.card || d.hero}.webp`}
-            />
-          </div>
-          <div className="ov" />
-          <div className="ct">
-            <div className="dl-swap" key={d.id}>
-              <span className="dl-tag" style={{ background: currentZone.color }}>
-                {KIND_LABELS[d.kind]?.[lang] || d.kind}
-              </span>
-              <h3>
-                {d.name}{' '}
-                <span className="bn" style={{ fontWeight: 500, opacity: 0.85, fontSize: '0.7em' }}>
-                  {d.bn}
-                </span>
-              </h3>
-              <div style={{ opacity: 0.9 }}>{lang === 'bn' ? d.tagBn : d.tag}</div>
-
-              {/* Contained spots inside this regional coverage zone */}
-              <div className="dl-chips">
-                {currentZone.spots.map((s) => (
-                  <span
-                    className={`dl-chip transition-transform ${
-                      hoveredSpotId === s.id ? 'scale-110 font-bold' : ''
-                    }`}
-                    key={s.id}
-                    style={
-                      hoveredSpotId === s.id
-                        ? { borderColor: currentZone.color, background: 'rgba(255,255,255,0.3)' }
-                        : {}
-                    }
-                  >
-                    {lang === 'bn' ? s.nameBn : s.name}
-                  </span>
-                ))}
+        {/* Region Preview Card */}
+        {(() => {
+          const cardInner = (
+            <>
+              <div className="ph">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  key={d.id}
+                  className="swap-in"
+                  alt={d.name}
+                  src={`/media/places/${d.card || d.hero}.webp`}
+                />
               </div>
+              <div className="ov" />
+              <div className="ct">
+                <div className="dl-swap" key={d.id}>
+                  <span className="dl-tag" style={{ background: currentZone.color }}>
+                    {isSeeded
+                      ? KIND_LABELS[d.kind]?.[lang] || d.kind
+                      : lang === 'bn'
+                        ? 'শীঘ্রই আসছে'
+                        : 'Coming soon'}
+                  </span>
+                  <h3>
+                    {d.name}{' '}
+                    <span className="bn" style={{ fontWeight: 500, opacity: 0.85, fontSize: '0.7em' }}>
+                      {d.bn}
+                    </span>
+                  </h3>
+                  <div style={{ opacity: 0.9 }}>{lang === 'bn' ? d.tagBn : d.tag}</div>
 
-              <span className="dl-btn dl-btn-light">
-                {lang === 'bn' ? `${d.bn} অঞ্চল উন্মোচন করুন` : `Explore ${d.name} Region`}{' '}
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                  style={{ width: '18px', height: '18px' }}
-                >
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </span>
-            </div>
-          </div>
-        </Link>
+                  {/* Contained spots inside this regional coverage zone */}
+                  <div className="dl-chips">
+                    {currentZone.spots.map((s) => (
+                      <span
+                        className={`dl-chip transition-transform ${
+                          hoveredSpotId === s.id ? 'scale-110 font-bold' : ''
+                        }`}
+                        key={s.id}
+                        style={
+                          hoveredSpotId === s.id
+                            ? { borderColor: currentZone.color, background: 'rgba(255,255,255,0.3)' }
+                            : {}
+                        }
+                      >
+                        {lang === 'bn' ? s.nameBn : s.name}
+                      </span>
+                    ))}
+                  </div>
+
+                  <span className="dl-btn dl-btn-light">
+                    {isSeeded
+                      ? lang === 'bn'
+                        ? `${d.bn} অঞ্চল উন্মোচন করুন`
+                        : `Explore ${d.name} Region`
+                      : lang === 'bn'
+                        ? 'শীঘ্রই আসছে'
+                        : 'Coming soon'}{' '}
+                    {isSeeded ? (
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                        style={{ width: '18px', height: '18px' }}
+                      >
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                      </svg>
+                    ) : null}
+                  </span>
+                </div>
+              </div>
+            </>
+          );
+
+          const cardStyle = {
+            '--tx': tilt.tx,
+            '--ty': tilt.ty,
+            boxShadow: `0 30px 60px -20px ${currentZone.color}66`,
+          } as React.CSSProperties;
+
+          if (!isSeeded) {
+            return (
+              <div
+                className="dl-tiltcard cursor-default"
+                id="mapcard"
+                onMouseMove={handleCardMouseMove}
+                onMouseLeave={handleCardMouseLeave}
+                style={cardStyle}
+              >
+                {cardInner}
+              </div>
+            );
+          }
+
+          return (
+            <Link
+              className="dl-tiltcard"
+              id="mapcard"
+              href={`/d/${d.id}`}
+              data-fly
+              data-flyimg={`/media/places/${d.card || d.hero}.webp`}
+              onMouseMove={handleCardMouseMove}
+              onMouseLeave={handleCardMouseLeave}
+              style={cardStyle}
+            >
+              {cardInner}
+            </Link>
+          );
+        })()}
       </div>
     </section>
   );

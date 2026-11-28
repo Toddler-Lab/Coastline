@@ -13,8 +13,8 @@ shared types in `packages/api-contracts`
 - Dates are ISO-8601 UTC; date-only parameters are Asia/Dhaka calendar dates (`2026-11-23`).
 - Money is integer minor units plus ISO currency (`{ "amountMinor": 12000, "currency": "BDT" }`).
 - Cursor pagination: default 20, maximum 100, stable sort.
-- `Idempotency-Key` header is required on every call that creates a booking, payment, refund, bid
-  acceptance or payout.
+- `Idempotency-Key` header is supported (optional on create calls today; required once WP-10 checkout
+  sessions land) on calls that create a booking, payment, refund, bid acceptance or payout.
 - State changes are explicit commands (`POST .../cancel`), never a free status `PATCH`.
 - The server derives every price, total, commission, provider scope and role. Unknown body fields
   are rejected.
@@ -22,22 +22,26 @@ shared types in `packages/api-contracts`
   (enabled only when `DEMO_AUTH_ENABLED=true`). The sign-in phase replaces this with session
   cookies; endpoints do not change.
 
-## 2. Existing endpoints (on `dev`, kept)
+## 2. Implemented endpoints (on `dev`)
 
 | Area | Endpoints |
 |---|---|
 | Identity | `GET /session`, `GET /demo/users` |
+| Places | `GET /destinations`, `GET /destinations/{destination}`, `GET /destinations/{destination}/spots/{spot}` |
 | Sunbeds | `GET /beach-points?date=&destination=`, `GET /beach-points/{code}?date=` |
-| Sunbed orders | `POST /orders`, `GET /orders/me`, `GET /orders/{ref}`, `POST /orders/{ref}/cancel` |
-| Hotels | `GET /hotels?destination=`, `GET /hotels/{slug}`, `POST /hotels/bookings` |
-| Dining | `GET /dining/venues?destination=&kind=&beachPointCode=&reservable=&delivers=`, `GET /dining/venues/{code}`, `GET /dining/venues/{code}/availability?date=`, `POST /dining/reservations`, `GET /dining/reservations/me`, `GET /dining/reservations/{ref}`, `POST /dining/reservations/{ref}/cancel`, `GET /dining/delivery/beds`, `POST /dining/food-orders`, `GET /dining/food-orders/me`, `GET /dining/food-orders/{ref}`, `POST /dining/food-orders/{ref}/cancel` |
+| Sunbed orders | `POST /orders`, `GET /orders`, `GET /orders/me`, `GET /orders/{ref}`, `POST /orders/{ref}/cancel` |
+| Hotels | `GET /hotels?destination=&spot=`, `GET /hotels/{slug}`, `POST /hotels/bookings` |
+| Dining | `GET /dining/venues?destination=&spot=&kind=&beachPointCode=&reservable=&delivers=`, `GET /dining/venues/{code}`, `GET /dining/venues/{code}/availability?date=`, `POST /dining/reservations`, `GET /dining/reservations/me`, `GET /dining/reservations/{ref}`, `POST /dining/reservations/{ref}/cancel`, `GET /dining/delivery/beds`, `POST /dining/food-orders`, `GET /dining/food-orders/me`, `GET /dining/food-orders/{ref}`, `POST /dining/food-orders/{ref}/cancel` |
+| Checkout & Payments | `POST /checkout/quote`, `GET /payments/methods` |
+| Saved | `GET /saved`, `POST /saved`, `DELETE /saved` |
+| Provider (scoped) | `GET /provider/today`, `GET /provider/venues`, `PATCH /provider/venues/{code}`, `PATCH /provider/menu-items/{id}`, `GET /provider/reservations`, `POST /provider/reservations/{ref}/check-in`, `POST /provider/reservations/{ref}/cancel`, `GET /provider/food-orders`, `POST /provider/food-orders/{ref}/status` |
+| Desk (scoped) | `GET /desk/arrivals`, `POST /desk/lookup`, `POST /desk/bookings/{ref}/check-in` |
 | Admin (current) | `GET /admin/overview`, `GET /admin/beach-points`, `GET /admin/orders`, `POST /admin/orders/{ref}/cancel`, `POST /admin/orders/{ref}/check-in`, `POST /admin/tickets/validate`, `/admin/dining/*` |
 | Health | `GET /health/live`, `GET /health/ready` |
 
-Changes: list endpoints accept `destination` and `spot`; create endpoints stop accepting
-`paymentMethod` and return a booking in `PENDING_PAYMENT` that is paid through `/checkout`;
-`/admin/dining/*` kitchen, reservation and venue actions are also exposed under `/provider/*` for
-the venue's members. Old admin routes stay until the web app no longer uses them.
+Planned transition (WP-10): create endpoints will stop accepting `paymentMethod` directly and
+return a booking in `PENDING_PAYMENT` paid through `POST /checkout` + `POST /checkout/{id}/pay`.
+Old `/admin/dining/*` routes stay until the web app no longer uses them.
 
 ## 3. Public
 
@@ -106,8 +110,8 @@ the venue's members. Old admin routes stay until the web app no longer uses them
 
 ## 6. Desk (`/desk`, scoped by destination assignment)
 
-`POST /desk/tickets/validate`, `POST /desk/bookings/{ref}/check-in`,
-`GET/POST /desk/lost-found`, `GET /desk/lost-found/{ref}`, `POST /desk/lost-found/{ref}/receive`,
+`GET /desk/arrivals`, `POST /desk/lookup`, `POST /desk/bookings/{ref}/check-in` *(implemented)*;
+planned: `GET/POST /desk/lost-found`, `GET /desk/lost-found/{ref}`, `POST /desk/lost-found/{ref}/receive`,
 `POST /desk/matches/{id}/confirm|dismiss`, `GET /desk/claims`, `POST /desk/claims/{ref}/verify|reject`,
 `POST /desk/claims/{ref}/handover`, `POST /desk/lost-found/{ref}/dispose`,
 `GET /desk/complaints`, `POST /desk/complaints/{ref}/acknowledge|note|escalate|resolve`,

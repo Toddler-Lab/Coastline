@@ -5,12 +5,13 @@ relevant to the assigned task; [README.md](README.md) maps work areas to docs.
 
 ## Current state
 
-The repository is a working pnpm monorepo: the Next.js web app, the NestJS API, the Prisma schema
-with migrations and seeds, and API tests. Sunbed booking, dining and hotels are implemented for
-Cox's Bazar. The product is being rebuilt into a multi-destination service platform on branch
-`redesign/v2`, following [docs/implementation-plan.md](docs/implementation-plan.md) and
-[docs/design.md](docs/design.md). When a task asks for documentation or structure only, do not add
-application code.
+The repository is a working pnpm monorepo on branch `dev`: the Next.js web app, the NestJS API,
+the Prisma schema with 9 migrations and multi-destination seeds, and unit/API/integration tests.
+Sunbed booking, dining, hotels, multi-destination discovery (`Cox's Bazar`, `Sylhet`, `Rangamati`),
+saved items, checkout quotes (`SANDBOX`), and role-scoped workspaces (`TOURIST`, `PROVIDER`,
+`DESK`, `ADMIN`) are running, while remaining v2 features are built in the order of
+[docs/implementation-plan.md](docs/implementation-plan.md) and [docs/design.md](docs/design.md).
+When a task asks for documentation or structure only, do not add application code.
 
 ## Read first
 
@@ -27,7 +28,7 @@ Do not load every guide by default. For cross-cutting work, read only the guides
 
 - Next.js App Router, React, TypeScript and Tailwind CSS in `apps/web`. This Next.js version has
   breaking changes: read the guide in `apps/web/node_modules/next/dist/docs/` before writing code.
-- Node.js 22 + NestJS on its default Express adapter in `apps/api`.
+- Node.js 22–24 (`.nvmrc` `24.11.1`) + NestJS on its default Express adapter in `apps/api`.
 - PostgreSQL 16+ with Prisma migrations in `packages/db`; reviewed SQL for inventory locks.
 - Shared request/response types in `packages/api-contracts`.
 - REST `/api/v1` with OpenAPI generated from NestJS DTOs.

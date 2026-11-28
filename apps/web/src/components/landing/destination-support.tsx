@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Bus, Car, MapPin, PackageSearch, Phone, Plane, ShieldCheck } from 'lucide-react';
 import type { DestinationDetailDto } from '@coastline/api-contracts';
-import type { DroneDestination } from '@/lib/drone-landing-data';
+import type { DroneDestination } from '@/lib/scenic-places-data';
 
 export interface DestinationSupportProps {
   destination: DestinationDetailDto;
@@ -15,7 +15,7 @@ export interface DestinationSupportProps {
 export function DestinationSupport({ destination, nextDest, lang }: DestinationSupportProps) {
   return (
     <>
-      <section className="dl-sec" id="transit" style={{ background: 'var(--surface-alt)' }}>
+      <section className="dl-sec" id="transit">
         <div className="dl-wrap">
           <div>
             <div className="dl-eyebrow" style={{ color: 'var(--accent)' }}>

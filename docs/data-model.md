@@ -3,26 +3,36 @@
 **Source of truth:** PostgreSQL 16+ · **ORM:** Prisma, reviewed SQL for locks · **Money:** integer
 minor units plus ISO currency · **Time:** `timestamptz` in UTC, presented in Asia/Dhaka
 
-This document describes the v2 model. Section 1 is what exists on `dev`; sections 2-9 are the
-additions and changes, delivered in the phases of [implementation-plan.md](implementation-plan.md).
+This document describes the v2 model. Section 1 summarises what exists on `dev` today; sections
+2-9 describe the full v2 target schema, delivered across the phases of
+[implementation-plan.md](implementation-plan.md).
 
 ## 1. What exists on `dev`
 
-Four applied migrations (`init`, `hotel_bookings`, `dining_foundation`,
-`hotel_booking_check_in_time`):
+Nine applied migrations (`init`, `hotel_bookings`, `dining_foundation`, `hotel_booking_check_in_time`,
+`payments_provider_and_method`, `idempotency_keys`, `beach_point_image`, `places`,
+`workspaces_and_saved`):
 
-- **Identity:** `users` (`TOURIST`, `ADMIN`).
-- **Sunbeds:** `beach_points`, `sunbeds`, `orders`, `order_items`, `booking_slots` (one row per bed
-  and hour; unique active slot prevents double booking).
-- **Hotels:** `hotels` (with a fixed `HotelZone` enum), `room_types`, `hotel_rooms`,
-  `hotel_bookings`, `hotel_room_nights` (one row per room and night).
-- **Dining:** `dining_venues`, `menu_categories`, `menu_items`, `dining_tables`,
-  `table_reservations`, `table_slots`, `food_orders`, `food_order_items`.
-- **Money:** `payments` with `provider = 'MOCK'`, `type` `CHARGE` or `REFUND`, exactly one parent.
-- **Platform:** `audit_events`.
+- **Identity & Workspaces:** `users` (`TOURIST`, `PROVIDER`, `DESK`, `ADMIN`), `providers` (without
+  `public_id`, `service_types` or `listings` yet), `provider_members` (`OWNER`, `STAFF`),
+  `desk_assignments`, `saved_items` (`SavedItemType`: `HOTEL`, `VENUE`, `SPOT` with `item_key`).
+- **Places:** `destinations`, `spots`, `emergency_contacts`, `spot_alerts` (without `hero_media_id`
+  yet).
+- **Sunbeds:** `beach_points` (with `spot_id`, `image_url`, `image_alt`, `image_credit`), `sunbeds`,
+  `orders`, `order_items`, `booking_slots` (one row per bed and hour; unique active slot prevents
+  double booking).
+- **Hotels:** `hotels` (with `destination_id`, `spot_id`, `provider_id`, nullable `area`, and legacy
+  `HotelZone` enum still required), `room_types`, `hotel_rooms`, `hotel_bookings`,
+  `hotel_room_nights` (one row per room and night).
+- **Dining:** `dining_venues` (with `destination_id`, `spot_id`, `provider_id`), `menu_categories`,
+  `menu_items`, `dining_tables`, `table_reservations`, `table_slots`, `food_orders`,
+  `food_order_items`.
+- **Money & Platform:** `payments` with `provider = 'SANDBOX'`, `method` (`BKASH`, `NAGAD`, `CARD`
+  nullable), `status` (`SUCCEEDED`, `FAILED`), `type` (`CHARGE`, `REFUND`), exactly one parent;
+  `idempotency_keys`; `audit_events`.
 
-These engines keep their tables and locking. v2 attaches them to destinations, spots, providers and
-listings rather than replacing them.
+These engines keep their tables and locking. Remaining v2 WPs attach generic `listings`,
+`offerings`, `commission_rules`, `ledger_entries`/`ledger_lines`, help, and quote tables.
 
 ## 2. Places
 
@@ -120,7 +130,7 @@ Posting rules are in [workflows.md](workflows.md) section 6.
 | `messages` | `conversation_id`, `sender_id`, `body` (max 2,000 characters), `created_at`, `read_at` | Text only |
 | `notifications` | `user_id`, `kind`, `title`, `body`, `link`, `read_at` | In-app inbox items |
 | `reviews` | `booking_ref` unique, `listing_id`, `provider_id`, `tourist_id`, `rating` 1-5, `body`, `reply`, `replied_at`, `status` (`PUBLISHED`, `HIDDEN`) | Only for completed bookings |
-| `saved_items` | `user_id`, `item_type` (`LISTING`, `SPOT`, `PROVIDER`), `item_id` | Unique triple |
+| `saved_items` | `user_id`, `item_type` (`HOTEL`, `VENUE`, `SPOT` today; target `LISTING`, `SPOT`, `PROVIDER` in WP-06/25), `item_key` (target `item_id`) | Unique triple |
 
 ## 9. Platform
 

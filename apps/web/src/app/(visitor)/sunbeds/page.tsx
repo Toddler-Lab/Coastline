@@ -6,7 +6,7 @@ import { serverApi } from '@/lib/api';
 import { getViewer } from '@/lib/session';
 import { apiErrorMessage } from '@/lib/places-server';
 import { formatMoney, hoursRange, slotLabel } from '@/lib/format';
-import { findDroneSpot } from '@/lib/drone-landing-data';
+import { findDroneSpot } from '@/lib/scenic-places-data';
 import { sunbedPickerHref } from '@/lib/places';
 import { PageHeader } from '@/components/patterns/spot-hub-sections';
 import { ErrorState } from '@/components/ui/feedback-states';

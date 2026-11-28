@@ -9,7 +9,7 @@ import {
   type InventoryResult,
 } from '@/lib/places-server';
 import { buildSearchIndex } from '@/lib/search';
-import { DroneLandingView } from '@/components/landing/drone-landing-view';
+import { DroneLandingView } from '@/components/landing/explore-landing-view';
 
 export const metadata: Metadata = {
   title: 'Explore Bangladesh from above | Coastline',

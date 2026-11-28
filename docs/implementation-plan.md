@@ -1,7 +1,7 @@
 # Implementation Plan: v2 Redesign
 
-**Audience:** engineers and coding agents · **Baseline:** branch `dev` at `3e9f8a9` · **Working
-branch:** `redesign/v2` · **Last revised:** 2026-11-17
+**Audience:** engineers and coding agents · **Working branch:** `dev` (absorbed `redesign/v2` and
+`design/drone-landing`) · **Last revised:** 2026-11-28
 
 This plan turns [design.md](design.md), [data-model.md](data-model.md), [workflows.md](workflows.md)
 and [api.md](api.md) into ordered work packages (WPs). Each WP is one reviewable change that leaves
@@ -10,27 +10,25 @@ the site building and working. [delivery-plan.md](delivery-plan.md) holds the mi
 How to use it: take the lowest-numbered open WP whose dependencies are done, read its section and the
 documents it cites, do exactly that scope, run the checks in section 3, then tick it in section 6.
 
-## 1. Baseline (`dev`, verified 2026-11-17)
+## 1. Current baseline (`dev`, verified at `2e20cee`)
 
 | Area | Fact |
 |---|---|
-| Web | Next.js 16.4 App Router, React 19, Tailwind CSS v4 with a dark-only `@theme` (`abyss`, `sea`, `foam`, ...), MapLibre, SWR. Home is a full-screen map with a beach rail on the left and a booking panel on the right. No web tests |
-| Routes | `/`, `/bookings`, `/bookings/[ref]`, `/food`, `/food/[code]`, `/food/orders/[ref]`, `/food/reservations/[ref]`, `/hotels`, `/hotels/[slug]`, `/rides`, `/activities`, `/admin`, `/admin/bookings`, `/admin/points`, `/admin/points/[code]`, `/admin/dining/*` |
-| API | Controllers: `beach-points`, `orders`, `admin` (overview, beach-points, orders, tickets), `hotels`, `dining/*`, `admin/dining/*`, `session`, `demo/users`, health. Empty placeholder module folders from the first proposal |
-| Data | Four migrations. `BeachPoint` is the root; `HotelZone` enum; `payments.provider = 'MOCK'` written directly by the sunbed, hotel, reservation and food-order services; roles `TOURIST`, `ADMIN` |
-| Auth | Seeded-account cookie sent as `x-demo-user-id` when `DEMO_AUTH_ENABLED=true` |
-| Gaps | No CI, no idempotency keys, no payment port, admin forms call missing `/admin/beach-points` and `/admin/sunbeds` write routes, no uploads, no notifications |
+| Web | Next.js 16.4 App Router, React 19, Tailwind CSS v4 with light/dark role tokens + `drone-landing.css`, MapLibre GL 6, SWR. Immersive drone stage hubs (`/`, `/d/[destination]`, `/d/[destination]/s/[spot]`), top-level directories (`/destinations`, `/stays`, `/dining`, `/sunbeds`, `/photographers` preview), provider/desk/admin shells, Vitest + Testing Library unit tests (no Playwright yet) |
+| API | NestJS 11 + Express (`health`, `identity`, `catalogue`, `bookings`, `hotels`, `dining`, `places`, `workspaces`, `checkout`, `payments`, `saved`, `audit`); empty `contracts/.gitkeep` remains |
+| Data | Nine applied migrations (`init`, `hotel_bookings`, `dining_foundation`, `hotel_booking_check_in_time`, `payments_provider_and_method`, `idempotency_keys`, `beach_point_image`, `places`, `workspaces_and_saved`). `Destination` -> `Spot` seeded for Cox's Bazar, Sylhet, Rangamati; `HotelZone` still present on `hotels`; `Payment` uses `SANDBOX` + `method`; roles `TOURIST`, `PROVIDER`, `DESK`, `ADMIN` |
+| Auth | Seeded-account cookie sent as `x-demo-user-id` when `DEMO_AUTH_ENABLED=true`; `ProviderScope` and `DeskScope` enforced via `provider_members` and `desk_assignments` |
+| Gaps | No CI workflow `.yml` (`.github/workflows/.gitkeep` only), no Playwright suite, no `/dev/components`, no `Listing`/`ProviderServiceType` tables (WP-06), no uploads (WP-07), no ledger/commission/payouts (WP-10/19), Explore/Hub components still read static `drone-landing-data.ts` (including unseeded Bandarban/Sundarbans) |
 
-The first redesign attempt is preserved on the `wp/*` branches (`wp/api-track` holds a
-payment-provider port and idempotency keys; `wp/02-tokens`, `wp/03-components`, `wp/04-shell` hold
-tokens and components). Those branches target the old design. A WP may cherry-pick code from them
-when it fits this plan, with a review, but must not bring back the old structure.
+The earlier `redesign/v2` and `design/drone-landing` branches have already been merged into `dev`.
+Older `wp/*` branches (`wp/api-track`, `wp/02-tokens`, `wp/03-components`, `wp/04-shell`) remain
+historical reference only.
 
 ## 2. Ground rules
 
 1. Follow [AGENTS.md](../AGENTS.md). Before writing Next.js code read the matching guide in
    `apps/web/node_modules/next/dist/docs/`; this Next.js version differs from older ones.
-2. One WP per pull request into `redesign/v2`. The site builds and tests pass after each one.
+2. One WP per pull request into `dev`. The site builds and tests pass after each one.
 3. UI uses role tokens and shared components only (design.md sections 3 and 8). No raw colours.
 4. Contract changes land in `packages/api-contracts`, the API, the web app and tests together.
 5. Migrations are forward-only with a backfill and a rollback note. Never edit an applied one.
@@ -86,8 +84,8 @@ After Phase B, the API work of one phase can run in parallel with the UI work of
 
 #### WP-03 Component library (L)
 - **Scope:** foundations and patterns from design.md section 8 under `components/ui` and
-  `components/patterns`, on Radix primitives; a `/dev/components` gallery page available only in
-  local.
+  `components/patterns` (using native `<dialog>` for sheets/dialogs or Radix primitives where
+  needed); a `/dev/components` gallery page available only in local.
 - **Tests:** keyboard and focus tests for sheet, dialog, tabs, chips, steppers.
 - **Done when:** gallery shows every component in both themes at 360 and 1280 px.
 
@@ -269,57 +267,56 @@ After Phase B, the API work of one phase can run in parallel with the UI work of
 
 ## 6. Progress
 
-**Immersive Hub pass (2026-11-21).** ADR-003 was accepted and its amendments applied to
-`docs/design.md`. The Explore, destination and spot-hub pages on branch `design/drone-landing` now use
-the full-viewport drone stage, nested spot backgrounds, fly-through navigation and the documented
-section order. Language selection moved from per-component state to a cookie-backed shared provider.
-A minimal Vitest + Testing Library harness was added to `apps/web` (the rest of WP-01, including
-Playwright journeys, is still open). No API, contract or schema change was made. See
-`docs/design-drone-landing.md` section 7 for the detailed implementation status.
+**Codebase audit sync (2026-11-28, `dev` @ `2e20cee`).** `redesign/v2` and `design/drone-landing` are
+merged into `dev`; the static `design/drone-landing/` prototype has been retired. What each WP
+delivered and what remains open:
 
-**UI pass (2026-11-17).** The whole web app was rebuilt on the v2 design against the existing API,
-with no API, contract or schema change. What it covers and what each WP still owes:
-
-| Area | Delivered in the UI pass | Still open |
+| Area | Delivered on `dev` | Still open |
 |---|---|---|
-| WP-02 tokens | Role tokens light/dark, destination accents, Inter + Hind Siliguri, theme cookie (no flash) | Old token names were removed, not mapped |
-| WP-03 components | `components/ui` and `components/patterns`; sheets use the native modal `<dialog>` instead of Radix | `/dev/components` gallery; keyboard/focus tests (no web test runner yet, WP-01) |
-| WP-04 shells | Visitor top/bottom bar, Help button and sheet, provider/desk/admin shells, workspace switcher | Roles `PROVIDER`/`DESK`, scopes and guards; staff workspaces open to `ADMIN` only |
-| WP-08/09 places | Explore, destination, spot hub, service lists, listing detail, search, redirects | Places come from `lib/places.ts` (Cox's Bazar descriptor + beach points as spots) until WP-05/06; no facility data, no list/map toggle |
-| WP-11/12/13 booking | Shared checkout with sandbox gateway screen, stay/table/food flows, restacked sunbed picker, Trips and ticket | Booking is created on Approve (no pending draft or payment port, WP-10); no offline ticket cache |
-| WP-17/18/23 portals | Provider Today, bookings, kitchen, listing/menu editor; desk scan and arrivals; admin overview, destinations (read-only), bookings | Every "Soon" item in the sidebars |
+| WP-01 harness | Vitest + Testing Library in `apps/web`; unused placeholder API folders removed except `contracts/.gitkeep` | GitHub Actions CI `.yml`, Playwright suite, removing `contracts/.gitkeep` |
+| WP-02 tokens | Role tokens light/dark, destination accents, Inter + Hind Siliguri + Instrument Serif + JetBrains Mono, theme cookie | Consolidate `drone-landing.css` aliases and extra ad-hoc tokens |
+| WP-03 components | `components/ui` and `components/patterns`; sheets use native modal `<dialog>` | `/dev/components` gallery; keyboard/focus tests for sheets/dialogs/tabs/chips/steppers |
+| WP-04 shells & roles | `TOURIST`, `PROVIDER`, `DESK`, `ADMIN`; `provider_members` + `desk_assignments` migration, `WorkspacesModule`, guards, shells, switcher | Engine-wide provider/desk scoping beyond dining + desk lookup |
+| WP-05 places | `destinations`, `spots`, `emergency_contacts`, `spot_alerts` migration; `PlacesModule`; Cox's Bazar, Sylhet, Rangamati seeds | Drop legacy `HotelZone` (`hotels.zone`), backfill non-null `area`, optional `hero_video` / `spot` media |
+| WP-06 listings | `Provider` model exists | `provider_service_types`, `listings`, `listing_media`, `listing_revisions`, generic `/listings` & `/providers` APIs |
+| WP-08/09 discovery | Explore, `/destinations`, `/stays`, `/dining`, `/sunbeds`, `/d/[destination]`, `/d/[destination]/s/[spot]`, service lists, `/l/[listing]`, `/search`, legacy redirects | Drive Hub/Explore/Spot views purely from `/destinations` API instead of static `drone-landing-data.ts` (Bandarban & Sundarbans 404 today), facility data, list/map toggle |
+| WP-10/11/12/13 booking | `PaymentProvider` port (`SANDBOX`), `IdempotencyKey`, `POST /checkout/quote`, `GET /payments/methods`, `/checkout/[draft]`, `/trips`, restacked sunbed picker | `PENDING_PAYMENT` draft bookings, `POST /checkout` + `/pay` + `/payments/sandbox/*`, `commission_rules`, `ledger_entries`, `ledger_lines`, `settings`, offline ticket cache |
+| WP-17/18/23 portals | Provider Today, bookings, kitchen, venue/menu editor; Desk arrivals, lookup, check-in; Admin overview, destinations (read-only), bookings | Admin CRUD for destinations/spots, provider/listing approvals, finance/payouts, desk lost-and-found & complaints (`Soon` pages) |
+| WP-25/26/29 | `SavedModule` + `/saved` (`HOTEL`/`VENUE`/`SPOT`); `/photographers` client-side preview (`demo-data.ts`); cookie-backed EN/BN switch on Hub/nav | Reviews (WP-25), photographer API/DB/bids/settlement (WP-26–28), full-site Bangla copy & formatters (WP-29) |
 
-| WP | Title | Done |
+Status key: `☑` Done · `◐` Partial · `☐` Open
+
+| WP | Title | Status |
 |---|---|---|
-| 01 | Quality harness | ☐ |
-| 02 | Tokens, theme and type | ☐ |
-| 03 | Component library | ☐ |
-| 04 | Workspace shells and roles | ☐ |
-| 05 | Destinations and spots | ☐ |
+| 01 | Quality harness | ◐ |
+| 02 | Tokens, theme and type | ☑ |
+| 03 | Component library | ◐ |
+| 04 | Workspace shells and roles | ☑ |
+| 05 | Destinations and spots | ◐ |
 | 06 | Providers and listings core | ☐ |
 | 07 | Media uploads | ☐ |
-| 08 | Explore, destination and spot pages | ☐ |
-| 09 | Lists, listing detail and search | ☐ |
-| 10 | Payment port, checkout, commission, ledger | ☐ |
-| 11 | Checkout UI and tickets | ☐ |
-| 12 | Trips | ☐ |
-| 13 | Existing engines in the new UI | ☐ |
+| 08 | Explore, destination and spot pages | ◐ |
+| 09 | Lists, listing detail and search | ◐ |
+| 10 | Payment port, checkout, commission, ledger | ◐ |
+| 11 | Checkout UI and tickets | ◐ |
+| 12 | Trips | ☑ |
+| 13 | Existing engines in the new UI | ☑ |
 | 14 | Generic offering engine | ☐ |
 | 15 | Rides, boats, tours, tickets UI | ☐ |
 | 16 | Provider onboarding and approvals | ☐ |
-| 17 | Provider workspace | ☐ |
-| 18 | Admin console | ☐ |
+| 17 | Provider workspace | ◐ |
+| 18 | Admin console | ◐ |
 | 19 | Earnings, payouts and finance | ☐ |
-| 20 | Alerts, emergency, Know content | ☐ |
+| 20 | Alerts, emergency, Know content | ◐ |
 | 21 | Lost and found | ☐ |
 | 22 | Complaints | ☐ |
-| 23 | Desk workspace | ☐ |
+| 23 | Desk workspace | ◐ |
 | 24 | Inbox, messages, notifications | ☐ |
-| 25 | Reviews and saved | ☐ |
-| 26 | Photographer profiles and packages | ☐ |
+| 25 | Reviews and saved | ◐ |
+| 26 | Photographer profiles and packages | ◐ |
 | 27 | Requests, bids and counters | ☐ |
 | 28 | Jobs, delivery and settlement | ☐ |
-| 29 | Bangla and English | ☐ |
+| 29 | Bangla and English | ◐ |
 | 30 | Accessibility, responsive, e2e, performance | ☐ |
 | 31 | Clean-up | ☐ |
 | 32 | Sign-in | ☐ |

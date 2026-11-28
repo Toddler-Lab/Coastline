@@ -2,8 +2,11 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, Compass, MapPin } from 'lucide-react';
-import { DRONE_DESTINATIONS, type DroneDestination } from '@/lib/drone-landing-data';
+import { ArrowRight, MapPin } from 'lucide-react';
+import type { DestinationSummaryDto } from '@coastline/api-contracts';
+import { DRONE_DESTINATIONS } from '@/lib/scenic-places-data';
+
+const DEFAULT_SEEDED = new Set(['coxs-bazar', 'sylhet', 'rangamati']);
 
 const KIND_BADGES: Record<string, { en: string; bn: string; color: string }> = {
   SEA: { en: 'Coast & Sea', bn: 'সমুদ্র ও উপকূল', color: '#0B7A8F' },
@@ -13,7 +16,15 @@ const KIND_BADGES: Record<string, { en: string; bn: string; color: string }> = {
   MANGROVE: { en: 'Mangrove & Delta', bn: 'ম্যানগ্রোভ ও ব-দ্বীপ', color: '#3E6B4A' },
 };
 
-export function DestinationsSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
+export function DestinationsSection({
+  lang = 'en',
+  destinations = [],
+}: {
+  lang?: 'en' | 'bn';
+  destinations?: DestinationSummaryDto[];
+}) {
+  const seededBySlug = new Map(destinations.map((d) => [d.slug, d]));
+  const hasLiveDestinations = destinations.length > 0;
   return (
     <section className="dl-sec py-16 md:py-24" id="destinations">
       <div className="dl-wrap">
@@ -44,6 +55,8 @@ export function DestinationsSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
               color: dest.accent,
             };
             const isFullWidth = idx === 4; // Sundarbans spans full width on desktop
+            const live = seededBySlug.get(dest.id);
+            const isSeeded = hasLiveDestinations ? Boolean(live) : DEFAULT_SEEDED.has(dest.id);
 
             return (
               <div
@@ -66,15 +79,17 @@ export function DestinationsSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/20" />
 
-                  {/* Telemetry pill */}
+                  {/* Status pill */}
                   <div className="absolute left-4 top-4 flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-xs font-mono text-white/90 backdrop-blur-md border border-white/15">
-                      <Compass className="size-3.5 text-accent" />
-                      {dest.coord}
-                    </span>
-                    <span className="rounded-full bg-black/60 px-2.5 py-1 text-xs font-mono text-white/80 backdrop-blur-md border border-white/15">
-                      ALT {dest.alt}M
-                    </span>
+                    {!isSeeded ? (
+                      <span className="rounded-full border border-white/25 bg-black/65 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
+                        {lang === 'bn' ? 'শীঘ্রই আসছে' : 'Coming soon'}
+                      </span>
+                    ) : live ? (
+                      <span className="rounded-full border border-white/20 bg-black/55 px-3 py-1 text-xs font-semibold text-white/95 backdrop-blur-md">
+                        {live.spotCount} {lang === 'bn' ? 'স্পট' : 'spots'}
+                      </span>
+                    ) : null}
                   </div>
 
                   {/* Territory kind badge */}
@@ -90,10 +105,7 @@ export function DestinationsSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                   {/* Title & Tagline overlay */}
                   <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 text-white">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                        Territory 0{idx + 1}
-                      </span>
-                      <span className="font-bn text-sm text-white/80">{dest.bn}</span>
+                      <span className="font-bn text-sm text-white/90">{dest.bn}</span>
                     </div>
                     <h3 className="mt-1 text-2xl font-extrabold md:text-3xl tracking-tight">
                       {dest.name}
@@ -123,30 +135,52 @@ export function DestinationsSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                       Key Spots ({dest.spots.length})
                     </p>
                     <div className="flex flex-wrap gap-1.5">
-                      {dest.spots.map((spot) => (
-                        <Link
-                          key={spot.id}
-                          href={`/d/${dest.id}/s/${spot.id}`}
-                          className="inline-flex items-center gap-1 rounded-full bg-surface-alt px-3 py-1 text-xs font-medium text-fg transition-colors hover:bg-action-bg hover:text-action-fg"
-                        >
-                          <MapPin className="size-3 text-muted group-hover:text-white" />
-                          {lang === 'bn' ? spot.bn : spot.name}
-                        </Link>
-                      ))}
+                      {dest.spots.map((spot) =>
+                        isSeeded ? (
+                          <Link
+                            key={spot.id}
+                            href={`/d/${dest.id}/s/${spot.id}`}
+                            className="inline-flex items-center gap-1 rounded-full bg-surface-alt px-3 py-1 text-xs font-medium text-fg transition-colors hover:bg-action-bg hover:text-action-fg"
+                          >
+                            <MapPin className="size-3 text-muted group-hover:text-current" />
+                            {lang === 'bn' ? spot.bn : spot.name}
+                          </Link>
+                        ) : (
+                          <span
+                            key={spot.id}
+                            className="inline-flex items-center gap-1 rounded-full bg-surface-alt px-3 py-1 text-xs font-medium text-muted"
+                          >
+                            <MapPin className="size-3" />
+                            {lang === 'bn' ? spot.bn : spot.name}
+                          </span>
+                        ),
+                      )}
                     </div>
                   </div>
 
                   {/* Primary CTA */}
                   <div className="mt-6 flex items-center justify-between pt-4 border-t border-line">
                     <span className="text-xs text-muted">
-                      Full territory guide, stays & activities
+                      {isSeeded
+                        ? 'Full territory guide, stays & activities'
+                        : lang === 'bn'
+                          ? 'এই অঞ্চলটি শীঘ্রই যুক্ত হচ্ছে'
+                          : 'Destination onboarding in progress'}
                     </span>
-                    <Link
-                      href={`/d/${dest.id}`}
-                      className="inline-flex items-center gap-2 rounded-xl bg-action-bg px-5 py-2.5 text-xs font-bold text-action-fg shadow-md transition-all hover:bg-action-bg/90 hover:scale-105"
-                    >
-                      Explore {dest.name} <ArrowRight className="size-3.5" />
-                    </Link>
+                    {isSeeded ? (
+                      <Link
+                        href={`/d/${dest.id}`}
+                        data-fly
+                        data-flyimg={`/media/places/${dest.hero}.webp`}
+                        className="inline-flex items-center gap-2 rounded-xl bg-action-bg px-5 py-2.5 text-xs font-bold text-action-fg shadow-md transition-all hover:bg-action-bg/90 hover:scale-105"
+                      >
+                        Explore {dest.name} <ArrowRight className="size-3.5" />
+                      </Link>
+                    ) : (
+                      <span className="inline-flex cursor-not-allowed items-center gap-2 rounded-xl bg-surface-alt px-5 py-2.5 text-xs font-semibold text-muted">
+                        {lang === 'bn' ? 'শীঘ্রই আসছে' : 'Coming soon'}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

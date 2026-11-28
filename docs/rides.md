@@ -28,9 +28,8 @@ Request ─► Bids ─► Accept┘
 
 ## 1. Operator Setup
 
-1. **Sign up** and choose the Ride Operator role.
-2. **Create the profile:** name, photo, bio, operating locations (Laboni,
-   Kolatoli, Sugandha, Patuartek, Inani), and ride types offered.
+1. **Apply as a Provider** (`PROVIDER` role) with `RIDE` / `BOAT` / `TOUR` service types.
+2. **Create the profile:** name, photo, bio, destination and operating spots, and ride types offered.
 3. **Upload proof and media:** photos or video of the vehicles or boats, plus
    trade license or permit where required.
 4. **Submit for verification:** ID, license or permit, and a safety equipment
@@ -140,8 +139,8 @@ this user do next?*
 
 ## 7. Communication and Payments
 
-- In-app chat tied to the booking, plus WhatsApp and SMS notifications.
-- Local payment methods: bKash, Nagad, and cards.
+- In-app inbox and notifications tied to the booking or request (in-app only per `AGENTS.md`).
+- Sandbox payment methods today (`SANDBOX` adapter): bKash, Nagad, and cards (no real credentials or money movement).
 
 ## 8. Roadmap
 

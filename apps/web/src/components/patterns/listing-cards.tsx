@@ -17,7 +17,7 @@ import {
   venueListingId,
 } from '@/lib/places';
 import { SERVICES } from '@/lib/services';
-import { findDroneSpot } from '@/lib/drone-landing-data';
+import { findDroneSpot } from '@/lib/scenic-places-data';
 import { Badge } from '@/components/ui/badge';
 import { PriceUnit } from '@/components/ui/display';
 import { AerialImage, Photo } from './spot-hub-sections';

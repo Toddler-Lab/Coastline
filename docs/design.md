@@ -1,7 +1,7 @@
 # Design Specification
 
-**Audience:** product, design and web engineering · **Status:** target design for the v2 redesign
-(branch `redesign/v2`), replaces the map-centred interface · **Last revised:** 2026-11-17
+**Audience:** product, design and web engineering · **Status:** target design for v2 on branch `dev`
+(replaces the old map-centred interface) · **Last revised:** 2026-11-28
 
 Coastline is a tourism service platform for Bangladesh. A visitor picks a destination (Cox's Bazar,
 Sylhet, Rangamati and any destination an operator adds), opens a spot inside it (Laboni Beach,
@@ -61,7 +61,9 @@ allowed only in the decorative drone HUD.
 
 ### 3.2 Colour roles
 
-Components use role tokens only, never raw values.
+Components use role tokens only, never raw values (`apps/web/src/app/globals.css` implements
+`text` as `--fg` and `border` as `--line`; visitor layout also loads `drone-landing.css` under
+`.drone-landing-scope`).
 
 | Role | Light | Dark | Use |
 |---|---|---|---|
@@ -227,58 +229,64 @@ Public routes are stable deep links.
 
 ### 6.1 Visitor
 
-| Route | Page | Shape |
-|---|---|---|
-| `/` | Explore | Hub |
-| `/search?q=&type=&destination=` | Search results | List |
-| `/d/[destination]` | Destination | Hub |
-| `/d/[destination]/[service]` | Service list in a destination (`stay`, `food`, `sunbeds`, `rides`, `boats`, `tours`, `tickets`, `photographers`, `shopping`, `facilities`) | List |
-| `/d/[destination]/s/[spot]` | Spot hub | Hub |
-| `/d/[destination]/s/[spot]/[service]` | Service list at a spot | List |
-| `/l/[listing]` | Listing detail (any bookable or info listing) | Detail |
-| `/l/[listing]/book` | Booking steps for that listing | Flow |
-| `/sunbeds/[beachPoint]` | Sunbed picker (map) | Flow |
-| `/photographers/[provider]` | Photographer profile, packages, portfolio | Detail |
-| `/requests/new?type=photographer&spot=` | Post a photographer request | Flow |
-| `/requests/[ref]` | Request with incoming bids | Detail |
-| `/checkout/[draft]` | Shared checkout | Flow |
-| `/trips` | Trips timeline | List |
-| `/trips/[ref]` | Ticket or order detail | Detail |
-| `/inbox`, `/inbox/[thread]` | Inbox and a conversation | List, Detail |
-| `/saved` | Saved items | List |
-| `/help` | Help centre for the current destination | Hub |
-| `/help/emergency` | Emergency information | Detail |
-| `/help/lost-found` | Lost and found board and actions | List |
-| `/help/lost-found/report?kind=lost\|found` | Report an item | Flow |
-| `/help/lost-found/[ref]` | A report or a found item, with claim | Detail |
-| `/help/report` | Report a problem (complaint) | Flow |
-| `/profile` | Profile and settings | Hub |
-| `/about`, `/terms`, `/privacy` | Information pages | Detail |
+| Route | Page | Shape | Status on `dev` |
+|---|---|---|---|
+| `/` | Explore | Hub | Implemented |
+| `/destinations` | All destinations directory | List | Implemented |
+| `/stays`, `/dining`, `/sunbeds` | Top-level cross-destination stay, dining and sunbed directories | List | Implemented |
+| `/photographers` | Photographers marketplace (interactive preview) | Hub | Preview (`demo-data.ts`) |
+| `/search?q=&type=&destination=` | Search results | List | Implemented |
+| `/d/[destination]` | Destination | Hub | Implemented (seeded destinations) |
+| `/d/[destination]/[service]` | Service list in a destination (`stay`, `food`, `sunbeds`, plus planned `rides`, `boats`, `tours`, `tickets`, `photographers`, `shopping`, `facilities`) | List | Implemented (`stay`, `food`, `sunbeds`) |
+| `/d/[destination]/s/[spot]` | Spot hub | Hub | Implemented |
+| `/d/[destination]/s/[spot]/[service]` | Service list at a spot | List | Implemented (`stay`, `food`, `sunbeds`) |
+| `/l/[listing]` | Listing detail (any bookable or info listing) | Detail | Implemented (stays & dining) |
+| `/l/[listing]/book` | Booking steps for that listing | Flow | Implemented (stays & dining) |
+| `/sunbeds/[beachPoint]` | Sunbed picker (map) | Flow | Implemented |
+| `/photographers/[provider]` | Photographer profile, packages, portfolio | Detail | Planned (WP-26) |
+| `/requests/new?type=photographer&spot=` | Post a photographer request | Flow | Planned (WP-27) |
+| `/requests/[ref]` | Request with incoming bids | Detail | Planned (WP-27) |
+| `/checkout/[draft]` | Shared checkout | Flow | Implemented (quote + direct create) |
+| `/trips` | Trips timeline | List | Implemented |
+| `/trips/[ref]` | Ticket or order detail | Detail | Implemented |
+| `/inbox`, `/inbox/[thread]` | Inbox and a conversation | List, Detail | Placeholder `/inbox` page |
+| `/saved` | Saved items | List | Implemented |
+| `/help` | Help centre for the current destination | Hub | Implemented |
+| `/help/emergency` | Emergency information | Detail | Implemented |
+| `/help/lost-found` | Lost and found board and actions | List | Placeholder (`coming soon`) |
+| `/help/lost-found/report?kind=lost\|found` | Report an item | Flow | Planned (WP-21) |
+| `/help/lost-found/[ref]` | A report or a found item, with claim | Detail | Planned (WP-21) |
+| `/help/report` | Report a problem (complaint) | Flow | Placeholder (`coming soon`) |
+| `/profile` | Profile and settings | Hub | Implemented |
+| `/about`, `/terms`, `/privacy` | Information pages | Detail | Implemented |
 
 ### 6.2 Provider, desk, admin
 
-| Route | Page |
-|---|---|
-| `/provider/onboarding` | Become a provider: business details, service types, destination, documents |
-| `/provider` | Today: arrivals, open requests, recent bookings, earnings this week |
-| `/provider/listings`, `/provider/listings/[id]` | Listings and the listing editor (adapts to type) |
-| `/provider/calendar` | Availability and blocked dates |
-| `/provider/bookings`, `/provider/bookings/[ref]` | Bookings, check-in, cancel |
-| `/provider/requests`, `/provider/requests/[ref]` | Open photographer or guide requests, place a bid |
-| `/provider/inbox` | Conversations |
-| `/provider/earnings` | Gross, commission, net, payouts |
-| `/provider/reviews` | Reviews and replies |
-| `/desk` | Scan a ticket or enter a reference |
-| `/desk/lost-found`, `/desk/lost-found/[ref]` | Log found items, verify claims, hand over |
-| `/desk/reports` | Complaint intake for the desk's destination |
-| `/admin` | Overview |
-| `/admin/destinations`, `/admin/destinations/[slug]` | Destinations and their spots |
-| `/admin/providers`, `/admin/providers/[id]` | Provider applications and accounts |
-| `/admin/listings` | Listing approval queue |
-| `/admin/bookings` | All bookings |
-| `/admin/payments`, `/admin/payouts` | Payment records, commission, payouts |
-| `/admin/lost-found`, `/admin/complaints`, `/admin/alerts` | Help operations |
-| `/admin/users`, `/admin/settings`, `/admin/audit` | Users, commission and platform settings, audit log |
+| Route | Page | Status on `dev` |
+|---|---|---|
+| `/provider/onboarding` | Become a provider: business details, service types, destination, documents | Planned (WP-16) |
+| `/provider` | Today: arrivals, open requests, recent bookings, earnings this week | Implemented |
+| `/provider/listings`, `/provider/listings/[id]` | Listings/venues and editor | Implemented (dining venues) |
+| `/provider/orders` | Kitchen queue (food orders) | Implemented |
+| `/provider/calendar` | Availability and blocked dates | `Soon` placeholder |
+| `/provider/bookings`, `/provider/bookings/[ref]` | Bookings, check-in, cancel | Implemented `/provider/bookings` |
+| `/provider/requests`, `/provider/requests/[ref]` | Open photographer or guide requests, place a bid | `Soon` placeholder (`/provider/requests`) |
+| `/provider/inbox` | Conversations | `Soon` placeholder |
+| `/provider/earnings` | Gross, commission, net, payouts | `Soon` placeholder |
+| `/provider/reviews` | Reviews and replies | `Soon` placeholder |
+| `/desk` | Scan a ticket or enter a reference | Implemented |
+| `/desk/arrivals` | Arrivals by day | Implemented |
+| `/desk/lost-found`, `/desk/lost-found/[ref]` | Log found items, verify claims, hand over | `Soon` placeholder (`/desk/lost-found`) |
+| `/desk/reports` | Complaint intake for the desk's destination | `Soon` placeholder |
+| `/desk/alerts` | Spot alerts for the desk's destination | `Soon` placeholder |
+| `/admin` | Overview | Implemented |
+| `/admin/destinations`, `/admin/destinations/[slug]` | Destinations and their spots | Implemented (read-only) |
+| `/admin/providers`, `/admin/providers/[id]` | Provider applications and accounts | `Soon` placeholder (`/admin/providers`) |
+| `/admin/listings` | Listing approval queue | `Soon` placeholder |
+| `/admin/bookings` | All bookings | Implemented |
+| `/admin/payments`, `/admin/payouts` | Payment records, commission, payouts | `Soon` placeholder |
+| `/admin/lost-found`, `/admin/complaints`, `/admin/alerts` | Help operations | `Soon` placeholder |
+| `/admin/users`, `/admin/settings`, `/admin/audit` | Users, commission and platform settings, audit log | `Soon` placeholder |
 
 ### 6.3 Routes from the current build
 
@@ -591,8 +599,8 @@ users and roles; audit search.
 
 ## 8. Component library
 
-Shared by all workspaces, built on accessible primitives (Radix for dialog, sheet, tabs, popover,
-radio group, select).
+Shared by all workspaces, built on accessible primitives (native `<dialog>` for sheets and dialogs,
+or Radix primitives where complex widgets require them).
 
 Foundations: `Button` (primary, secondary, text, danger; sizes), `IconButton`, `Chip` (filter,
 choice, input), `Badge`, `StatusBadge`, `TextField`, `TextArea`, `Select`, `DatePicker`,

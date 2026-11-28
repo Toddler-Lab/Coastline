@@ -30,7 +30,7 @@ import { getViewer } from '@/lib/session';
 import { apiErrorMessage, loadInventory, loadSpot } from '@/lib/places-server';
 import { SPOT_KIND_LABELS, servicesPresent, spotInventory, sunbedPickerHref } from '@/lib/places';
 import { formatMoney, hoursRange, slotLabel } from '@/lib/format';
-import { findDroneDestination, findDroneSpot } from '@/lib/drone-landing-data';
+import { findDroneDestination, findDroneSpot } from '@/lib/scenic-places-data';
 import { SpotHero, type SpotHeroSpot } from '@/components/landing/spot-hero';
 import { buttonClass } from '@/components/ui/button';
 import { Card, Section } from '@/components/ui/display';

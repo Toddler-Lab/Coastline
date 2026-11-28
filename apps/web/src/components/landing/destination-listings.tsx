@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ChevronRight, Hotel, Utensils } from 'lucide-react';
 import type { DestinationDetailDto } from '@coastline/api-contracts';
 import type { InventoryResult } from '@/lib/places-server';
-import type { DroneDestination } from '@/lib/drone-landing-data';
+import type { DroneDestination } from '@/lib/scenic-places-data';
 import { CardRow, CardRowItem } from '@/components/patterns/spot-hub-sections';
 import { HotelCard, VenueCard } from '@/components/patterns/listing-cards';
 

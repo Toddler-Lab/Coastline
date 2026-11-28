@@ -14,7 +14,7 @@ import type { PlaceInventory } from '@/lib/places';
 import { sunbedPickerHref } from '@/lib/places';
 import { SERVICES, type ServiceKey } from '@/lib/services';
 import { formatMoney, hoursRange, slotLabel } from '@/lib/format';
-import { findDroneSpot } from '@/lib/drone-landing-data';
+import { findDroneSpot } from '@/lib/scenic-places-data';
 import { ChipLink, ChipRow } from '@/components/ui/chip';
 import { EmptyState, ErrorState } from '@/components/ui/feedback-states';
 import { HotelCard, VenueCard } from './listing-cards';

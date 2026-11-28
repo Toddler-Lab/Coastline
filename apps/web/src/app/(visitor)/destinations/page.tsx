@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Compass, MapPin, Sparkles, Umbrella, ArrowRight } from 'lucide-react';
-import { DRONE_DESTINATIONS } from '@/lib/drone-landing-data';
+import { DRONE_DESTINATIONS } from '@/lib/scenic-places-data';
 import { PageHeader } from '@/components/patterns/spot-hub-sections';
 
 export const metadata: Metadata = {

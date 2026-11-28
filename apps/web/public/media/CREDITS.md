@@ -1,7 +1,8 @@
 # Media credits
 
 All photos and videos in `apps/web/public/media/` come from **Wikimedia Commons** under Creative Commons
-licences. They were collected on 2026-11-18 for the drone-landing design (`design/drone-landing/`).
+licences. They were collected on 2026-11-18 for the drone-landing design (originally prototyped on
+branch `design/drone-landing`, now implemented in `apps/web`).
 `credits.json` is the machine-readable copy of this table; the UI renders credits from it.
 
 ## Licence obligations (read before reusing)

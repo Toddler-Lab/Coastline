@@ -1,22 +1,22 @@
 # Delivery Plan
 
-Branch `redesign/v2`, started from `dev` (`3e9f8a9`). Detail per work package is in
+Branch `dev` (v2 redesign merged from `redesign/v2` and `design/drone-landing`). Detail per work package is in
 [implementation-plan.md](implementation-plan.md).
 
 ## 1. Milestones
 
-| Milestone | Work packages | What can be shown |
-|---|---|---|
-| M1 New look | WP-01 to WP-04 | New light and dark design, component gallery, visitor and workspace shells with Help button |
-| M2 Places | WP-05 to WP-09 | Explore, Cox's Bazar, Sylhet, Rangamati, spot hubs, lists, listing pages, search |
-| M3 One checkout | WP-10 to WP-13 | Every existing service pays through one checkout, commission recorded, Trips timeline, new sunbed picker |
-| M4 More services | WP-14, WP-15 | Boats, rides, tours, entry tickets bookable |
-| M5 Portals | WP-16 to WP-19 | Providers onboard and run their business; admin console; earnings and payouts |
-| M6 Help | WP-20 to WP-23 | Alerts, emergency, lost and found, complaints, desk |
-| M7 Engagement | WP-24, WP-25 | Inbox, notifications, reviews, saved |
-| M8 Photographers | WP-26 to WP-28 | Packages, requests and bids, delivery and per-photo settlement |
-| M9 Release quality | WP-29 to WP-31 | Bangla, accessibility, end-to-end suite, clean-up |
-| M10 Sign-in | WP-32 | Phone sign-in replaces the account switcher |
+| Milestone | Work packages | Status on `dev` | What can be shown |
+|---|---|---|---|
+| M1 New look | WP-01 to WP-04 | Partial (UI tokens, shells, scopes, web Vitest; missing CI, Playwright, `/dev/components`) | New light and dark design, visitor and workspace shells with Help button |
+| M2 Places | WP-05 to WP-09 | Partial (Places API, Explore/Destination/Spot hubs, lists, listing detail, search; missing WP-06 generic listings & WP-07 uploads) | Explore, Cox's Bazar, Sylhet, Rangamati, spot hubs, lists, listing pages, search |
+| M3 One checkout | WP-10 to WP-13 | Partial (`SANDBOX` port, idempotency, `/checkout/quote`, `/checkout/[draft]`, `/trips`, restacked sunbed picker; missing ledger, commission, checkout sessions) | Shared checkout flow, Trips timeline, new sunbed picker |
+| M4 More services | WP-14, WP-15 | Open | Boats, rides, tours, entry tickets bookable |
+| M5 Portals | WP-16 to WP-19 | Partial (Provider Today/bookings/kitchen/dining editor, Desk scan/arrivals, Admin overview/destinations read-only/bookings) | Providers run dining and view bookings; admin overview and destinations |
+| M6 Help | WP-20 to WP-23 | Partial (emergency contacts, active spot alerts, Help sheet; missing lost-and-found & complaints backend) | Emergency numbers, alerts banner, Help sheet |
+| M7 Engagement | WP-24, WP-25 | Partial (`/saved` API + UI; `/inbox` UI placeholder; missing messaging, notifications, reviews) | Saved items |
+| M8 Photographers | WP-26 to WP-28 | UI preview only (`/photographers` static client preview; no API/DB) | Interactive photographer marketplace preview |
+| M9 Release quality | WP-29 to WP-31 | Partial (cookie-backed EN/BN switch on Hub/nav; missing full Bangla copy, Playwright/a11y/perf pass, clean-up) | EN/BN switch on Hub pages |
+| M10 Sign-in | WP-32 | Open | Phone sign-in replaces the account switcher |
 
 Each milestone ends with a working site, so the project can be presented after any of them.
 
