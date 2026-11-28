@@ -40,7 +40,7 @@ function SunbedPointCard({ point }: { point: BeachPointSummary }) {
   return (
     <Link
       href={sunbedPickerHref(point)}
-      className="group flex h-full overflow-hidden rounded-2xl border border-line bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
+      className="glass-card group flex h-full overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
     >
       <div className="relative aspect-square w-32 flex-none overflow-hidden bg-surface-alt md:w-44">
         {heroImageSrc ? (

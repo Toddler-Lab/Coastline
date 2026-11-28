@@ -81,7 +81,7 @@ export function DestinationListings({
               className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 selectedFilterSpot === 'all'
                   ? 'bg-action-bg text-action-fg shadow-sm'
-                  : 'bg-surface border border-line text-muted hover:border-primary/50'
+                  : 'glass-card text-muted hover:border-primary/50 hover:text-fg'
               }`}
             >
               {lang === 'bn' ? 'সকল স্পট' : 'All Spots'}
@@ -99,7 +99,7 @@ export function DestinationListings({
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     selectedFilterSpot === sSlug
                       ? 'bg-action-bg text-action-fg shadow-sm'
-                      : 'bg-surface border border-line text-muted hover:border-primary/50'
+                      : 'glass-card text-muted hover:border-primary/50 hover:text-fg'
                   }`}
                 >
                   {sName}

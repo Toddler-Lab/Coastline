@@ -5,11 +5,7 @@ import Link from 'next/link';
 
 export function LandingHelpSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
   return (
-    <section
-      className="dl-sec"
-      id="help"
-      style={{ background: 'var(--card-bg, var(--surface))', borderTop: '1px solid var(--line)' }}
-    >
+    <section className="dl-sec" id="help">
       <div className="dl-wrap">
         <div>
           <div className="dl-eyebrow">{lang === 'bn' ? 'সহায়তা' : 'Help'}</div>

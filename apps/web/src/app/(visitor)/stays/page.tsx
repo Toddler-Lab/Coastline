@@ -72,7 +72,7 @@ export default async function StaysPage({
               className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
                 active
                   ? 'bg-action-bg text-action-fg shadow-md'
-                  : 'bg-surface border border-line text-muted hover:border-primary/40 hover:text-fg'
+                  : 'glass-card text-muted hover:border-primary/40 hover:text-fg'
               }`}
             >
               {tab.label}
@@ -127,7 +127,7 @@ export default async function StaysPage({
             <Link
               key={hotel.id}
               href={listingHref(hotelListingId(hotel))}
-              className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
+              className="glass-card group flex flex-col overflow-hidden rounded-3xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
             >
               <div className="relative aspect-[16/10] w-full overflow-hidden bg-surface-alt">
                 {hotel.featuredImage ? (
@@ -142,14 +142,14 @@ export default async function StaysPage({
                     <BedDouble className="size-10" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/42 via-transparent to-transparent" />
                 {hotel.isFeatured ? (
                   <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-bold text-white shadow-md">
                     <Sparkles className="size-3" /> Featured Stay
                   </span>
                 ) : null}
                 {hotel.starRating > 0 ? (
-                  <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-xs font-bold text-amber-400 backdrop-blur-md">
+                  <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full border border-white/35 bg-white/20 px-2.5 py-1 text-xs font-bold text-amber-300 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
                     <Star className="size-3 fill-current" /> {hotel.starRating} Stars
                   </span>
                 ) : null}

@@ -11,6 +11,14 @@ export function VisitorMainShell({ children }: { children: React.ReactNode }) {
     pathname === '/' ||
     /^\/d\/[^/]+$/.test(pathname) ||
     /^\/d\/[^/]+\/s\/[^/]+$/.test(pathname);
+  const isDiscovery =
+    pathname === '/destinations' ||
+    pathname === '/stays' ||
+    pathname === '/dining' ||
+    pathname === '/sunbeds' ||
+    pathname === '/photographers' ||
+    /^\/d\/[^/]+\/[^/]+$/.test(pathname) ||
+    /^\/d\/[^/]+\/s\/[^/]+\/[^/]+$/.test(pathname);
 
   return (
     <main
@@ -18,6 +26,7 @@ export function VisitorMainShell({ children }: { children: React.ReactNode }) {
       className={cn(
         'min-h-[70dvh] w-full',
         hasHero ? 'pt-0' : 'pt-24 md:pt-28',
+        isDiscovery && 'coastal-mesh',
         'pb-[calc(var(--bottombar-h)+env(safe-area-inset-bottom)+24px)] lg:pb-16',
       )}
     >

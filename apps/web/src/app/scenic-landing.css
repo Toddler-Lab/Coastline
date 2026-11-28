@@ -89,16 +89,24 @@
   gap: 12px;
   padding: 10px 14px 10px 18px;
   border-radius: 999px;
-  background: rgba(10, 24, 23, 0.45);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(10, 28, 26, 0.24));
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.48),
+    0 12px 36px rgba(6, 20, 19, 0.14);
   color: var(--on-media);
   transition:
     background 0.3s ease,
     color 0.3s ease,
     border-color 0.3s ease,
     box-shadow 0.3s ease;
+}
+
+.dl-nav:not(.solid) .dl-logo,
+.dl-nav:not(.solid) .dl-nav-links a {
+  text-shadow: 0 1px 10px rgba(6, 16, 15, 0.35);
 }
 
 .dl-logo {
@@ -229,13 +237,16 @@
   color: var(--on-media) !important;
 }
 
-/* Scrolled Nav (Solid) - Light Mode */
+/* Scrolled Nav (Frosted Glass) - Light Mode */
 .dl-nav.solid {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--glass-chrome-scrolled);
+  backdrop-filter: blur(24px) saturate(185%);
+  -webkit-backdrop-filter: blur(24px) saturate(185%);
   color: var(--ink);
-  border: 1px solid rgba(12, 26, 25, 0.12);
+  border: 1px solid var(--glass-edge);
   box-shadow:
-    0 10px 30px -10px rgba(12, 26, 25, 0.12),
+    inset 0 1px 0 var(--glass-rim),
+    0 12px 34px -8px rgba(12, 26, 25, 0.12),
     0 2px 6px rgba(12, 26, 25, 0.04);
 }
 
@@ -298,11 +309,15 @@
   color: var(--on-media) !important;
 }
 
-/* Scrolled Nav (Solid) - Dark Mode */
+/* Scrolled Nav (Frosted Glass) - Dark Mode */
 :root[data-theme='dark'] .dl-nav.solid {
-  background: rgba(20, 27, 28, 0.95);
-  border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+  background: var(--glass-chrome-scrolled);
+  backdrop-filter: blur(24px) saturate(175%);
+  -webkit-backdrop-filter: blur(24px) saturate(175%);
+  border-color: var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    0 14px 40px -10px rgba(0, 0, 0, 0.45);
   color: var(--on-media);
 }
 
@@ -368,9 +383,13 @@
 /* System Dark Mode support for Scrolled Nav */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .dl-nav.solid {
-    background: rgba(20, 27, 28, 0.95);
-    border-color: rgba(255, 255, 255, 0.14);
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+    background: var(--glass-chrome-scrolled);
+    backdrop-filter: blur(24px) saturate(175%);
+    -webkit-backdrop-filter: blur(24px) saturate(175%);
+    border-color: var(--glass-edge);
+    box-shadow:
+      inset 0 1px 0 var(--glass-rim),
+      0 14px 40px -10px rgba(0, 0, 0, 0.45);
     color: var(--on-media);
   }
 
@@ -544,7 +563,8 @@
   .dl-nav {
     inset: 8px 8px auto;
     padding: 6px 10px 6px 12px;
-    gap: 8px;
+    gap: 6px;
+    max-width: calc(100vw - 16px);
   }
 
   .dl-logo {
@@ -661,16 +681,16 @@
   background:
     linear-gradient(
       90deg,
-      rgba(6, 16, 15, 0.72) 0%,
-      rgba(6, 16, 15, 0.42) 48%,
-      rgba(6, 16, 15, 0.12) 100%
+      rgba(6, 16, 15, 0.42) 0%,
+      rgba(6, 16, 15, 0.14) 44%,
+      rgba(6, 16, 15, 0) 80%
     ),
     linear-gradient(
       180deg,
-      rgba(6, 16, 15, 0.5) 0%,
-      rgba(6, 16, 15, 0) 28%,
-      rgba(6, 16, 15, 0) 52%,
-      rgba(6, 16, 15, 0.84) 100%
+      rgba(6, 16, 15, 0.16) 0%,
+      rgba(6, 16, 15, 0) 24%,
+      rgba(6, 16, 15, 0) 58%,
+      rgba(6, 16, 15, 0.56) 100%
     );
 }
 
@@ -797,10 +817,13 @@
   gap: 6px;
   padding: 8px;
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
+    0 18px 44px rgba(6, 20, 19, 0.18);
   max-width: 720px;
 }
 
@@ -829,6 +852,8 @@
 
 .dl-field select,
 .dl-field input {
+  width: 100%;
+  min-width: 0;
   background: none;
   border: 0;
   color: var(--on-media);
@@ -864,16 +889,6 @@
 
 @media (max-width: 720px) {
   .dl-search {
-    grid-template-columns: 1fr 1fr;
-  }
-  .dl-search .dl-btn {
-    grid-column: 1 / -1;
-    min-height: 52px;
-  }
-}
-
-@media (max-width: 480px) {
-  .dl-search {
     grid-template-columns: 1fr;
     gap: 4px;
     padding: 6px;
@@ -884,6 +899,7 @@
     min-height: 48px;
   }
   .dl-search .dl-btn {
+    grid-column: 1 / -1;
     min-height: 48px;
     border-radius: 14px;
   }
@@ -1051,13 +1067,17 @@
   min-height: 44px;
   padding: 0 16px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(10, 24, 23, 0.42);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(18px) saturate(175%);
+  -webkit-backdrop-filter: blur(18px) saturate(175%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.48),
+    0 8px 24px rgba(6, 20, 19, 0.14);
   color: var(--on-media);
   font-weight: 600;
   font-size: 14px;
+  text-shadow: 0 1px 6px rgba(6, 16, 15, 0.3);
   transition:
     background 0.2s ease,
     border-color 0.2s ease,
@@ -1065,8 +1085,8 @@
 }
 
 .dl-hero-pause:hover {
-  background: rgba(10, 24, 23, 0.65);
-  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.58);
 }
 
 .dl-hero-pause svg {
@@ -1080,9 +1100,9 @@
 
 @media (max-width: 1080px) {
   .dl-hero-controls {
-    top: auto;
-    bottom: calc(var(--bottombar-h, 64px) + env(safe-area-inset-bottom, 0px) + 14px);
-    left: 16px;
+    top: 76px;
+    bottom: auto;
+    left: auto;
     right: 16px;
   }
   .dl-hero-pause {
@@ -1127,8 +1147,14 @@
 .dl-dest-masthead-transparent {
   background: transparent !important;
   min-height: 52svh !important;
-  padding-top: 84px !important;
+  padding-top: 112px !important;
   padding-bottom: 24px !important;
+}
+
+.dl-dest-masthead-transparent .dl-hero-controls {
+  left: auto;
+  right: clamp(16px, 4vw, 48px);
+  top: 96px;
 }
 
 .dl-glass-feed {
@@ -1136,25 +1162,13 @@
 }
 
 .dl-glass-panel {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(22px) saturate(145%);
-  -webkit-backdrop-filter: blur(22px) saturate(145%);
-  border: 1px solid rgba(255, 255, 255, 0.48);
-  box-shadow: 0 16px 48px rgba(6, 16, 15, 0.16);
-}
-
-:root[data-theme='dark'] .dl-glass-panel {
-  background: rgba(15, 22, 24, 0.74);
-  border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 20px 54px rgba(0, 0, 0, 0.45);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .dl-glass-panel {
-    background: rgba(15, 22, 24, 0.74);
-    border-color: rgba(255, 255, 255, 0.14);
-    box-shadow: 0 20px 54px rgba(0, 0, 0, 0.45);
-  }
+  background: var(--glass-surface);
+  backdrop-filter: blur(26px) saturate(185%);
+  -webkit-backdrop-filter: blur(26px) saturate(185%);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    var(--glass-shadow);
 }
 
 .dl-glass-panel .dl-sec {
@@ -1262,8 +1276,7 @@
 
 /* luxury stats ribbon inspired by premium travel UI */
 .dl-metrics-strip {
-  background: var(--card-bg, var(--on-media));
-  border-bottom: 1px solid var(--line);
+  background: transparent;
   padding: clamp(28px, 4vw, 44px) 0;
   position: relative;
   z-index: 5;
@@ -1536,7 +1549,7 @@
 .dl-tiltcard .ov {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 35%, rgba(5, 15, 14, 0.85));
+  background: linear-gradient(180deg, transparent 48%, rgba(5, 15, 14, 0.65));
 }
 
 .dl-tiltcard .ct {
@@ -1644,7 +1657,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 40%, rgba(4, 14, 13, 0.85));
+  background: linear-gradient(180deg, transparent 48%, rgba(4, 14, 13, 0.68));
 }
 
 .dl-spot .in {
@@ -1888,8 +1901,13 @@
   gap: 14px;
   padding: 18px;
   border-radius: 18px;
-  background: var(--card-bg, var(--on-media));
-  border: 1px solid var(--line);
+  background: var(--glass-card);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    var(--glass-card-shadow);
 }
 
 .dl-steps .k {
@@ -1925,8 +1943,11 @@
 .dl-rate {
   padding: 12px 16px;
   border-radius: 14px;
-  background: var(--card-bg, var(--on-media));
-  border: 1px solid var(--line);
+  background: var(--glass-card);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  box-shadow: inset 0 1px 0 var(--glass-rim);
   font-size: 14px;
 }
 
@@ -1998,11 +2019,22 @@
 .dl-help-card {
   padding: 26px;
   border-radius: 22px;
-  background: var(--card-bg, var(--on-media));
-  border: 1px solid var(--line);
+  background: var(--glass-card);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(20px) saturate(175%);
+  -webkit-backdrop-filter: blur(20px) saturate(175%);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    var(--glass-card-shadow);
   display: flex;
   flex-direction: column;
   gap: 10px;
+  transition: transform 0.25s var(--ease-out), background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.dl-help-card:not(.em):hover {
+  background: var(--glass-card-hover);
+  transform: translateY(-2px);
 }
 
 @media (max-width: 640px) {
@@ -2207,9 +2239,11 @@
 .dl-fact {
   padding: 10px 14px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
   font-size: 14px;
 }
 
@@ -2281,9 +2315,13 @@
   overflow-x: auto;
   padding: 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--line);
+  background: var(--glass-chrome-scrolled);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    var(--glass-card-shadow);
   scrollbar-width: none;
   width: max-content;
   max-width: 100%;
@@ -2466,13 +2504,16 @@
   gap: 10px;
   padding: 6px 14px 6px 6px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(10, 20, 19, 0.45);
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
   color: var(--on-media) !important;
   font-weight: 600;
   font-size: 14px;
   min-height: 48px;
+  text-shadow: 0 1px 6px rgba(6, 16, 15, 0.28);
   transition: background 0.3s, border-color 0.3s;
 }
 
@@ -2485,8 +2526,8 @@
 }
 
 .dl-spot-picker :is(button, a):hover {
-  background: rgba(10, 20, 19, 0.65);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.56);
 }
 
 .dl-spot-picker :is(button, a) img {
@@ -2533,10 +2574,14 @@
   align-self: start;
   padding: 22px;
   border-radius: 24px;
-  background: rgba(250, 252, 251, 0.96);
-  color: var(--ink);
-  border: 1px solid rgba(12, 26, 25, 0.1);
-  backdrop-filter: blur(20px);
+  background: var(--glass-surface);
+  color: var(--fg);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    var(--glass-shadow);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -2591,8 +2636,10 @@
   align-items: center;
   padding: 12px;
   border-radius: 14px;
-  border: 1px solid var(--line);
-  background: var(--card-bg, var(--on-media));
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-card);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
   text-decoration: none;
 }
 
@@ -2643,8 +2690,10 @@
 .dl-know li {
   padding: 14px;
   border-radius: 14px;
-  background: var(--card-bg, var(--on-media));
-  border: 1px solid var(--line);
+  background: var(--glass-card);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
   font-size: 15px;
   line-height: 1.5;
 }
@@ -2676,8 +2725,13 @@
 .dl-lcard {
   border-radius: 22px;
   overflow: hidden;
-  background: var(--card-bg, var(--on-media));
-  border: 1px solid var(--line);
+  background: var(--glass-card);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    var(--glass-card-shadow);
   text-decoration: none;
   transition: transform 0.4s var(--ease-out), box-shadow 0.4s;
 }
@@ -2718,11 +2772,12 @@
   left: 12px;
   top: 12px;
   margin: 0;
-  background: rgba(10, 24, 23, 0.78);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(14px) saturate(170%);
+  -webkit-backdrop-filter: blur(14px) saturate(170%);
   color: var(--on-media) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  text-shadow: 0 1px 4px rgba(6, 16, 15, 0.35);
 }
 
 .dl-lcard .bd2 {
@@ -2797,7 +2852,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(5, 15, 14, 0.75), rgba(5, 15, 14, 0.1));
+  background: linear-gradient(90deg, rgba(5, 15, 14, 0.54), rgba(5, 15, 14, 0.08));
 }
 
 .dl-next div {
@@ -2919,8 +2974,6 @@
 :root[data-theme='dark'] .dl-row,
 :root[data-theme='dark'] .dl-know li,
 :root[data-theme='dark'] .dl-lcard {
-  background: var(--surface, var(--surface));
-  border-color: var(--line, var(--line));
   color: var(--fg, var(--fg));
 }
 
@@ -2932,8 +2985,6 @@
   :root:not([data-theme='light']) .dl-row,
   :root:not([data-theme='light']) .dl-know li,
   :root:not([data-theme='light']) .dl-lcard {
-    background: var(--surface, var(--surface));
-    border-color: var(--line, var(--line));
     color: var(--fg, var(--fg));
   }
 }
@@ -2960,8 +3011,8 @@
 }
 
 :root[data-theme='dark'] .dl-tabs {
-  background: rgba(23, 29, 30, 0.9);
-  border-color: var(--line, var(--line));
+  background: var(--glass-chrome-scrolled);
+  border-color: var(--glass-edge);
 }
 
 :root[data-theme='dark'] .dl-tabs a {
@@ -2980,8 +3031,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .dl-tabs {
-    background: rgba(23, 29, 30, 0.9);
-    border-color: var(--line, var(--line));
+    background: var(--glass-chrome-scrolled);
+    border-color: var(--glass-edge);
   }
 
   :root:not([data-theme='light']) .dl-tabs a {
@@ -3000,15 +3051,15 @@
 }
 
 :root[data-theme='dark'] .dl-hub-panel {
-  background: rgba(23, 29, 30, 0.95);
-  border: 1px solid var(--line, var(--line));
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-edge);
   color: var(--fg, var(--fg));
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .dl-hub-panel {
-    background: rgba(23, 29, 30, 0.95);
-    border: 1px solid var(--line, var(--line));
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-edge);
     color: var(--fg, var(--fg));
   }
 }
@@ -3053,24 +3104,32 @@
   }
 }
 
-:root[data-theme='dark'] .dl-alert {
-  background: var(--sun-soft-bg-dark);
-  border-color: var(--sun-soft-fg);
+:root[data-theme='dark'] .dl-alert,
+:root[data-theme='dark'] .dl-dest-alert {
+  background: rgba(56, 38, 12, 0.56);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-color: rgba(242, 196, 109, 0.36);
   color: var(--sun);
 }
 
-:root[data-theme='dark'] .dl-alert svg {
+:root[data-theme='dark'] .dl-alert svg,
+:root[data-theme='dark'] .dl-dest-alert svg {
   stroke: var(--sun);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .dl-alert {
-    background: var(--sun-soft-bg-dark);
-    border-color: var(--sun-soft-fg);
+  :root:not([data-theme='light']) .dl-alert,
+  :root:not([data-theme='light']) .dl-dest-alert {
+    background: rgba(56, 38, 12, 0.56);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border-color: rgba(242, 196, 109, 0.36);
     color: var(--sun);
   }
 
-  :root:not([data-theme='light']) .dl-alert svg {
+  :root:not([data-theme='light']) .dl-alert svg,
+  :root:not([data-theme='light']) .dl-dest-alert svg {
     stroke: var(--sun);
   }
 }
@@ -3161,13 +3220,16 @@
   align-items: center;
   gap: 6px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(10, 24, 23, 0.45);
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
   padding: 6px 12px;
   font-size: 13px;
   font-weight: 600;
   color: var(--on-media);
+  text-shadow: 0 1px 6px rgba(6, 16, 15, 0.28);
 }
 
 .dl-spot-stage .dl-spot-meta .kind {
@@ -3213,15 +3275,15 @@
     z-index: 8;
   }
 
-  /* Phones have no pointer tilt, so a steadier scrim keeps copy legible. */
+  /* Phones have no pointer tilt, so a bottom-focused scrim keeps copy legible without darkening the upper frame. */
   .dl-stage .dl-shade,
   .dl-spot-stage .dl-shade {
     background: linear-gradient(
       180deg,
-      rgba(6, 16, 15, 0.62) 0%,
-      rgba(6, 16, 15, 0.38) 32%,
-      rgba(6, 16, 15, 0.58) 66%,
-      rgba(6, 16, 15, 0.88) 100%
+      rgba(6, 16, 15, 0.22) 0%,
+      rgba(6, 16, 15, 0.08) 38%,
+      rgba(6, 16, 15, 0.38) 68%,
+      rgba(6, 16, 15, 0.68) 100%
     ) !important;
   }
 }
@@ -3299,10 +3361,14 @@
   z-index: 8;
   padding: 16px 20px;
   border-radius: 18px;
-  background: var(--sun-soft-bg);
+  background: rgba(255, 246, 227, 0.78);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
   border: 1px solid var(--sun-soft-border);
   color: var(--sun-soft-fg);
-  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 10px 24px -12px rgba(0, 0, 0, 0.15);
 }
 
 .dl-dest-alert svg {
@@ -3324,9 +3390,13 @@
   gap: 12px;
   padding: 16px;
   border-radius: 20px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  box-shadow: 0 16px 36px -16px rgba(18, 26, 28, 0.12);
+  background: var(--glass-surface);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    var(--glass-shadow);
   margin-top: 24px;
   position: relative;
   z-index: 10;
@@ -3338,8 +3408,9 @@
   gap: 12px;
   padding: 10px 14px;
   border-radius: 14px;
-  background: var(--surface-alt);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: var(--glass-card);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-rim);
 }
 
 .dl-pulse-icon {
@@ -3448,8 +3519,13 @@
 .dl-guide-card {
   padding: 22px;
   border-radius: 20px;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: var(--glass-card);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    var(--glass-card-shadow);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -3494,8 +3570,11 @@
   gap: 10px;
   padding: 6px 16px 6px 6px;
   border-radius: 999px;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: var(--glass-card);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  box-shadow: inset 0 1px 0 var(--glass-rim);
   color: var(--fg);
   font-size: 14px;
   font-weight: 600;
@@ -3542,6 +3621,13 @@
   box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.2);
 }
 
+.dl-spot-stage.dl-spot-stage-hero {
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+  height: clamp(560px, 78svh, 820px);
+}
+
 .dl-spot-stage-media {
   position: absolute;
   inset: 0;
@@ -3570,9 +3656,9 @@
   z-index: 2;
   background: linear-gradient(
     180deg,
-    rgba(5, 15, 14, 0.15) 0%,
-    rgba(5, 15, 14, 0.45) 45%,
-    rgba(5, 15, 14, 0.88) 100%
+    rgba(5, 15, 14, 0.04) 0%,
+    rgba(5, 15, 14, 0.22) 48%,
+    rgba(5, 15, 14, 0.68) 100%
   );
 }
 

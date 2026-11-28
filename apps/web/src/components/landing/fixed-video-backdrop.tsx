@@ -53,14 +53,14 @@ export function FixedVideoBackdrop({
         </video>
       ) : null}
 
-      {/* Contrast scrim so foreground glassmorphism & text stay legible */}
+      {/* Subtle atmospheric vignette so footage stays bright and luminous glass refracts cleanly */}
       <div
         className="absolute inset-0"
         style={{
           background:
             scrimVariant === 'destination'
-              ? 'linear-gradient(180deg, rgba(6,16,15,0.46) 0%, rgba(6,16,15,0.28) 42%, rgba(6,16,15,0.68) 100%)'
-              : 'linear-gradient(105deg, rgba(6,16,15,0.64) 0%, rgba(6,16,15,0.34) 50%, rgba(6,16,15,0.22) 100%), linear-gradient(180deg, rgba(6,16,15,0.35) 0%, rgba(6,16,15,0) 30%, rgba(6,16,15,0.72) 100%)',
+              ? 'linear-gradient(180deg, rgba(6,16,15,0.18) 0%, rgba(6,16,15,0.06) 45%, rgba(6,16,15,0.34) 100%)'
+              : 'linear-gradient(105deg, rgba(6,16,15,0.34) 0%, rgba(6,16,15,0.12) 45%, rgba(6,16,15,0.04) 100%), linear-gradient(180deg, rgba(6,16,15,0.14) 0%, rgba(6,16,15,0) 32%, rgba(6,16,15,0.36) 100%)',
         }}
       />
     </div>

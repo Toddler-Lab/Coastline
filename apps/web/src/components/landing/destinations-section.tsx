@@ -61,7 +61,7 @@ export function DestinationsSection({
             return (
               <div
                 key={dest.id}
-                className={`group relative overflow-hidden rounded-3xl border border-line bg-surface shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-2xl ${
+                className={`group relative overflow-hidden rounded-3xl glass-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-2xl ${
                   isFullWidth ? 'lg:col-span-2' : ''
                 }`}
               >
@@ -77,16 +77,16 @@ export function DestinationsSection({
                     alt={dest.name}
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/20" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/58 via-black/10 to-transparent" />
 
                   {/* Status pill */}
                   <div className="absolute left-4 top-4 flex items-center gap-2">
                     {!isSeeded ? (
-                      <span className="rounded-full border border-white/25 bg-black/65 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
+                      <span className="rounded-full border border-white/35 bg-white/18 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
                         {lang === 'bn' ? 'শীঘ্রই আসছে' : 'Coming soon'}
                       </span>
                     ) : live ? (
-                      <span className="rounded-full border border-white/20 bg-black/55 px-3 py-1 text-xs font-semibold text-white/95 backdrop-blur-md">
+                      <span className="rounded-full border border-white/35 bg-white/18 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
                         {live.spotCount} {lang === 'bn' ? 'স্পট' : 'spots'}
                       </span>
                     ) : null}

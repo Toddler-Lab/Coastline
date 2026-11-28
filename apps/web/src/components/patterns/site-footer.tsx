@@ -6,7 +6,7 @@ import { LogoMark } from './logo';
 
 export function SiteFooter() {
   return (
-    <footer className="no-print mt-16 border-t border-line/60 bg-surface/70 backdrop-blur-xl">
+    <footer className="no-print relative z-10 mt-16 border-t border-[var(--glass-edge)] bg-[var(--glass-surface)] backdrop-blur-2xl backdrop-saturate-180 shadow-[inset_0_1px_0_var(--glass-rim)]">
       <div className="dl-wrap py-12 md:py-16">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand & Purpose */}

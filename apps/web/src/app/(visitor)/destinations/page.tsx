@@ -22,7 +22,7 @@ export default function DestinationsPage() {
         {DRONE_DESTINATIONS.map((dest, idx) => (
           <div
             key={dest.id}
-            className="group relative overflow-hidden rounded-3xl border border-line bg-surface shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-2xl"
+            className="glass-card group relative overflow-hidden rounded-3xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-2xl"
           >
             {/* Hero Image / Video Container */}
             <div className="relative aspect-[16/9] w-full overflow-hidden bg-surface-alt">
@@ -32,15 +32,15 @@ export default function DestinationsPage() {
                 alt={dest.name}
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/58 via-black/10 to-transparent" />
 
               {/* Telemetry pill */}
               <div className="absolute left-4 top-4 flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-xs font-mono text-white/90 backdrop-blur-md border border-white/15">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/35 bg-white/18 px-3 py-1 text-xs font-mono text-white backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
                   <Compass className="size-3.5 text-accent" />
                   {dest.coord}
                 </span>
-                <span className="rounded-full bg-black/60 px-2.5 py-1 text-xs font-mono text-white/80 backdrop-blur-md border border-white/15">
+                <span className="rounded-full border border-white/35 bg-white/18 px-2.5 py-1 text-xs font-mono text-white backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
                   ALT {dest.alt}M
                 </span>
               </div>

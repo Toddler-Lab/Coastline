@@ -262,22 +262,22 @@ export function PhotographerMarketplace() {
           className="relative grid h-72 grid-cols-[1.25fr_1fr] gap-3 sm:h-96 lg:h-[420px]"
           aria-label="Destination inspiration"
         >
-          <div className="relative overflow-hidden rounded-lg">
+          <div className="relative overflow-hidden rounded-2xl">
             <SamplePhoto name="coxs_inani" alt="Sunlight over the sandy shoreline at Inani Beach" />
-            <span className="absolute bottom-4 left-4 rounded-full bg-surface px-3 py-1.5 text-body-sm">
+            <span className="glass-card absolute bottom-4 left-4 rounded-full px-3 py-1.5 text-body-sm">
               <MapPin aria-hidden className="mr-1 inline size-3.5 text-primary" /> Inani Beach
             </span>
           </div>
           <div className="grid min-h-0 grid-rows-2 gap-3">
-            <div className="overflow-hidden rounded-lg">
+            <div className="overflow-hidden rounded-2xl">
               <SamplePhoto name="sylhet_tea" alt="Rolling green tea gardens in Sylhet" />
             </div>
-            <div className="relative overflow-hidden rounded-lg">
+            <div className="relative overflow-hidden rounded-2xl">
               <SamplePhoto
                 name="coxs_beach_waves"
                 alt="Waves washing over the Cox’s Bazar shoreline"
               />
-              <span className="absolute bottom-3 left-2 rounded-full bg-surface px-2 py-1.5 text-caption sm:text-body-sm">
+              <span className="glass-card absolute bottom-3 left-2 rounded-full px-2.5 py-1.5 text-caption sm:text-body-sm">
                 <Sun aria-hidden className="mr-1 inline size-4 text-warn" /> Golden hour
               </span>
             </div>
@@ -285,7 +285,7 @@ export function PhotographerMarketplace() {
         </div>
       </section>
 
-      <Card className="grid gap-5 p-5 md:grid-cols-3 md:gap-8">
+      <div className="glass-card grid gap-5 rounded-2xl p-5 md:grid-cols-3 md:gap-8">
         {[
           {
             icon: Search,
@@ -313,7 +313,7 @@ export function PhotographerMarketplace() {
             </div>
           </div>
         ))}
-      </Card>
+      </div>
 
       <div id="marketplace" className="scroll-mt-28">
         <div
@@ -376,7 +376,7 @@ export function PhotographerMarketplace() {
                 </Select>
               </Field>
             </div>
-            <Card className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="glass-card grid gap-4 rounded-2xl p-4 sm:grid-cols-2 lg:grid-cols-4">
               <Field label="Destination" htmlFor="photo-destination">
                 <Select
                   id="photo-destination"
@@ -420,7 +420,7 @@ export function PhotographerMarketplace() {
                   <option value="under100">Up to Tk 100 / package</option>
                 </Select>
               </Field>
-            </Card>
+            </div>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap gap-2" role="group" aria-label="Shooting style">
                 {styles.map((s) => (
@@ -435,7 +435,7 @@ export function PhotographerMarketplace() {
             </div>
             <div className="grid gap-6 md:grid-cols-2">
               {visible.map((p) => (
-                <Card as="article" key={p.id} className="overflow-hidden">
+                <article key={p.id} className="glass-card overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40">
                   <div className="relative h-56 overflow-hidden sm:h-64">
                     <SamplePhoto
                       name={p.image}
@@ -456,14 +456,14 @@ export function PhotographerMarketplace() {
                             : [...saved, p.id],
                         )
                       }
-                      className="absolute right-4 top-4 grid size-11 place-items-center rounded-full bg-surface text-primary"
+                      className="glass-card absolute right-4 top-4 grid size-11 place-items-center rounded-full text-primary"
                     >
                       <Heart
                         aria-hidden
                         className={cn('size-5', saved.includes(p.id) && 'fill-current')}
                       />
                     </button>
-                    <span className="absolute bottom-4 left-4 rounded-full bg-surface px-3 py-1.5 text-body-sm">
+                    <span className="glass-card absolute bottom-4 left-4 rounded-full px-3 py-1.5 text-body-sm">
                       {p.specialty}
                     </span>
                   </div>
@@ -501,7 +501,7 @@ export function PhotographerMarketplace() {
                       </Button>
                     </div>
                   </div>
-                </Card>
+                </article>
               ))}
             </div>
             {visible.length === 0 && (

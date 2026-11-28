@@ -35,8 +35,13 @@ Inside the Hub pages:
 3. **Drone HUD.** A decorative overlay (corner brackets, REC, timecode, coordinates, altitude) in a
    monospace face. It is `aria-hidden`, hidden on phones, and never carries information a visitor
    needs.
-4. **Glass surfaces.** Translucent blurred panels are allowed only on top of hero media (search,
-   place rail, facts, service tiles over the services band). Elsewhere surfaces stay solid.
+4. **Glass surfaces (revised 2026-11-28).** Hub pages (`/`, `/d/[destination]`,
+   `/d/[destination]/s/[spot]`) use a 2-tier dual-theme luminous glass hierarchy (`--glass-surface`
+   and nested `--glass-card` with specular `--glass-rim` top borders) over a bright, minimally
+   scrimmed scenic backdrop, paired with persistent frosted glass visitor chrome (`LandingNav`,
+   `BottomBar`, `SiteFooter`). Discovery directories (`/destinations`, `/stays`, `/dining`,
+   `/sunbeds`, `/photographers`) pair `.glass-card` surfaces with a calm `.coastal-mesh` ambient
+   gradient; checkout flows and staff portals (`/provider`, `/desk`, `/admin`) stay solid.
 5. **Parallax.** Allowed on the hero camera and on one full-bleed photo band per page; never on
    text or controls. Disabled under reduced motion.
 6. **Display type.** Hero and section titles may use a larger display size than `display`

@@ -177,7 +177,7 @@ export function ServiceTile({
   return (
     <Link
       href={href}
-      className="group flex min-h-24 flex-col justify-between gap-3 rounded-md border border-line bg-surface p-3 transition-colors hover:border-primary hover:bg-primary-soft md:p-4"
+      className="glass-card group flex min-h-24 flex-col justify-between gap-3 rounded-2xl p-3 transition-all hover:-translate-y-0.5 hover:border-primary/50 md:p-4"
     >
       <span className="grid size-11 place-items-center rounded-full bg-primary-soft text-primary group-hover:bg-surface">
         <Icon aria-hidden className="size-6" />
@@ -259,7 +259,7 @@ export function RowLink({
     </>
   );
   const className =
-    'flex min-h-16 items-center gap-3 rounded-md border border-line bg-surface px-3 py-2 hover:bg-surface-alt';
+    'glass-card flex min-h-16 items-center gap-3 rounded-2xl px-3 py-2 transition-colors hover:border-primary/40';
   return external ? (
     <a href={href} className={className}>
       {content}

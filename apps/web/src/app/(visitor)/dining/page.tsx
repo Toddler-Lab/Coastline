@@ -86,7 +86,7 @@ export default async function DiningPage({
               className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
                 active
                   ? 'bg-action-bg text-action-fg shadow-md'
-                  : 'bg-surface border border-line text-muted hover:border-primary/40 hover:text-fg'
+                  : 'glass-card text-muted hover:border-primary/40 hover:text-fg'
               }`}
             >
               {tab.label}
@@ -139,7 +139,7 @@ export default async function DiningPage({
             <Link
               key={venue.id}
               href={listingHref(venueListingId(venue))}
-              className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
+              className="glass-card group flex flex-col overflow-hidden rounded-3xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
             >
               <div className="relative aspect-[16/10] w-full overflow-hidden bg-surface-alt">
                 {venue.imageUrl ? (
@@ -154,7 +154,7 @@ export default async function DiningPage({
                     <UtensilsCrossed className="size-10" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/42 via-transparent to-transparent" />
                 {venue.deliveryEnabled ? (
                   <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-md">
                     <Sparkles className="size-3" /> Delivers to Sunbed

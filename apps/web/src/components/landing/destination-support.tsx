@@ -86,11 +86,7 @@ export function DestinationSupport({ destination, nextDest, lang }: DestinationS
         </div>
       </section>
 
-      <section
-        className="dl-sec"
-        id="dhelp"
-        style={{ background: 'var(--card-bg, var(--surface))', borderTop: '1px solid var(--line)' }}
-      >
+      <section className="dl-sec border-t border-[var(--glass-edge)]" id="dhelp">
         <div className="dl-wrap">
           <div>
             <div className="dl-eyebrow" style={{ color: 'var(--accent)' }}>

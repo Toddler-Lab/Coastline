@@ -106,4 +106,24 @@ describe('DroneLandingView', () => {
     expect(container.querySelector('a[href="/d/sundarbans"]')).toBeNull();
     expect(container.querySelector('a[href="/d/coxs-bazar"]')).not.toBeNull();
   });
+
+  it('uses luminous 2-tier glass panels and cards without opaque bg-surface section overrides', () => {
+    const { container } = render(
+      <LanguageProvider initial="en">
+        <DroneLandingView
+          destinations={SEEDED_DESTINATIONS}
+          destination={null}
+          searchIndex={[]}
+          inventory={null}
+        />
+      </LanguageProvider>,
+    );
+
+    expect(container.querySelectorAll('.dl-glass-panel').length).toBeGreaterThanOrEqual(7);
+    expect(container.querySelectorAll('.glass-card').length).toBeGreaterThan(0);
+    expect(container.querySelector('section#about')?.className).not.toContain('bg-surface/30');
+    expect(container.querySelector('section#help')?.getAttribute('style') ?? '').not.toContain(
+      'var(--surface)',
+    );
+  });
 });

@@ -48,8 +48,8 @@ export default async function SunbedsHubPage() {
 
       {/* Feature Highlights Ribbon */}
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-line bg-surface p-4 shadow-sm flex items-start gap-3">
-          <span className="grid size-10 flex-none place-items-center rounded-xl bg-primary/10 text-primary">
+        <div className="glass-card rounded-2xl p-4 flex items-start gap-3">
+          <span className="grid size-10 flex-none place-items-center rounded-xl bg-primary/12 text-primary">
             <Umbrella className="size-5" />
           </span>
           <div>
@@ -57,8 +57,8 @@ export default async function SunbedsHubPage() {
             <p className="text-xs text-muted mt-0.5">Pick exact bed positions right at the water line.</p>
           </div>
         </div>
-        <div className="rounded-2xl border border-line bg-surface p-4 shadow-sm flex items-start gap-3">
-          <span className="grid size-10 flex-none place-items-center rounded-xl bg-primary/10 text-primary">
+        <div className="glass-card rounded-2xl p-4 flex items-start gap-3">
+          <span className="grid size-10 flex-none place-items-center rounded-xl bg-primary/12 text-primary">
             <Clock className="size-5" />
           </span>
           <div>
@@ -66,8 +66,8 @@ export default async function SunbedsHubPage() {
             <p className="text-xs text-muted mt-0.5">Book 1 to 6 hours ahead; cancel free up to 30 mins before.</p>
           </div>
         </div>
-        <div className="rounded-2xl border border-line bg-surface p-4 shadow-sm flex items-start gap-3">
-          <span className="grid size-10 flex-none place-items-center rounded-xl bg-primary/10 text-primary">
+        <div className="glass-card rounded-2xl p-4 flex items-start gap-3">
+          <span className="grid size-10 flex-none place-items-center rounded-xl bg-primary/12 text-primary">
             <Sparkles className="size-5" />
           </span>
           <div>
@@ -88,7 +88,7 @@ export default async function SunbedsHubPage() {
             return (
               <div
                 key={point.code}
-                className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
+                className="glass-card group flex flex-col overflow-hidden rounded-3xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
               >
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-surface-alt">
                   {imageSrc ? (
@@ -103,7 +103,7 @@ export default async function SunbedsHubPage() {
                       <Umbrella className="size-10" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
                   <span className="absolute left-3 top-3 rounded-full bg-emerald-500/90 px-3 py-1 text-xs font-bold text-white shadow-md backdrop-blur-md">
                     {point.freeBeds} Free Now
                   </span>

@@ -44,7 +44,7 @@ export function SectionTabs({
   return (
     <nav
       aria-label={label}
-      className="no-print sticky top-0 z-30 -mx-4 border-b border-line bg-bg px-4 md:-mx-6 md:px-6 lg:top-[var(--topbar-h)] lg:mx-0 lg:px-0"
+      className="no-print glass-panel sticky top-20 z-30 w-max max-w-full rounded-full px-3 lg:top-[88px]"
     >
       <div ref={listRef} className="scrollbar-none flex gap-1 overflow-x-auto">
         {tabs.map((tab) => (

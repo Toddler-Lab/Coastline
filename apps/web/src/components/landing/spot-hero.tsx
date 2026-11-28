@@ -25,6 +25,7 @@ export interface SpotHeroProps {
   coords: string;
   alt: string;
   bestTime?: string | null;
+  headerAction?: React.ReactNode;
 }
 
 /** Immersive spot hero: every spot in the destination is a nested background layer. */
@@ -40,6 +41,7 @@ export function SpotHero({
   coords,
   alt,
   bestTime,
+  headerAction,
 }: SpotHeroProps) {
   const { lang } = useLanguage();
   const [previewIdx, setPreviewIdx] = useState<number | null>(null);
@@ -54,7 +56,7 @@ export function SpotHero({
     <>
       <FlyTransitionListener />
       <section
-        className="dl-spot-stage"
+        className="dl-spot-stage dl-spot-stage-hero"
         aria-label={`${lang === 'bn' ? destinationNameBn || destinationName : destinationName} spot hero`}
       >
         {/* Nested backgrounds: the selected spot sits above the others and crossfades. */}
@@ -74,6 +76,21 @@ export function SpotHero({
           </div>
         </div>
         <div className="dl-shade" aria-hidden="true" />
+
+        <div className="dl-spot-breadcrumb justify-between">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 overflow-x-auto whitespace-nowrap">
+            <Link href="/" className="hover:text-white transition-colors">
+              {lang === 'bn' ? 'বাংলাদেশ' : 'Bangladesh'}
+            </Link>
+            <span aria-hidden>/</span>
+            <Link href={`/d/${destinationSlug}`} className="hover:text-white transition-colors">
+              {lang === 'bn' && destinationNameBn ? destinationNameBn : destinationName}
+            </Link>
+            <span aria-hidden>/</span>
+            <span className="text-white">{lang === 'bn' && nameBn ? nameBn : spots[currentIdx]?.name}</span>
+          </nav>
+          {headerAction ? <div className="flex-none">{headerAction}</div> : null}
+        </div>
 
         <div className="dl-spot-copy dl-wrap">
           <div className="dl-spot-meta">

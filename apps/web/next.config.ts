@@ -10,6 +10,9 @@ const LEGACY_DESTINATION = 'coxs-bazar';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  experimental: {
+    agentUpgrade: 'security',
+  },
   turbopack: {
     root: monorepoRoot,
   },

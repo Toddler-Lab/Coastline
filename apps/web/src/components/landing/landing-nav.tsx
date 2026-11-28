@@ -145,7 +145,7 @@ export function LandingNav({ lang: propLang, onLangChange: propOnLangChange }: L
       {mobileOpen && (
         <div
           id="landing-mobile-nav"
-          className="dl-nav-drawer absolute inset-x-0 top-full mt-2 max-h-[calc(100dvh-100px)] overflow-y-auto rounded-3xl border border-line bg-surface p-4 text-fg shadow-soft xl:hidden"
+          className="dl-nav-drawer glass-panel absolute inset-x-0 top-full mt-2 max-h-[calc(100dvh-100px)] overflow-y-auto rounded-3xl p-4 text-fg xl:hidden"
           onKeyDown={(event) => {
             if (event.key === 'Escape') {
               setMobileOpen(false);

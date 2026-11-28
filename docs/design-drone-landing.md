@@ -71,8 +71,8 @@ Phone layouts: `11-home-phone`, `12-destination-phone`.
 | Accents | SEA `#0B7A8F`, FOREST `#2F7D32`, LAKE `#2457A6`, HILL `#8A5A1F` | Pins, tags, tabs, hub, prices on destination pages |
 | `sun` *(new)* | `#E8A93A` | Kicker rule, progress bars, map pin highlight on dark media |
 | `cream` *(new)* | `#F6E7C8` | Serif accent words on dark media |
-| `stage-scrim` *(new)* | top 0.55 → 0 at 26%, 0 at 50%, 0.78 at 100% of `#06100F`; plus a radial vignette 0.45 | Text legibility over media. Required wherever text sits on media |
-| `glass` *(new)* | `rgba(255,255,255,.14)` + `blur(16px)`, border `rgba(255,255,255,.28)` | Controls over media only |
+| `stage-scrim` *(new)* | localized bottom-left/bottom-edge contrast protection (global backdrop vignette kept light at 0.12–0.36 so footage shines through glass) | Text legibility over media without darkening the whole viewport |
+| `glass` *(revised)* | Dual-theme luminous glass tokens (`--glass-surface`, `--glass-card`, `--glass-chrome-scrolled`, `--glass-rim` specular top border, `blur(20–26px) saturate(175–185%)`) | Hub glass feed, nested Hub cards, persistent visitor chrome, and discovery cards over `.coastal-mesh` |
 
 ### 3.2 Type
 

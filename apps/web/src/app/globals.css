@@ -26,12 +26,21 @@
   --sun: #e8a93a;
   --sun-ink: #9a5b00;
   --cream: #f6e7c8;
-  /* Hub-only media tokens (ADR-003): glass controls and scrims over drone media. */
-  --glass: rgb(255 255 255 / 0.14);
-  --glass-strong: rgb(255 255 255 / 0.22);
-  --glass-border: rgb(255 255 255 / 0.28);
+  /* Luminous glassmorphism tokens (dual-theme) */
+  --glass: rgb(255 255 255 / 0.18);
+  --glass-strong: rgb(255 255 255 / 0.28);
+  --glass-border: rgb(255 255 255 / 0.38);
+  --glass-surface: rgb(255 255 255 / 0.56);
+  --glass-card: rgb(255 255 255 / 0.64);
+  --glass-card-hover: rgb(255 255 255 / 0.78);
+  --glass-chrome: rgb(255 255 255 / 0.18);
+  --glass-chrome-scrolled: rgb(255 255 255 / 0.72);
+  --glass-rim: rgb(255 255 255 / 0.82);
+  --glass-edge: rgb(14 40 38 / 0.11);
+  --glass-shadow: 0 18px 48px rgb(6 20 19 / 0.12);
+  --glass-card-shadow: 0 10px 30px rgb(6 20 19 / 0.08);
   --on-media: #ffffff;
-  --on-media-muted: rgb(255 255 255 / 0.82);
+  --on-media-muted: rgb(255 255 255 / 0.88);
   --ink: #0c1a19;
   --ink-2: #3b4a48;
   --coral: #e2603f;
@@ -101,6 +110,15 @@
   --info: #8db8f2;
   --scrim: rgb(0 0 0 / 0.6);
   --shadow: 0 6px 24px rgb(0 0 0 / 0.45);
+  --glass-surface: rgb(11 24 26 / 0.48);
+  --glass-card: rgb(255 255 255 / 0.08);
+  --glass-card-hover: rgb(255 255 255 / 0.14);
+  --glass-chrome: rgb(255 255 255 / 0.14);
+  --glass-chrome-scrolled: rgb(14 26 28 / 0.68);
+  --glass-rim: rgb(255 255 255 / 0.22);
+  --glass-edge: rgb(255 255 255 / 0.15);
+  --glass-shadow: 0 22px 56px rgb(0 0 0 / 0.36);
+  --glass-card-shadow: 0 14px 36px rgb(0 0 0 / 0.28);
 
   --accent-sea: #6fd3e6;
   --accent-forest: #8fd694;
@@ -134,6 +152,15 @@
     --info: #8db8f2;
     --scrim: rgb(0 0 0 / 0.6);
     --shadow: 0 6px 24px rgb(0 0 0 / 0.45);
+    --glass-surface: rgb(11 24 26 / 0.48);
+    --glass-card: rgb(255 255 255 / 0.08);
+    --glass-card-hover: rgb(255 255 255 / 0.14);
+    --glass-chrome: rgb(255 255 255 / 0.14);
+    --glass-chrome-scrolled: rgb(14 26 28 / 0.68);
+    --glass-rim: rgb(255 255 255 / 0.22);
+    --glass-edge: rgb(255 255 255 / 0.15);
+    --glass-shadow: 0 22px 56px rgb(0 0 0 / 0.36);
+    --glass-card-shadow: 0 14px 36px rgb(0 0 0 / 0.28);
 
     --accent-sea: #6fd3e6;
     --accent-forest: #8fd694;
@@ -293,6 +320,7 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-padding-top: calc(var(--topbar-h) + 64px);
+    overflow-x: clip;
   }
 
   body {
@@ -559,17 +587,58 @@
 }
 
 @utility glass-panel {
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: var(--glass-surface);
+  backdrop-filter: blur(26px) saturate(185%);
+  -webkit-backdrop-filter: blur(26px) saturate(185%);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    var(--glass-shadow);
+}
+
+@utility glass-card {
+  background: var(--glass-card);
+  backdrop-filter: blur(20px) saturate(175%);
+  -webkit-backdrop-filter: blur(20px) saturate(175%);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    var(--glass-card-shadow);
 }
 
 @utility glass-nav {
-  background: rgba(10, 24, 23, 0.35);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: var(--glass-chrome);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    0 12px 32px rgb(6 20 19 / 0.14);
+}
+
+@utility coastal-mesh {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(75% 55% at 10% 0%, rgb(14 110 106 / 0.13) 0%, transparent 65%),
+    radial-gradient(65% 50% at 92% 12%, rgb(11 122 143 / 0.12) 0%, transparent 62%),
+    radial-gradient(60% 50% at 50% 95%, rgb(232 169 58 / 0.09) 0%, transparent 65%);
+  background-attachment: fixed;
+}
+
+:root[data-theme='dark'] .coastal-mesh {
+  background-image:
+    radial-gradient(75% 55% at 10% 0%, rgb(95 208 198 / 0.14) 0%, transparent 65%),
+    radial-gradient(65% 50% at 92% 12%, rgb(36 87 166 / 0.18) 0%, transparent 62%),
+    radial-gradient(60% 50% at 50% 95%, rgb(242 196 109 / 0.08) 0%, transparent 65%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .coastal-mesh {
+    background-image:
+      radial-gradient(75% 55% at 10% 0%, rgb(95 208 198 / 0.14) 0%, transparent 65%),
+      radial-gradient(65% 50% at 92% 12%, rgb(36 87 166 / 0.18) 0%, transparent 62%),
+      radial-gradient(60% 50% at 50% 95%, rgb(242 196 109 / 0.08) 0%, transparent 65%);
+  }
 }
 
 @keyframes drone {

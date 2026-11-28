@@ -47,7 +47,7 @@ export function LanguageSwitch({ overMedia = false }: { overMedia?: boolean }) {
     <div
       className={
         overMedia
-          ? 'inline-flex items-center rounded-full border border-white/30 bg-black/35 p-0.5 backdrop-blur-md'
+          ? 'inline-flex items-center rounded-full border border-white/35 bg-white/18 p-0.5 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]'
           : 'inline-flex items-center rounded-full border border-line bg-surface-alt p-0.5'
       }
       role="group"

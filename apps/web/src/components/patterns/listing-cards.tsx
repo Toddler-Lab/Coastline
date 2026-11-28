@@ -35,7 +35,7 @@ function CardShell({
     <Link
       href={href}
       className={cn(
-        'group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl',
+        'glass-card group flex h-full flex-col overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl',
         className,
       )}
     >
@@ -48,7 +48,7 @@ function TypeBadge({ service }: { service: 'stay' | 'food' | 'sunbeds' }) {
   const meta = SERVICES[service];
   const Icon = meta.icon;
   return (
-    <span className="absolute left-3 top-3 inline-flex h-7 items-center gap-1.5 rounded-full bg-surface/90 px-3 text-caption font-semibold text-fg shadow-md backdrop-blur-md">
+    <span className="glass-card absolute left-3 top-3 inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-caption font-semibold text-fg">
       <Icon aria-hidden className="size-3.5 text-primary" />
       {meta.label}
     </span>
@@ -177,7 +177,7 @@ export function SpotCard({
             className="h-full w-full"
           />
         )}
-        <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-0.5 text-xs font-medium text-white/90 backdrop-blur-md">
+        <span className="absolute left-3 top-3 rounded-full border border-white/35 bg-white/18 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
           {SPOT_KIND_LABELS[spot.kind]}
         </span>
       </div>

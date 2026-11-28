@@ -63,7 +63,7 @@ export function BottomBar() {
   return (
     <nav
       aria-label="Main"
-      className="no-print fixed inset-x-0 bottom-0 z-50 border-t border-line/70 bg-surface/90 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(0,0,0,0.06)] lg:hidden"
+      className="no-print fixed inset-x-0 bottom-0 z-50 border-t border-[var(--glass-edge)] bg-[var(--glass-chrome-scrolled)] backdrop-blur-2xl backdrop-saturate-180 pb-[env(safe-area-inset-bottom)] shadow-[inset_0_1px_0_var(--glass-rim),0_-8px_28px_rgba(6,20,19,0.12)] lg:hidden"
     >
       <ul className="mx-auto grid h-[var(--bottombar-h)] max-w-xl grid-cols-5">
         {VISITOR_NAV.map((item) => {

@@ -118,7 +118,7 @@ export function DestinationSpotHub({
 
           <Link
             href={`/d/${destination.slug}/s/${currentSpot?.slug || droneSpot.id}`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-surface border border-line hover:border-primary/50 text-fg transition-all shadow-sm self-start md:self-auto"
+            className="glass-card inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold hover:border-primary/50 text-fg transition-all self-start md:self-auto"
           >
             <span>{lang === 'bn' ? 'সম্পূর্ণ স্পট গাইড' : 'Open Full Spot Guide'}</span>
             <ChevronRight className="size-4" />
@@ -223,7 +223,7 @@ export function DestinationSpotHub({
                   {droneSpot.know.slice(0, 2).map((tip, i) => (
                     <div
                       key={i}
-                      className="flex items-start gap-2 px-3 py-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/15 text-xs text-white/90"
+                      className="flex items-start gap-2 px-3 py-2 rounded-xl bg-white/18 backdrop-blur-md border border-white/32 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)] text-xs text-white"
                     >
                       <Info className="size-4 shrink-0 text-amber-300 mt-0.5" />
                       <span>{tip}</span>
@@ -248,7 +248,7 @@ export function DestinationSpotHub({
                 <button
                   type="button"
                   onClick={() => onJumpToListings(currentSpot?.slug || droneSpot.id)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border border-white/20 transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm bg-white/18 hover:bg-white/28 text-white backdrop-blur-md border border-white/35 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] transition-all"
                 >
                   <span>
                     {lang === 'bn'

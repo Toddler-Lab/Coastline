@@ -15,7 +15,7 @@ import {
 
 export function AboutProjectSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
   return (
-    <section className="dl-sec py-16 md:py-24 border-t border-line/60 bg-surface/30" id="about">
+    <section className="dl-sec py-16 md:py-24" id="about">
       <div className="dl-wrap">
         {/* Section Header */}
         <div className="max-w-2xl">
@@ -37,9 +37,9 @@ export function AboutProjectSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
 
         {/* 4 Core Pillars of Coastline */}
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-3xl border border-line bg-surface p-6 shadow-sm flex flex-col justify-between">
+          <div className="glass-card rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-0.5">
             <div>
-              <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+              <div className="grid size-12 place-items-center rounded-2xl bg-primary/12 text-primary">
                 <ShieldCheck className="size-6" />
               </div>
               <h3 className="mt-4 text-base font-bold text-fg">
@@ -51,14 +51,14 @@ export function AboutProjectSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                   : 'An independent commission platform. Every host, hotel, and attendant is verified before being listed.'}
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-line/60 text-[11px] font-semibold text-primary">
+            <div className="mt-6 pt-4 border-t border-line/50 text-[11px] font-semibold text-primary">
               {lang === 'bn' ? 'স্বচ্ছ নীতিমালা ✓' : 'Transparent policies ✓'}
             </div>
           </div>
 
-          <div className="rounded-3xl border border-line bg-surface p-6 shadow-sm flex flex-col justify-between">
+          <div className="glass-card rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-0.5">
             <div>
-              <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+              <div className="grid size-12 place-items-center rounded-2xl bg-primary/12 text-primary">
                 <Sparkles className="size-6" />
               </div>
               <h3 className="mt-4 text-base font-bold text-fg">
@@ -70,14 +70,14 @@ export function AboutProjectSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                   : 'No tourist markups on the beach. Published hourly rates for loungers and sealed bidding for beach photographers.'}
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-line/60 text-[11px] font-semibold text-primary">
+            <div className="mt-6 pt-4 border-t border-line/50 text-[11px] font-semibold text-primary">
               {lang === 'bn' ? 'সিলড বিডিং ও সঠিক দর ✓' : 'Sealed competitive bids ✓'}
             </div>
           </div>
 
-          <div className="rounded-3xl border border-line bg-surface p-6 shadow-sm flex flex-col justify-between">
+          <div className="glass-card rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-0.5">
             <div>
-              <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+              <div className="grid size-12 place-items-center rounded-2xl bg-primary/12 text-primary">
                 <QrCode className="size-6" />
               </div>
               <h3 className="mt-4 text-base font-bold text-fg">
@@ -89,14 +89,14 @@ export function AboutProjectSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                   : 'Tickets open offline without mobile reception. Attendants scan high-contrast QR passes right at the sunbed.'}
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-line/60 text-[11px] font-semibold text-primary">
+            <div className="mt-6 pt-4 border-t border-line/50 text-[11px] font-semibold text-primary">
               {lang === 'bn' ? 'অফলাইনে কাজ করে ✓' : 'Works without internet ✓'}
             </div>
           </div>
 
-          <div className="rounded-3xl border border-line bg-surface p-6 shadow-sm flex flex-col justify-between">
+          <div className="glass-card rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-0.5">
             <div>
-              <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+              <div className="grid size-12 place-items-center rounded-2xl bg-primary/12 text-primary">
                 <Lock className="size-6" />
               </div>
               <h3 className="mt-4 text-base font-bold text-fg">
@@ -108,14 +108,14 @@ export function AboutProjectSection({ lang = 'en' }: { lang?: 'en' | 'bn' }) {
                   : 'We never store card numbers, CVVs, or wallet PINs. All payments, commissions, and refunds are immutable.'}
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-line/60 text-[11px] font-semibold text-primary">
+            <div className="mt-6 pt-4 border-t border-line/50 text-[11px] font-semibold text-primary">
               {lang === 'bn' ? 'স্যান্ডবক্স ও নিরাপত্তা ✓' : 'Protected payment port ✓'}
             </div>
           </div>
         </div>
 
         {/* Responsible Tourism & Community Callout */}
-        <div className="mt-10 rounded-3xl border border-line bg-surface p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="mt-10 glass-card rounded-3xl p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="max-w-xl">
             <h4 className="text-base font-bold text-fg">
               {lang === 'bn'

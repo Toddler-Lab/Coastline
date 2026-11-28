@@ -16,7 +16,7 @@ export function AlertBanner({ alert, className }: { alert: SpotAlertDto; classNa
   return (
     <div
       role={alert.severity === 'DANGER' ? 'alert' : 'status'}
-      className={cn('flex gap-3 rounded-md border px-4 py-3', style.box, className)}
+      className={cn('flex gap-3 rounded-2xl border px-4 py-3 backdrop-blur-xl shadow-[inset_0_1px_0_var(--glass-rim)]', style.box, className)}
     >
       <Icon aria-hidden className={cn('mt-0.5 size-5 flex-none', style.iconClass)} />
       <div className="min-w-0 text-body-sm">

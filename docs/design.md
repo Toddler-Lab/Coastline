@@ -55,9 +55,13 @@ Bright, photo-led and calm. Photography of the actual places carries the emotion
 around it stays quiet: white and soft-grey surfaces, one deep teal brand colour, and a per-destination
 accent that tints hero areas and selected states. Shapes are soft but not bubbly.
 
-Avoid: neon, stock tropical imagery, dense dashboards on visitor pages. Glass blur and photo-legibility
-gradients are allowed only over hero media on Hub pages (ADR-003). Uppercase technical labels are
-allowed only in the decorative drone HUD.
+Avoid: neon, stock tropical imagery, dense dashboards on visitor pages. Dual-theme luminous glass
+surfaces (`glass-surface`, `glass-card`, `glass-chrome`, `glass-rim`) and localized legibility
+gradients are used on visitor Hub pages (`/`, `/d/[destination]`, `/d/[destination]/s/[spot]`),
+shared visitor chrome (`LandingNav`, `BottomBar`, `SiteFooter`), and discovery directories
+(`/destinations`, `/stays`, `/dining`, `/sunbeds`, `/photographers` over `.coastal-mesh`) while
+keeping checkout flows and provider/desk/admin workspaces solid for task speed (ADR-003). Uppercase
+technical labels are allowed only in the decorative drone HUD.
 
 ### 3.2 Colour roles
 

@@ -84,7 +84,7 @@ export function SpotsRailSection({
             className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${
               activeDestination === 'all'
                 ? 'bg-fg text-bg shadow-sm'
-                : 'border border-line bg-surface text-muted hover:bg-surface-alt hover:text-fg'
+                : 'glass-card text-muted hover:text-fg'
             }`}
           >
             {lang === 'bn' ? 'সকল অঞ্চল' : 'All Regions'}
@@ -101,7 +101,7 @@ export function SpotsRailSection({
                 className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
                   isSelected
                     ? 'scale-105 shadow-md'
-                    : 'border border-line bg-surface text-muted hover:bg-surface-alt hover:text-fg'
+                    : 'glass-card text-muted hover:text-fg'
                 }`}
                 style={
                   isSelected
